@@ -1,38 +1,44 @@
-# Progress Tracker
+# Ember
 
-A personal progress tracker focused on workouts and physical activity, with extra tracker types for other habits (reading, meditation, water, ...).
+A personal progress tracker focused on workouts (strength and cardio), with optional trackers for reading and other habits. One codebase for the web, Android and iOS.
 
 University project for the course **Programming Languages 2**.
 
-> **Status:** research & architecture phase. No application code yet.
+> **Status:** backend skeleton (FastAPI, Docker Compose). The frontend is not started yet.
 
-## Architecture at a glance (planned)
+## Stack
 
-| Layer    | Technology (proposed)                         | Folder       |
-|----------|-----------------------------------------------|--------------|
-| Frontend | Flutter Web SPA (+ desktop build as a bonus)  | `frontend/`  |
-| Backend  | Python, FastAPI, SQLAlchemy, Alembic          | `backend/`   |
-| Database | PostgreSQL                                    | via Docker   |
+| Layer | Technology | Folder |
+|---|---|---|
+| Frontend | Expo (React Native + TypeScript): web SPA, Android, iOS | `frontend/` |
+| Backend | Python 3.13, FastAPI, SQLAlchemy, Alembic, pytest | `backend/` |
+| Database | PostgreSQL | Docker locally, Neon in production |
+| Hosting | Cloudflare (web), Google Cloud Run (API), Neon (database) | |
 
-Final choices and their reasons are recorded in [`docs/decisions/`](docs/decisions/).
+## Quick start
+
+Requirements: [Docker Desktop](https://www.docker.com/products/docker-desktop/).
+
+```bash
+cp .env.example .env
+docker compose up --build
+```
+
+On Windows PowerShell use `Copy-Item .env.example .env`. Then open the API docs at http://localhost:8000/api/docs.
+
+Backend development without Docker, tests and linting: [backend/README.md](backend/README.md).
 
 ## Repository layout
 
 ```
 .
-├── backend/          FastAPI service (REST API, business rules, auth)
-├── frontend/         Flutter app (web SPA + desktop)
-├── docs/             Product spec, architecture, API spec, ADRs, PDF outline
-├── .env.example      Environment variables template
+├── backend/              FastAPI service: REST API, business rules, auth
+├── frontend/             Expo app (not started yet)
+├── docker-compose.yml    Local API + PostgreSQL
+├── .env.example          Environment variables template
 └── README.md
 ```
 
-## Documentation
+## Author
 
-Start with [`docs/README.md`](docs/README.md). It lists every document and its status.
-
-## Team
-
-| Name | Role |
-|------|------|
-| TBD  | TBD  |
+Maksym Bodnar

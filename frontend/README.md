@@ -1,13 +1,13 @@
 # Frontend
 
-Progress Tracker client: web SPA, Android and iOS from one codebase.
+Ember client: web SPA, Android and iOS from one codebase.
 
-**Planned stack:** Expo (React Native + TypeScript), Expo Router, TanStack Query, Zustand, react-hook-form + zod, i18next, Orval-generated API client. Every dependency must run in Expo Go ([decisions §2](../.claude/docs/decisions.md)).
+**Planned stack:** Expo (React Native + TypeScript), Expo Router, TanStack Query, Zustand, react-hook-form + zod, i18next, an API client generated from the OpenAPI spec. Every dependency must run in Expo Go, so the app can be tested on an iPhone without a Mac.
 
 **Responsibilities:**
-- Onboarding, Home / Today, session logging per tracker type, history, progress & records, goals, settings
-- Responsive layout (mobile / tablet / desktop), light and dark themes, accessibility
+- Onboarding, Home, session logging per tracker type, history, progress and records, goals, settings
+- Responsive layout (mobile, tablet, desktop), light and dark themes, accessibility
 - English, Polish and Ukrainian with runtime switching
-- Active workout and outbox stored on the device ([decisions §7](../.claude/docs/decisions.md))
+- The active workout and unsynced sessions are stored on the device, so logging works offline
 
-> No source code yet. The UI follows the Figma file.
+> Not started yet.

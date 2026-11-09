@@ -1,13 +1,55 @@
 # Backend
 
-REST API for Progress Tracker.
+REST API for Ember.
 
-**Planned stack:** Python 3.13, uv, FastAPI, SQLAlchemy 2 (async) + psycopg 3, Alembic, pytest, Ruff, PostgreSQL ([decisions §4](../.claude/docs/decisions.md)).
+## Stack
 
-**Responsibilities:**
-- Authentication and authorization (JWT access + rotating refresh tokens, Argon2id; [decisions §5](../.claude/docs/decisions.md))
-- CRUD for trackers, sessions, entries, exercises, books, goals
-- Business rules: weekly streaks, personal records, volume, goal progress, reading pace
-- Statistics endpoints (weekly summary, streak, records)
+- Python 3.13, managed with [uv](https://docs.astral.sh/uv/)
+- FastAPI (served by Uvicorn), pydantic-settings
+- pytest, Ruff
+- PostgreSQL through Docker Compose
+- Planned: SQLAlchemy 2 (async) with psycopg 3, Alembic, PyJWT, pwdlib (Argon2id)
 
-> No source code yet.
+## Layout
+
+```
+backend/
+├── app/
+│   ├── main.py        app factory: CORS, docs at /api/docs, routers under /api/v1
+│   ├── config.py      settings from environment variables and ../.env
+│   ├── system/        health check
+│   └── <domain>/      one package per business area
+├── tests/             unit tests, mirroring app/
+├── Dockerfile
+├── pyproject.toml     dependencies and tool settings (pytest, Ruff)
+└── uv.lock
+```
+
+Business rules are pure functions without database access, so they are unit-tested directly.
+
+## Run
+
+With Docker, from the repository root:
+
+```bash
+docker compose up --build
+```
+
+Without Docker, from `backend/`:
+
+```bash
+uv sync
+uv run fastapi dev app/main.py
+```
+
+API docs: http://localhost:8000/api/docs
+
+## Tests and linting
+
+From `backend/`:
+
+```bash
+uv run pytest
+uv run ruff check .
+uv run ruff format .
+```
