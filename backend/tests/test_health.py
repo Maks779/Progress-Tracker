@@ -18,7 +18,14 @@ def test_docs_are_served_under_api():
     assert response.status_code == 200
 
 
-def test_unknown_route_returns_404():
+def test_unknown_route_returns_404_problem():
     response = client.get("/api/v1/does-not-exist")
 
     assert response.status_code == 404
+    assert response.headers["content-type"] == "application/problem+json"
+    assert response.json() == {
+        "type": "about:blank",
+        "title": "Not found",
+        "status": 404,
+        "code": "not_found",
+    }

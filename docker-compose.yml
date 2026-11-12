@@ -19,9 +19,10 @@ services:
 
   api:
     build: ./backend
-    command: fastapi dev app/main.py --host 0.0.0.0 --port 8000
+    command: sh -c "alembic upgrade head && fastapi dev app/main.py --host 0.0.0.0 --port 8000"
+    env_file: .env
     environment:
-      CORS_ORIGINS: ${CORS_ORIGINS}
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
       WATCHFILES_FORCE_POLLING: "true"
     ports:
       - "${API_PORT:-8000}:8000"
