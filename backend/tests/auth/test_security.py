@@ -39,11 +39,15 @@ def test_access_token_round_trip():
     assert (claims.user_id, claims.family_id) == (user_id, family_id)
 
 
-def test_expired_access_token_is_rejected(monkeypatch: pytest.MonkeyPatch):
-    long_ago = datetime.now(UTC) - timedelta(hours=1)
-    monkeypatch.setattr(security.clock, "utcnow", lambda: long_ago)
-    token, _ = create_access_token(uuid4(), uuid4())
+def test_access_token_expires_on_the_app_clock(monkeypatch: pytest.MonkeyPatch):
+    issued = datetime(2026, 10, 29, 20, tzinfo=UTC)
+    monkeypatch.setattr(security.clock, "utcnow", lambda: issued)
+    token, ttl = create_access_token(uuid4(), uuid4())
 
+    monkeypatch.setattr(security.clock, "utcnow", lambda: issued + timedelta(seconds=ttl - 1))
+    assert decode_access_token(token) is not None
+
+    monkeypatch.setattr(security.clock, "utcnow", lambda: issued + timedelta(seconds=ttl))
     assert decode_access_token(token) is None
 
 

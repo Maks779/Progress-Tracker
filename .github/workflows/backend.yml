@@ -1,0 +1,41 @@
+name: Backend
+
+on:
+  push:
+    branches: [main]
+    paths: ["backend/**", ".github/workflows/backend.yml"]
+  pull_request:
+    paths: ["backend/**", ".github/workflows/backend.yml"]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: progress
+          POSTGRES_PASSWORD: progress
+          POSTGRES_DB: progress_tracker
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U progress -d progress_tracker"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql+psycopg://progress:progress@localhost:5432/progress_tracker
+      JWT_SECRET: ci-only-secret-that-is-long-enough-for-hs256
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.13.7"
+      - run: uv sync --frozen
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run pytest

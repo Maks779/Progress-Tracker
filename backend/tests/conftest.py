@@ -1,5 +1,6 @@
 import asyncio
 from collections.abc import AsyncIterator
+from datetime import UTC, datetime
 from pathlib import Path
 
 import psycopg
@@ -11,12 +12,14 @@ from sqlalchemy import make_url
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engine
 from sqlalchemy.pool import NullPool
 
+from app import clock
 from app.auth.email import get_email_sender
 from app.config import Settings
 from app.database import get_db
 from app.main import app
 from app.rate_limit import reset_all
 
+FIXED_NOW = datetime(2026, 10, 29, 20, tzinfo=UTC)
 BACKEND_DIR = Path(__file__).resolve().parents[1]
 
 
@@ -89,6 +92,12 @@ class CapturedEmails:
 
     async def send_password_reset(self, email: str, link: str) -> None:
         self.links.append((email, link))
+
+
+@pytest.fixture(autouse=True)
+def _fixed_now(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Every test starts at the same moment, so results never depend on the real date or time."""
+    monkeypatch.setattr(clock, "utcnow", lambda: FIXED_NOW)
 
 
 @pytest.fixture(autouse=True)

@@ -55,14 +55,15 @@ def create_access_token(user_id: UUID, family_id: UUID) -> tuple[str, int]:
 
 
 def decode_access_token(token: str) -> AccessClaims | None:
+    """Claims of a valid access token. Expiry is checked on the app clock, like every time rule."""
     try:
         payload = jwt.decode(
             token,
             get_settings().jwt_secret,
             algorithms=[ALGORITHM],
-            options={"require": ["exp", "sub", "fid"]},
+            options={"require": ["exp", "sub", "fid"], "verify_exp": False, "verify_iat": False},
         )
-        if payload.get("type") != "access":
+        if payload.get("type") != "access" or payload["exp"] <= clock.utcnow().timestamp():
             return None
         return AccessClaims(user_id=UUID(payload["sub"]), family_id=UUID(payload["fid"]))
     except (jwt.InvalidTokenError, ValueError, TypeError):
