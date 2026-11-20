@@ -1,6 +1,6 @@
 from uuid import UUID, uuid4
 
-from sqlalchemy import CheckConstraint, true
+from sqlalchemy import CheckConstraint, ForeignKey, true
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import Base, TimestampMixin
@@ -26,3 +26,6 @@ class UserAccount(TimestampMixin, Base):
     distance_unit: Mapped[str] = mapped_column(default="km", server_default="km")
     notify_rest_timer: Mapped[bool] = mapped_column(default=True, server_default=true())
     notify_weekly_reminder: Mapped[bool] = mapped_column(default=True, server_default=true())
+    main_tracker_id: Mapped[UUID | None] = mapped_column(
+        ForeignKey("tracker.id", ondelete="SET NULL", use_alter=True)
+    )

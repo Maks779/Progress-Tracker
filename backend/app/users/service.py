@@ -3,12 +3,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.auth.dependencies import Auth
 from app.auth.security import hash_password, verify_password
 from app.auth.service import invalid_credentials, revoke_families
+from app.trackers.service import set_main_tracker
 from app.users.models import UserAccount
 from app.users.schemas import MeUpdate, PasswordChange
 
 
 async def update_me(db: AsyncSession, user: UserAccount, data: MeUpdate) -> UserAccount:
-    for field, value in data.model_dump(exclude_unset=True).items():
+    changes = data.model_dump(exclude_unset=True)
+    main_tracker_id = changes.pop("main_tracker_id", None)
+    if main_tracker_id is not None:
+        await set_main_tracker(db, user, main_tracker_id)
+    for field, value in changes.items():
         setattr(user, field, value)
     await db.commit()
     await db.refresh(user)

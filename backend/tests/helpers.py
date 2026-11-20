@@ -44,3 +44,26 @@ async def login(
 async def auth_headers(client: AsyncClient, email: str = "alex@example.com") -> dict[str, str]:
     tokens = await register(client, email=email)
     return bearer(tokens["access_token"])
+
+
+TRACKER_DEFAULTS: dict[str, dict[str, Any]] = {
+    "strength": {"name": "Gym", "color": "strength", "icon": "dumbbell"},
+    "cardio": {"name": "Running", "color": "cardio", "icon": "activity"},
+    "reading": {"name": "Reading", "color": "reading", "icon": "book-open"},
+    "general": {
+        "name": "Water",
+        "color": "general",
+        "icon": "droplet",
+        "general_mode": "counter",
+        "counter_unit": "glasses",
+    },
+}
+
+
+async def create_tracker(
+    client: AsyncClient, headers: dict[str, str], tracker_type: str = "strength", **overrides: Any
+) -> dict[str, Any]:
+    body = {"type": tracker_type, **TRACKER_DEFAULTS[tracker_type], **overrides}
+    response = await client.post("/api/v1/trackers", json=body, headers=headers)
+    assert response.status_code == 201, response.text
+    return response.json()

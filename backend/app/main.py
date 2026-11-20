@@ -5,6 +5,7 @@ from app.auth.router import router as auth_router
 from app.config import get_settings
 from app.errors import register_error_handlers
 from app.system.router import router as system_router
+from app.trackers.router import router as trackers_router
 from app.users.router import router as users_router
 
 
@@ -29,7 +30,7 @@ def create_app() -> FastAPI:
 
     register_error_handlers(app)
 
-    for router in (system_router, auth_router, users_router):
+    for router in (system_router, auth_router, users_router, trackers_router):
         app.include_router(router, prefix="/api/v1")
 
     return app
