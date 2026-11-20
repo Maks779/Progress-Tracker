@@ -41,6 +41,7 @@ class Me(BaseModel):
     distance_unit: DistanceUnit
     notify_rest_timer: bool
     notify_weekly_reminder: bool
+    main_tracker_id: UUID | None
     created_at: datetime
 
 
@@ -55,6 +56,7 @@ class MeUpdate(BaseModel):
     distance_unit: DistanceUnit | None = None
     notify_rest_timer: bool | None = None
     notify_weekly_reminder: bool | None = None
+    main_tracker_id: UUID | None = None
 
     @model_validator(mode="after")
     def _require_values(self) -> "MeUpdate":

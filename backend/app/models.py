@@ -2,6 +2,7 @@
 
 from app.auth.models import PasswordResetToken, RefreshToken
 from app.database import Base
+from app.trackers.models import Tracker
 from app.users.models import UserAccount
 
-__all__ = ["Base", "PasswordResetToken", "RefreshToken", "UserAccount"]
+__all__ = ["Base", "PasswordResetToken", "RefreshToken", "Tracker", "UserAccount"]
