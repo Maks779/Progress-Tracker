@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.auth.router import router as auth_router
+from app.books.router import router as books_router
 from app.config import get_settings
 from app.errors import register_error_handlers
 from app.exercises.router import router as exercises_router
@@ -37,6 +38,7 @@ def create_app() -> FastAPI:
         users_router,
         trackers_router,
         exercises_router,
+        books_router,
     ):
         app.include_router(router, prefix="/api/v1")
 
