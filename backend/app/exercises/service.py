@@ -1,13 +1,14 @@
 from datetime import date
 from uuid import UUID
 
-from sqlalchemy import or_, select
+from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app import clock
 from app.errors import AppError, not_found
 from app.exercises.models import Exercise
 from app.exercises.schemas import ExerciseOut, ExerciseWrite
+from app.sessions.models import Session, StrengthEntry
 
 
 def builtin_is_read_only() -> AppError:
@@ -22,8 +23,14 @@ def available_exercises(user_id: UUID):
 
 
 async def last_used_dates(db: AsyncSession, user_id: UUID) -> dict[UUID, date]:
-    """Latest session date per exercise. Empty until strength sessions exist."""
-    return {}
+    """Latest session date per exercise the user has logged."""
+    query = (
+        select(StrengthEntry.exercise_id, func.max(Session.local_date))
+        .join(Session, Session.id == StrengthEntry.session_id)
+        .where(Session.user_id == user_id, Session.deleted_at.is_(None))
+        .group_by(StrengthEntry.exercise_id)
+    )
+    return {exercise_id: last for exercise_id, last in (await db.execute(query)).all()}
 
 
 def to_out(exercise: Exercise, last_used: date | None) -> ExerciseOut:
