@@ -9,6 +9,7 @@ from app.exercises.router import router as exercises_router
 from app.goals.router import router as goals_router
 from app.sessions.router import records_router
 from app.sessions.router import router as sessions_router
+from app.stats.router import router as stats_router
 from app.system.router import router as system_router
 from app.trackers.router import router as trackers_router
 from app.users.router import router as users_router
@@ -45,6 +46,7 @@ def create_app() -> FastAPI:
         sessions_router,
         records_router,
         goals_router,
+        stats_router,
     ):
         app.include_router(router, prefix="/api/v1")
 
