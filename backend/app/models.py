@@ -4,6 +4,7 @@ from app.auth.models import PasswordResetToken, RefreshToken
 from app.books.models import Book
 from app.database import Base
 from app.exercises.models import Exercise
+from app.goals.models import Goal, GoalTarget
 from app.sessions.models import (
     CardioEntry,
     GeneralEntry,
@@ -21,6 +22,8 @@ __all__ = [
     "CardioEntry",
     "Exercise",
     "GeneralEntry",
+    "Goal",
+    "GoalTarget",
     "PasswordResetToken",
     "ReadingEntry",
     "RefreshToken",

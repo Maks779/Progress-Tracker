@@ -6,6 +6,7 @@ from app.books.router import router as books_router
 from app.config import get_settings
 from app.errors import register_error_handlers
 from app.exercises.router import router as exercises_router
+from app.goals.router import router as goals_router
 from app.sessions.router import records_router
 from app.sessions.router import router as sessions_router
 from app.system.router import router as system_router
@@ -43,6 +44,7 @@ def create_app() -> FastAPI:
         books_router,
         sessions_router,
         records_router,
+        goals_router,
     ):
         app.include_router(router, prefix="/api/v1")
 

@@ -2,6 +2,7 @@ import asyncio
 from collections.abc import AsyncIterator
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 
 import psycopg
 import pytest
@@ -18,6 +19,7 @@ from app.config import Settings
 from app.database import get_db
 from app.main import app
 from app.rate_limit import reset_all
+from tests.helpers import Api, auth_headers, create_tracker
 
 FIXED_NOW = datetime(2026, 10, 29, 20, tzinfo=UTC)
 BACKEND_DIR = Path(__file__).resolve().parents[1]
@@ -121,3 +123,23 @@ async def client(db: AsyncSession) -> AsyncIterator[AsyncClient]:
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         yield client
     app.dependency_overrides.clear()
+
+
+@pytest.fixture
+async def api(client: AsyncClient) -> Api:
+    return Api(client, await auth_headers(client))
+
+
+@pytest.fixture
+async def gym(api: Api) -> dict[str, Any]:
+    return await create_tracker(api.client, api.headers, "strength")
+
+
+@pytest.fixture
+def freeze(monkeypatch: pytest.MonkeyPatch):
+    """Set the app's current time: freeze(datetime(2026, 10, 29, 10, tzinfo=UTC))."""
+
+    def set_now(moment: datetime) -> None:
+        monkeypatch.setattr(clock, "utcnow", lambda: moment)
+
+    return set_now

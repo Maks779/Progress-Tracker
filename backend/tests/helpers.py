@@ -1,4 +1,5 @@
 from typing import Any
+from uuid import uuid4
 
 from httpx import AsyncClient
 
@@ -67,3 +68,21 @@ async def create_tracker(
     response = await client.post("/api/v1/trackers", json=body, headers=headers)
     assert response.status_code == 201, response.text
     return response.json()
+
+
+class Api:
+    def __init__(self, client: AsyncClient, headers: dict[str, str]) -> None:
+        self.client = client
+        self.headers = headers
+
+    async def put(self, body: dict[str, Any], session_id: str | None = None, status: int = 201):
+        response = await self.client.put(
+            f"/api/v1/sessions/{session_id or uuid4()}", json=body, headers=self.headers
+        )
+        assert response.status_code == status, response.text
+        return response.json()
+
+    async def get(self, path: str, status: int = 200) -> Any:
+        response = await self.client.get(f"/api/v1{path}", headers=self.headers)
+        assert response.status_code == status, response.text
+        return response.json()

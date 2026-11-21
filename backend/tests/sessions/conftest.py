@@ -3,12 +3,8 @@ from typing import Any
 from uuid import uuid4
 from zoneinfo import ZoneInfo
 
-import pytest
-from httpx import AsyncClient
-
 from app import clock
 from app.exercises.catalog import builtin_id
-from tests.helpers import auth_headers, create_tracker
 
 WARSAW = ZoneInfo("Europe/Warsaw")
 
@@ -47,31 +43,3 @@ def strength(tracker_id: str, entries: list[dict], days_ago: int = 0, **extra: A
         "strength": {"exercises": entries},
         **extra,
     }
-
-
-class Api:
-    def __init__(self, client: AsyncClient, headers: dict[str, str]) -> None:
-        self.client = client
-        self.headers = headers
-
-    async def put(self, body: dict[str, Any], session_id: str | None = None, status: int = 201):
-        response = await self.client.put(
-            f"/api/v1/sessions/{session_id or uuid4()}", json=body, headers=self.headers
-        )
-        assert response.status_code == status, response.text
-        return response.json()
-
-    async def get(self, path: str, status: int = 200) -> Any:
-        response = await self.client.get(f"/api/v1{path}", headers=self.headers)
-        assert response.status_code == status, response.text
-        return response.json()
-
-
-@pytest.fixture
-async def api(client: AsyncClient) -> Api:
-    return Api(client, await auth_headers(client))
-
-
-@pytest.fixture
-async def gym(api: Api) -> dict[str, Any]:
-    return await create_tracker(api.client, api.headers, "strength")
