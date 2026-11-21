@@ -12,6 +12,7 @@ from app.books.models import Book
 from app.books.schemas import BookOut, BookWrite
 from app.errors import field_error, not_found
 from app.ownership import get_owned
+from app.sessions.reading import reading_rows
 from app.users.models import UserAccount
 
 
@@ -25,7 +26,16 @@ async def reading_states(
     db: AsyncSession, books: list[Book], window_start: date
 ) -> dict[UUID, ReadingState]:
     """Latest end page and pages read since window_start, per book (from reading sessions)."""
-    return {book.id: ReadingState(book.start_page, 0) for book in books}
+    if not books:
+        return {}
+    rows = await reading_rows(db, books[0].user_id, {book.id for book in books})
+    states = {}
+    for book in books:
+        book_rows = [row for row in rows if row.book_id == book.id]
+        current_page = book_rows[-1].end_page if book_rows else book.start_page
+        in_window = sum(row.pages_read for row in book_rows if row.local_date >= window_start)
+        states[book.id] = ReadingState(current_page, in_window)
+    return states
 
 
 def to_out(book: Book, state: ReadingState, today: date) -> BookOut:
