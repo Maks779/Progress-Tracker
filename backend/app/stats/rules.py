@@ -2,11 +2,21 @@
 
 from datetime import date, timedelta
 from decimal import Decimal
+from enum import StrEnum
 from typing import Literal
 
 from app.goals.rules import week_start
 
-Period = Literal["4w", "3m", "1y", "all"]
+
+class Period(StrEnum):
+    """Progress period: four weeks, three months, one year or everything."""
+
+    FOUR_WEEKS = "4w"
+    THREE_MONTHS = "3m"
+    ONE_YEAR = "1y"
+    ALL = "all"
+
+
 BucketKind = Literal["week", "month"]
 
 PERIOD_WEEKS = {"4w": 4, "3m": 13, "1y": 52}

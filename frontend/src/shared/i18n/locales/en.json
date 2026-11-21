@@ -1,0 +1,43 @@
+{
+  "tabs": {
+    "home": "Home",
+    "history": "History",
+    "log": "Log",
+    "progress": "Progress",
+    "profile": "Profile"
+  },
+  "home": {
+    "title": "Let’s keep moving.",
+    "api": "Server",
+    "apiOnline": "Connected",
+    "apiOffline": "Not reachable",
+    "apiChecking": "Checking…"
+  },
+  "history": {
+    "title": "Your effort, recorded.",
+    "empty": "Your completed sessions will appear here."
+  },
+  "log": {
+    "title": "Log a session",
+    "empty": "Choose a tracker to log a session."
+  },
+  "progress": {
+    "title": "The bigger picture.",
+    "empty": "Log two sessions to see your first trend."
+  },
+  "profile": {
+    "title": "Your space, your rules.",
+    "language": "Language",
+    "theme": "Theme",
+    "themeSystem": "System",
+    "themeLight": "Light",
+    "themeDark": "Dark"
+  },
+  "notFound": {
+    "title": "Off the beaten path.",
+    "body": "This page doesn’t exist. Your progress is right where you left it.",
+    "back": "Back to Home"
+  },
+  "sessions_one": "{{count}} session",
+  "sessions_other": "{{count}} sessions"
+}

@@ -72,7 +72,7 @@ async def exercise_records(exercise_id: UUID, user: CurrentUser, db: DbSession) 
     "/{exercise_id}/progress", response_model=ExerciseProgress, summary="Exercise line chart"
 )
 async def exercise_progress(
-    exercise_id: UUID, user: CurrentUser, db: DbSession, period: Period = "4w"
+    exercise_id: UUID, user: CurrentUser, db: DbSession, period: Period = Period.FOUR_WEEKS
 ) -> ExerciseProgress:
     await service.get_available(db, user.id, exercise_id)
     return await stats.exercise_progress(db, user, exercise_id, period)

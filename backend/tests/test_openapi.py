@@ -46,6 +46,14 @@ def test_errors_are_documented_as_problem_details():
                 )
 
 
+def test_operation_ids_are_the_endpoint_names():
+    ids = [operation["operationId"] for _, _, operation in operations()]
+
+    assert len(ids) == len(set(ids))
+    assert "list_sessions" in ids
+    assert all(operation_id.isidentifier() for operation_id in ids)
+
+
 def test_default_validation_schema_is_replaced():
     schemas = schema()["components"]["schemas"]
 

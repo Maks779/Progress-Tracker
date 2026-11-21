@@ -12,7 +12,7 @@
           "system"
         ],
         "summary": "Health check endpoint",
-        "operationId": "health_api_v1_health_get",
+        "operationId": "health",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -23,7 +23,7 @@
                     "type": "string"
                   },
                   "type": "object",
-                  "title": "Response Health Api V1 Health Get"
+                  "title": "Response Health"
                 }
               }
             }
@@ -37,7 +37,7 @@
           "auth"
         ],
         "summary": "Create an account and sign in",
-        "operationId": "register_api_v1_auth_register_post",
+        "operationId": "register",
         "parameters": [
           {
             "name": "X-Client",
@@ -113,7 +113,7 @@
           "auth"
         ],
         "summary": "Sign in with email and password",
-        "operationId": "login_api_v1_auth_login_post",
+        "operationId": "login",
         "parameters": [
           {
             "name": "X-Client",
@@ -189,7 +189,7 @@
           "auth"
         ],
         "summary": "Rotate the refresh token and get a new access token",
-        "operationId": "refresh_api_v1_auth_refresh_post",
+        "operationId": "refresh",
         "parameters": [
           {
             "name": "X-Client",
@@ -288,7 +288,7 @@
           "auth"
         ],
         "summary": "Revoke the current refresh token family",
-        "operationId": "logout_api_v1_auth_logout_post",
+        "operationId": "logout",
         "parameters": [
           {
             "name": "X-Client",
@@ -380,7 +380,7 @@
           "auth"
         ],
         "summary": "Request a password reset link",
-        "operationId": "forgot_password_api_v1_auth_password_forgot_post",
+        "operationId": "forgot_password",
         "requestBody": {
           "content": {
             "application/json": {
@@ -439,7 +439,7 @@
           "auth"
         ],
         "summary": "Set a new password with a reset token",
-        "operationId": "reset_password_api_v1_auth_password_reset_post",
+        "operationId": "reset_password",
         "requestBody": {
           "content": {
             "application/json": {
@@ -493,7 +493,7 @@
           "me"
         ],
         "summary": "Current user with settings",
-        "operationId": "read_me_api_v1_me_get",
+        "operationId": "read_me",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -547,7 +547,7 @@
           "me"
         ],
         "summary": "Update profile and settings",
-        "operationId": "update_me_api_v1_me_patch",
+        "operationId": "update_me",
         "requestBody": {
           "content": {
             "application/json": {
@@ -613,7 +613,7 @@
           "me"
         ],
         "summary": "Change password",
-        "operationId": "change_password_api_v1_me_password_post",
+        "operationId": "change_password",
         "requestBody": {
           "content": {
             "application/json": {
@@ -672,7 +672,7 @@
           "me"
         ],
         "summary": "Permanently delete the account",
-        "operationId": "delete_account_api_v1_me_delete_post",
+        "operationId": "delete_account",
         "requestBody": {
           "content": {
             "application/json": {
@@ -731,7 +731,7 @@
           "me"
         ],
         "summary": "Export everything as JSON",
-        "operationId": "export_json_api_v1_me_export_json_get",
+        "operationId": "export_json",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -787,7 +787,7 @@
           "trackers"
         ],
         "summary": "List trackers",
-        "operationId": "list_trackers_api_v1_trackers_get",
+        "operationId": "list_trackers",
         "security": [
           {
             "HTTPBearer": []
@@ -853,7 +853,7 @@
           "trackers"
         ],
         "summary": "Create a tracker",
-        "operationId": "create_tracker_api_v1_trackers_post",
+        "operationId": "create_tracker",
         "security": [
           {
             "HTTPBearer": []
@@ -919,7 +919,7 @@
           "trackers"
         ],
         "summary": "Get a tracker",
-        "operationId": "get_tracker_api_v1_trackers__tracker_id__get",
+        "operationId": "get_tracker",
         "security": [
           {
             "HTTPBearer": []
@@ -985,7 +985,7 @@
           "trackers"
         ],
         "summary": "Update or archive a tracker",
-        "operationId": "update_tracker_api_v1_trackers__tracker_id__patch",
+        "operationId": "update_tracker",
         "security": [
           {
             "HTTPBearer": []
@@ -1061,7 +1061,7 @@
           "trackers"
         ],
         "summary": "Delete a tracker (soft)",
-        "operationId": "delete_tracker_api_v1_trackers__tracker_id__delete",
+        "operationId": "delete_tracker",
         "security": [
           {
             "HTTPBearer": []
@@ -1122,7 +1122,7 @@
           "trackers"
         ],
         "summary": "Export one tracker as CSV",
-        "operationId": "export_csv_api_v1_trackers__tracker_id__export_csv_get",
+        "operationId": "export_csv",
         "security": [
           {
             "HTTPBearer": []
@@ -1186,7 +1186,7 @@
           "exercises"
         ],
         "summary": "Full exercise list (built-in + custom)",
-        "operationId": "list_exercises_api_v1_exercises_get",
+        "operationId": "list_exercises",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -1242,7 +1242,7 @@
           "exercises"
         ],
         "summary": "Create or update a custom exercise (idempotent)",
-        "operationId": "put_exercise_api_v1_exercises__exercise_id__put",
+        "operationId": "put_exercise",
         "security": [
           {
             "HTTPBearer": []
@@ -1328,7 +1328,7 @@
           "exercises"
         ],
         "summary": "Delete a custom exercise (soft)",
-        "operationId": "delete_exercise_api_v1_exercises__exercise_id__delete",
+        "operationId": "delete_exercise",
         "security": [
           {
             "HTTPBearer": []
@@ -1389,7 +1389,7 @@
           "exercises"
         ],
         "summary": "Sets from the most recent session with this exercise (prefill)",
-        "operationId": "last_sets_api_v1_exercises__exercise_id__last_sets_get",
+        "operationId": "last_sets",
         "security": [
           {
             "HTTPBearer": []
@@ -1457,7 +1457,7 @@
           "exercises"
         ],
         "summary": "Current personal records of one exercise",
-        "operationId": "exercise_records_api_v1_exercises__exercise_id__records_get",
+        "operationId": "exercise_records",
         "security": [
           {
             "HTTPBearer": []
@@ -1525,7 +1525,7 @@
           "exercises"
         ],
         "summary": "Exercise line chart",
-        "operationId": "exercise_progress_api_v1_exercises__exercise_id__progress_get",
+        "operationId": "exercise_progress",
         "security": [
           {
             "HTTPBearer": []
@@ -1547,15 +1547,8 @@
             "in": "query",
             "required": false,
             "schema": {
-              "enum": [
-                "4w",
-                "3m",
-                "1y",
-                "all"
-              ],
-              "type": "string",
-              "default": "4w",
-              "title": "Period"
+              "$ref": "#/components/schemas/Period",
+              "default": "4w"
             }
           }
         ],
@@ -1609,7 +1602,7 @@
           "books"
         ],
         "summary": "List books",
-        "operationId": "list_books_api_v1_books_get",
+        "operationId": "list_books",
         "security": [
           {
             "HTTPBearer": []
@@ -1687,7 +1680,7 @@
           "books"
         ],
         "summary": "Get a book with progress and estimate",
-        "operationId": "get_book_api_v1_books__book_id__get",
+        "operationId": "get_book",
         "security": [
           {
             "HTTPBearer": []
@@ -1753,7 +1746,7 @@
           "books"
         ],
         "summary": "Add or update a book (idempotent)",
-        "operationId": "put_book_api_v1_books__book_id__put",
+        "operationId": "put_book",
         "security": [
           {
             "HTTPBearer": []
@@ -1839,7 +1832,7 @@
           "books"
         ],
         "summary": "Delete a book (soft)",
-        "operationId": "delete_book_api_v1_books__book_id__delete",
+        "operationId": "delete_book",
         "security": [
           {
             "HTTPBearer": []
@@ -1900,7 +1893,7 @@
           "sessions"
         ],
         "summary": "List sessions (History)",
-        "operationId": "list_sessions_api_v1_sessions_get",
+        "operationId": "list_sessions",
         "security": [
           {
             "HTTPBearer": []
@@ -2037,7 +2030,7 @@
           "sessions"
         ],
         "summary": "Session detail",
-        "operationId": "get_session_api_v1_sessions__session_id__get",
+        "operationId": "get_session",
         "security": [
           {
             "HTTPBearer": []
@@ -2103,7 +2096,7 @@
           "sessions"
         ],
         "summary": "Create or replace a session (idempotent)",
-        "operationId": "put_session_api_v1_sessions__session_id__put",
+        "operationId": "put_session",
         "security": [
           {
             "HTTPBearer": []
@@ -2189,7 +2182,7 @@
           "sessions"
         ],
         "summary": "Delete a session (soft)",
-        "operationId": "delete_session_api_v1_sessions__session_id__delete",
+        "operationId": "delete_session",
         "security": [
           {
             "HTTPBearer": []
@@ -2250,7 +2243,7 @@
           "sessions"
         ],
         "summary": "Undo a delete",
-        "operationId": "restore_session_api_v1_sessions__session_id__restore_post",
+        "operationId": "restore_session",
         "security": [
           {
             "HTTPBearer": []
@@ -2318,7 +2311,7 @@
           "exercises"
         ],
         "summary": "Records screen",
-        "operationId": "list_records_api_v1_records_get",
+        "operationId": "list_records",
         "security": [
           {
             "HTTPBearer": []
@@ -2404,7 +2397,7 @@
           "goals"
         ],
         "summary": "List goals with progress, status and streak",
-        "operationId": "list_goals_api_v1_goals_get",
+        "operationId": "list_goals",
         "security": [
           {
             "HTTPBearer": []
@@ -2477,7 +2470,7 @@
           "goals"
         ],
         "summary": "Create a goal",
-        "operationId": "create_goal_api_v1_goals_post",
+        "operationId": "create_goal",
         "security": [
           {
             "HTTPBearer": []
@@ -2543,7 +2536,7 @@
           "goals"
         ],
         "summary": "Get a goal",
-        "operationId": "get_goal_api_v1_goals__goal_id__get",
+        "operationId": "get_goal",
         "security": [
           {
             "HTTPBearer": []
@@ -2609,7 +2602,7 @@
           "goals"
         ],
         "summary": "Update a goal",
-        "operationId": "update_goal_api_v1_goals__goal_id__patch",
+        "operationId": "update_goal",
         "security": [
           {
             "HTTPBearer": []
@@ -2685,7 +2678,7 @@
           "goals"
         ],
         "summary": "Delete a goal (soft)",
-        "operationId": "delete_goal_api_v1_goals__goal_id__delete",
+        "operationId": "delete_goal",
         "security": [
           {
             "HTTPBearer": []
@@ -2746,7 +2739,7 @@
           "stats"
         ],
         "summary": "Home screen data for the current week",
-        "operationId": "home_api_v1_stats_home_get",
+        "operationId": "home",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -2802,7 +2795,7 @@
           "stats"
         ],
         "summary": "History month calendar",
-        "operationId": "calendar_api_v1_stats_calendar_get",
+        "operationId": "calendar",
         "security": [
           {
             "HTTPBearer": []
@@ -2890,7 +2883,7 @@
           "stats"
         ],
         "summary": "Progress overview",
-        "operationId": "progress_api_v1_stats_progress_get",
+        "operationId": "progress",
         "security": [
           {
             "HTTPBearer": []
@@ -2902,15 +2895,8 @@
             "in": "query",
             "required": false,
             "schema": {
-              "enum": [
-                "4w",
-                "3m",
-                "1y",
-                "all"
-              ],
-              "type": "string",
-              "default": "4w",
-              "title": "Period"
+              "$ref": "#/components/schemas/Period",
+              "default": "4w"
             }
           },
           {
@@ -3408,14 +3394,7 @@
             "title": "Exercise Id"
           },
           "period": {
-            "type": "string",
-            "enum": [
-              "4w",
-              "3m",
-              "1y",
-              "all"
-            ],
-            "title": "Period"
+            "$ref": "#/components/schemas/Period"
           },
           "change_kg": {
             "anyOf": [
@@ -4416,6 +4395,17 @@
         ],
         "title": "PasswordChange"
       },
+      "Period": {
+        "type": "string",
+        "enum": [
+          "4w",
+          "3m",
+          "1y",
+          "all"
+        ],
+        "title": "Period",
+        "description": "Progress period: four weeks, three months, one year or everything."
+      },
       "Problem": {
         "properties": {
           "type": {
@@ -4496,14 +4486,7 @@
       "ProgressStats": {
         "properties": {
           "period": {
-            "type": "string",
-            "enum": [
-              "4w",
-              "3m",
-              "1y",
-              "all"
-            ],
-            "title": "Period"
+            "$ref": "#/components/schemas/Period"
           },
           "bucket": {
             "type": "string",
