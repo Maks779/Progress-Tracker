@@ -8,6 +8,9 @@ from app.exercises import service
 from app.exercises.schemas import ExerciseList, ExerciseOut, ExerciseWrite
 from app.sessions import history
 from app.sessions.schemas import ExerciseRecords, LastSets
+from app.stats import service as stats
+from app.stats.rules import Period
+from app.stats.schemas import ExerciseProgress
 
 router = APIRouter(prefix="/exercises", tags=["exercises"])
 
@@ -63,3 +66,13 @@ async def exercise_records(exercise_id: UUID, user: CurrentUser, db: DbSession) 
         max_reps=found.get("max_reps"),
         estimated_1rm=found.get("estimated_1rm"),
     )
+
+
+@router.get(
+    "/{exercise_id}/progress", response_model=ExerciseProgress, summary="Exercise line chart"
+)
+async def exercise_progress(
+    exercise_id: UUID, user: CurrentUser, db: DbSession, period: Period = "4w"
+) -> ExerciseProgress:
+    await service.get_available(db, user.id, exercise_id)
+    return await stats.exercise_progress(db, user, exercise_id, period)
