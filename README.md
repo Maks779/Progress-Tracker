@@ -4,7 +4,7 @@ A personal progress tracker focused on workouts (strength and cardio), with opti
 
 University project for the course **Programming Languages 2**.
 
-> **Status:** backend skeleton (FastAPI, Docker Compose). The frontend is not started yet.
+> **Status:** the backend API is in place (accounts, trackers, sessions, records, goals, statistics, export). The frontend is not started yet.
 
 ## Stack
 
@@ -24,7 +24,7 @@ cp .env.example .env
 docker compose up --build
 ```
 
-On Windows PowerShell use `Copy-Item .env.example .env`. Then open the API docs at http://localhost:8000/api/docs.
+On Windows PowerShell use `Copy-Item .env.example .env`. Then open the interactive API docs at http://localhost:8000/api/docs.
 
 Backend development without Docker, tests and linting: [backend/README.md](backend/README.md).
 

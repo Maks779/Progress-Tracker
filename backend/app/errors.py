@@ -4,11 +4,48 @@ from typing import Any
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 logger = logging.getLogger(__name__)
 
 PROBLEM_MEDIA_TYPE = "application/problem+json"
+
+
+class ProblemFieldError(BaseModel):
+    field: str
+    code: str
+    message: str
+
+
+class Problem(BaseModel):
+    """RFC 9457 problem details. `code` is stable and drives translated messages in the app."""
+
+    type: str = "about:blank"
+    title: str
+    status: int
+    code: str
+    detail: str | None = None
+    errors: list[ProblemFieldError] | None = None
+
+
+def problem_docs(*statuses: int) -> dict[int | str, dict[str, Any]]:
+    """OpenAPI response entries for error statuses, all in the problem details format."""
+    return {
+        status: {"description": STATUS_CODES[status][1], "model": Problem} for status in statuses
+    }
+
+
+def use_problem_media_type(schema: dict[str, Any]) -> dict[str, Any]:
+    """Document every 4xx and 5xx body as application/problem+json."""
+    for path in schema.get("paths", {}).values():
+        for operation in path.values():
+            for status, response in operation.get("responses", {}).items():
+                content = response.get("content", {})
+                if status[0] in "45" and "application/json" in content:
+                    response["content"] = {PROBLEM_MEDIA_TYPE: content["application/json"]}
+    return schema
+
 
 STATUS_CODES = {
     400: ("bad_request", "Bad request"),
