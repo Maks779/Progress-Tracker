@@ -1,0 +1,45 @@
+{
+  "tabs": {
+    "home": "Start",
+    "history": "Historia",
+    "log": "Dodaj",
+    "progress": "Postępy",
+    "profile": "Profil"
+  },
+  "home": {
+    "title": "Ruszajmy dalej.",
+    "api": "Serwer",
+    "apiOnline": "Połączono",
+    "apiOffline": "Brak połączenia",
+    "apiChecking": "Sprawdzanie…"
+  },
+  "history": {
+    "title": "Twój wysiłek, zapisany.",
+    "empty": "Tutaj pojawią się ukończone sesje."
+  },
+  "log": {
+    "title": "Dodaj sesję",
+    "empty": "Wybierz tracker, aby dodać sesję."
+  },
+  "progress": {
+    "title": "Szerszy obraz.",
+    "empty": "Zapisz dwie sesje, aby zobaczyć pierwszy trend."
+  },
+  "profile": {
+    "title": "Twoja przestrzeń, twoje zasady.",
+    "language": "Język",
+    "theme": "Motyw",
+    "themeSystem": "Systemowy",
+    "themeLight": "Jasny",
+    "themeDark": "Ciemny"
+  },
+  "notFound": {
+    "title": "Poza utartym szlakiem.",
+    "body": "Ta strona nie istnieje. Twoje postępy są tam, gdzie je zostawiłeś.",
+    "back": "Wróć do startu"
+  },
+  "sessions_one": "{{count}} sesja",
+  "sessions_few": "{{count}} sesje",
+  "sessions_many": "{{count}} sesji",
+  "sessions_other": "{{count}} sesji"
+}

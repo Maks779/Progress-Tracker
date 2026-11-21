@@ -28,6 +28,9 @@ async def calendar(
 
 @router.get("/progress", response_model=ProgressStats, summary="Progress overview")
 async def progress(
-    user: CurrentUser, db: DbSession, period: Period = "4w", tracker_id: UUID | None = None
+    user: CurrentUser,
+    db: DbSession,
+    period: Period = Period.FOUR_WEEKS,
+    tracker_id: UUID | None = None,
 ) -> ProgressStats:
     return await service.progress(db, user, period, tracker_id)

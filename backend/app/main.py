@@ -79,6 +79,7 @@ def create_app() -> FastAPI:
         version="0.1.0",
         description=DESCRIPTION,
         openapi_tags=TAGS,
+        generate_unique_id_function=lambda route: route.name,
         docs_url="/api/docs",
         redoc_url=None,
         openapi_url="/api/openapi.json",
