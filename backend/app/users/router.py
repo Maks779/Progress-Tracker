@@ -3,6 +3,8 @@ from fastapi import APIRouter, Response
 from app.auth.dependencies import CurrentAuth, CurrentUser
 from app.auth.router import clear_refresh_cookie
 from app.database import DbSession
+from app.exports import service as exports
+from app.exports.service import Export
 from app.users import service
 from app.users.models import UserAccount
 from app.users.schemas import AccountDeletion, Me, MeUpdate, PasswordChange
@@ -32,3 +34,13 @@ async def delete_account(data: AccountDeletion, user: CurrentUser, db: DbSession
     response = Response(status_code=204)
     clear_refresh_cookie(response)
     return response
+
+
+@router.get("/export.json", response_model=Export, summary="Export everything as JSON")
+async def export_json(user: CurrentUser, db: DbSession) -> Response:
+    export = await exports.export_json(db, user)
+    return Response(
+        export.model_dump_json(indent=2),
+        media_type="application/json",
+        headers={"Content-Disposition": 'attachment; filename="ember-export.json"'},
+    )
