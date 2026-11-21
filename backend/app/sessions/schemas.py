@@ -1,6 +1,6 @@
 from datetime import date, datetime
 from decimal import Decimal
-from typing import Annotated, Any, Literal
+from typing import Annotated, Literal
 from uuid import UUID
 
 from pydantic import (
@@ -13,6 +13,7 @@ from pydantic import (
     StringConstraints,
 )
 
+from app.goals.schemas import GoalOut
 from app.trackers.schemas import TrackerType
 
 Kg = Annotated[Decimal, PlainSerializer(float, return_type=float, when_used="json")]
@@ -141,7 +142,7 @@ class RecordOut(BaseModel):
 class SessionSaved(BaseModel):
     session: SessionOut
     new_records: list[RecordOut]
-    goals: list[Any] = []
+    goals: list[GoalOut] = []
 
 
 class Headline(BaseModel):

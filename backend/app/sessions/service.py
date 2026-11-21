@@ -9,6 +9,7 @@ from app import clock
 from app.books.models import Book
 from app.errors import AppError, field_error, not_found
 from app.exercises.models import Exercise
+from app.goals.service import goals_for_tracker
 from app.ownership import get_owned
 from app.pagination import decode_cursor, encode_cursor
 from app.sessions import rules
@@ -316,7 +317,9 @@ async def describe(db: AsyncSession, user: UserAccount, session: Session) -> Ses
         history = await strength_history(db, user.id, exercise_ids)
         records = session_records(history, session.id, session.started_at)
     return SessionSaved(
-        session=session_out(session, tracker, pages, len(records)), new_records=records
+        session=session_out(session, tracker, pages, len(records)),
+        new_records=records,
+        goals=await goals_for_tracker(db, user, tracker.id),
     )
 
 

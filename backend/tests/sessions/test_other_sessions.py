@@ -2,8 +2,8 @@ from uuid import uuid4
 
 import pytest
 
-from tests.helpers import create_tracker
-from tests.sessions.conftest import Api, at, entry, sets, strength
+from tests.helpers import Api, create_tracker
+from tests.sessions.conftest import at, entry, sets, strength
 
 pytestmark = pytest.mark.anyio
 

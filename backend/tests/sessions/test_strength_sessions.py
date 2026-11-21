@@ -3,8 +3,8 @@ from uuid import uuid4
 import pytest
 
 from app.exercises.catalog import builtin_id
-from tests.helpers import auth_headers, create_tracker
-from tests.sessions.conftest import Api, entry, sets, strength
+from tests.helpers import Api, auth_headers, create_tracker
+from tests.sessions.conftest import entry, sets, strength
 
 pytestmark = pytest.mark.anyio
 
