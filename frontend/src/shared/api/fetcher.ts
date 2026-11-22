@@ -1,3 +1,5 @@
+import { Platform } from 'react-native';
+
 import { apiOrigin } from './config';
 
 export type ProblemFieldError = { field: string; code: string; message: string };
@@ -29,13 +31,28 @@ export class ApiError extends Error {
 /** A request without an answer after this long fails as `timeout` instead of hanging. */
 export const REQUEST_TIMEOUT_MS = 10_000;
 
+/** Web keeps the refresh token in an httpOnly cookie, phones send it in the request body. */
+export const CLIENT_KIND: 'web' | 'native' = Platform.OS === 'web' ? 'web' : 'native';
+
+const AUTH_PATH = '/api/v1/auth/';
+
 type TokenProvider = () => string | null;
+type UnauthorizedHandler = () => Promise<boolean>;
 
 let accessToken: TokenProvider = () => null;
+let onUnauthorized: UnauthorizedHandler = async () => false;
 
 /** The auth layer tells the fetcher how to read the current access token. */
 export function setAccessTokenProvider(provider: TokenProvider): void {
   accessToken = provider;
+}
+
+/**
+ * The auth layer renews the session when a request answers 401 and says whether to repeat it.
+ * Auth endpoints never trigger it, so a failed refresh cannot call itself.
+ */
+export function setUnauthorizedHandler(handler: UnauthorizedHandler): void {
+  onUnauthorized = handler;
 }
 
 async function readBody(response: Response): Promise<unknown> {
@@ -56,7 +73,20 @@ function toProblem(status: number, body: unknown): Problem {
 
 /** The fetch function Orval's generated hooks call. */
 export async function apiFetch<T>(url: string, options: RequestInit = {}): Promise<T> {
+  try {
+    return await send<T>(url, options);
+  } catch (error) {
+    const expired = error instanceof ApiError && error.status === 401;
+    if (expired && !url.startsWith(AUTH_PATH) && (await onUnauthorized())) {
+      return send<T>(url, options);
+    }
+    throw error;
+  }
+}
+
+async function send<T>(url: string, options: RequestInit): Promise<T> {
   const headers = new Headers(options.headers);
+  headers.set('X-Client', CLIENT_KIND);
   const token = accessToken();
   if (token && !headers.has('Authorization')) {
     headers.set('Authorization', `Bearer ${token}`);

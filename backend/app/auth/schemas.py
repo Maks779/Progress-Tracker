@@ -1,6 +1,6 @@
-from typing import Literal
+from typing import Annotated, Literal
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, StringConstraints
 
 from app.users.schemas import Language, Password, PersonName, TimezoneName
 
@@ -28,8 +28,15 @@ class ForgotPasswordRequest(BaseModel):
     email: EmailStr
 
 
+ResetToken = Annotated[str, StringConstraints(min_length=1, max_length=256)]
+
+
+class ResetTokenCheck(BaseModel):
+    token: ResetToken
+
+
 class ResetPasswordRequest(BaseModel):
-    token: str
+    token: ResetToken
     new_password: Password
 
 

@@ -31,7 +31,9 @@
     "theme": "Theme",
     "themeSystem": "System",
     "themeLight": "Light",
-    "themeDark": "Dark"
+    "themeDark": "Dark",
+    "account": "Account",
+    "logOut": "Log out"
   },
   "notFound": {
     "title": "Off the beaten path.",
@@ -39,5 +41,102 @@
     "back": "Back to Home"
   },
   "sessions_one": "{{count}} session",
-  "sessions_other": "{{count}} sessions"
+  "sessions_other": "{{count}} sessions",
+  "auth": {
+    "secure": "Secure by design",
+    "hero": {
+      "eyebrow": "The progress tracker",
+      "title": "The quiet power of showing up.",
+      "body": "A space for your strength, your miles, your books. And everything you’re becoming.",
+      "ringValue": "2",
+      "ringCaption": "of 3 workouts this week",
+      "restDay": "Rest-day safe",
+      "better": "A little better, every week",
+      "footer": "Built around you · Ember 1.0"
+    },
+    "welcome": {
+      "caption": "Your pace. Your progress.",
+      "eyebrow": "Progress, at your pace",
+      "title": "Small efforts. Lasting change.",
+      "subtitle": "A little stronger. A little further. Make room for what moves you.",
+      "start": "Get started",
+      "haveAccount": "I already have an account"
+    },
+    "fields": {
+      "name": "Name",
+      "email": "Email",
+      "password": "Password",
+      "newPassword": "New password",
+      "confirmPassword": "Repeat new password"
+    },
+    "passwordHint": "Use at least 8 characters.",
+    "passwordHidden": "Password is hidden.",
+    "passwordShown": "Password is visible.",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "signUp": {
+      "eyebrow": "Create your account",
+      "title": "Keep your progress.",
+      "subtitle": "One account. Every session, safely in sync.",
+      "submit": "Create account",
+      "haveAccount": "Already a member?",
+      "logIn": "Log in"
+    },
+    "logIn": {
+      "eyebrow": "Welcome back",
+      "title": "Pick up where you left off.",
+      "subtitle": "Your next small win is waiting.",
+      "forgot": "Forgot password?",
+      "submit": "Log in",
+      "noAccount": "New here?",
+      "signUp": "Create account",
+      "expiredTitle": "Your session has expired",
+      "expiredBody": "Log in again to keep going."
+    },
+    "forgot": {
+      "eyebrow": "Reset password",
+      "title": "Let’s get you back in.",
+      "subtitle": "Enter your email and we’ll send a secure reset link.",
+      "submit": "Send reset link",
+      "sentTitle": "Check your inbox",
+      "sentBody": "If an account exists for {{email}}, we sent a link. It expires in 30 minutes.",
+      "back": "Back to log in",
+      "resend": "Send again",
+      "resendIn": "Send again in {{seconds}} s",
+      "otherEmail": "Use a different email"
+    },
+    "reset": {
+      "eyebrow": "Set new password",
+      "title": "Choose a new password.",
+      "subtitle": "You’ll be signed out on every device.",
+      "submit": "Save password",
+      "doneTitle": "Password updated",
+      "doneBody": "Log in with your new password.",
+      "logIn": "Log in",
+      "invalidTitle": "This link no longer works",
+      "invalidBody": "Reset links work once and expire after 30 minutes.",
+      "requestNew": "Request a new link",
+      "checking": "Checking the link…"
+    },
+    "errors": {
+      "nameRequired": "Enter your name.",
+      "nameTooLong": "Use at most 50 characters.",
+      "emailRequired": "Enter your email address.",
+      "emailInvalid": "Enter a valid email address.",
+      "emailTaken": "An account with this email already exists.",
+      "passwordRequired": "Enter your password.",
+      "passwordTooShort": "Use at least 8 characters.",
+      "passwordTooLong": "Use at most 128 characters.",
+      "invalidCredentials": "Email or password is incorrect.",
+      "rateLimited": "Too many attempts. Try again in a few minutes.",
+      "confirmPasswordRequired": "Repeat your new password.",
+      "passwordsDontMatch": "Passwords don’t match.",
+      "passwordTooCommon": "This password is too common. Try a longer or less predictable one."
+    }
+  },
+  "errors": {
+    "network": "Can’t reach the server. Check your connection and try again.",
+    "timeout": "The server took too long to answer. Try again.",
+    "unknown": "Something went wrong. Try again."
+  }
 }

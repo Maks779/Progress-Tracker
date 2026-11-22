@@ -6,6 +6,8 @@ from zoneinfo import available_timezones
 
 from pydantic import AfterValidator, BaseModel, ConfigDict, StringConstraints, model_validator
 
+from app.auth.passwords import reject_common_password
+
 Language = Literal["en", "pl", "uk"]
 Theme = Literal["system", "light", "dark"]
 WeightUnit = Literal["kg", "lb"]
@@ -25,7 +27,9 @@ def _check_timezone(value: str) -> str:
 
 TimezoneName = Annotated[str, AfterValidator(_check_timezone)]
 PersonName = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=50)]
-Password = Annotated[str, StringConstraints(min_length=8, max_length=128)]
+Password = Annotated[
+    str, StringConstraints(min_length=8, max_length=128), AfterValidator(reject_common_password)
+]
 
 
 class Me(BaseModel):

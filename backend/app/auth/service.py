@@ -37,8 +37,14 @@ def invalid_credentials() -> AppError:
     return AppError(401, code="invalid_credentials", detail="Email or password is incorrect.")
 
 
+def _no_session() -> AppError:
+    """No refresh token was sent: the user never signed in here, or signed out."""
+    return AppError(401, code="no_session", detail="Sign in to continue.")
+
+
 def _session_expired() -> AppError:
-    return AppError(401, detail="Your session has expired. Sign in again.")
+    """A refresh token was sent but no longer works: expired, revoked or reused."""
+    return AppError(401, code="session_expired", detail="Your session has expired. Sign in again.")
 
 
 async def get_user_by_email(db: AsyncSession, email: str) -> UserAccount | None:
@@ -124,7 +130,7 @@ async def login(db: AsyncSession, email: str, password: str, client: ClientKind)
 async def refresh(db: AsyncSession, raw_token: str | None) -> IssuedTokens:
     """Rotate a refresh token. Reusing an already used token revokes its whole family."""
     if not raw_token:
-        raise _session_expired()
+        raise _no_session()
     result = await db.execute(
         select(RefreshToken)
         .where(RefreshToken.token_hash == hash_token(raw_token))
@@ -156,12 +162,35 @@ async def logout(db: AsyncSession, raw_token: str | None) -> None:
         await db.commit()
 
 
+RESET_EMAIL_COOLDOWN = timedelta(minutes=1)
+
+
+def _invalid_reset_link() -> AppError:
+    return AppError(
+        400, code="invalid_reset_link", detail="The reset link is invalid or has expired."
+    )
+
+
 async def request_password_reset(db: AsyncSession, email: str, sender: EmailSender) -> None:
-    user = await get_user_by_email(db, email)
+    """Email a reset link, at most once a minute per account, so repeated clicks send one email."""
+    user = await db.scalar(
+        select(UserAccount).where(UserAccount.email == normalize_email(email)).with_for_update()
+    )
     if user is None:
         return
     settings = get_settings()
     now = clock.utcnow()
+    recent = await db.scalar(
+        select(PasswordResetToken.id)
+        .where(
+            PasswordResetToken.user_id == user.id,
+            PasswordResetToken.created_at > now - RESET_EMAIL_COOLDOWN,
+        )
+        .limit(1)
+    )
+    if recent is not None:
+        await db.rollback()
+        return
     raw_token = new_opaque_token()
     db.add(
         PasswordResetToken(
@@ -176,19 +205,29 @@ async def request_password_reset(db: AsyncSession, email: str, sender: EmailSend
     await sender.send_password_reset(user.email, link)
 
 
+async def _usable_reset_token(
+    db: AsyncSession, raw_token: str, for_update: bool = False
+) -> PasswordResetToken:
+    query = select(PasswordResetToken).where(PasswordResetToken.token_hash == hash_token(raw_token))
+    if for_update:
+        query = query.with_for_update()
+    token = await db.scalar(query)
+    if token is None or token.used_at is not None or token.expires_at <= clock.utcnow():
+        raise _invalid_reset_link()
+    return token
+
+
+async def check_reset_token(db: AsyncSession, raw_token: str) -> None:
+    """Fail early when a link was already used or has expired, before the user types a password."""
+    await _usable_reset_token(db, raw_token)
+
+
 async def reset_password(db: AsyncSession, raw_token: str, new_password: str) -> None:
-    result = await db.execute(
-        select(PasswordResetToken)
-        .where(PasswordResetToken.token_hash == hash_token(raw_token))
-        .with_for_update()
-    )
-    token = result.scalar_one_or_none()
-    now = clock.utcnow()
-    if token is None or token.used_at is not None or token.expires_at <= now:
-        raise AppError(400, detail="The reset link is invalid or has expired.")
+    token = await _usable_reset_token(db, raw_token, for_update=True)
     user = await db.get(UserAccount, token.user_id)
     if user is None:
-        raise AppError(400, detail="The reset link is invalid or has expired.")
+        raise _invalid_reset_link()
+    now = clock.utcnow()
     user.password_hash = hash_password(new_password)
     await db.execute(
         update(PasswordResetToken)
