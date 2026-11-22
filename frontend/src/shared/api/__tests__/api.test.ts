@@ -1,5 +1,5 @@
 import { apiOrigin } from '../config';
-import { ApiError, apiFetch, setAccessTokenProvider } from '../fetcher';
+import { ApiError, REQUEST_TIMEOUT_MS, apiFetch, setAccessTokenProvider } from '../fetcher';
 
 describe('apiOrigin', () => {
   it('uses EXPO_PUBLIC_API_URL when it is set', () => {
@@ -75,6 +75,54 @@ describe('apiFetch', () => {
     expect(error).toBeInstanceOf(ApiError);
     expect((error as ApiError).code).toBe('validation_error');
     expect((error as ApiError).fieldErrors[0].field).toBe('email');
+  });
+
+  it('reports an unreachable server as a network error', async () => {
+    fetchMock.mockRejectedValue(new TypeError('Network request failed'));
+
+    const error = (await apiFetch('/api/v1/health').catch((caught: unknown) => caught)) as ApiError;
+
+    expect(error).toBeInstanceOf(ApiError);
+    expect(error.status).toBe(0);
+    expect(error.code).toBe('network_error');
+  });
+
+  describe('when the server does not answer', () => {
+    function hangUntilAborted() {
+      fetchMock.mockImplementation(
+        (_url: string, init: RequestInit) =>
+          new Promise((_resolve, reject) => {
+            init.signal?.addEventListener('abort', () => reject(new Error('Aborted')));
+          }),
+      );
+    }
+
+    beforeEach(() => jest.useFakeTimers());
+    afterEach(() => jest.useRealTimers());
+
+    it('gives up after the timeout', async () => {
+      hangUntilAborted();
+
+      const pending = apiFetch('/api/v1/health').catch((caught: unknown) => caught);
+      jest.advanceTimersByTime(REQUEST_TIMEOUT_MS);
+      const error = (await pending) as ApiError;
+
+      expect(error).toBeInstanceOf(ApiError);
+      expect(error.code).toBe('timeout');
+    });
+
+    it('lets the caller cancel without reporting an error code', async () => {
+      hangUntilAborted();
+      const caller = new AbortController();
+
+      const pending = apiFetch('/api/v1/health', { signal: caller.signal }).catch(
+        (caught: unknown) => caught,
+      );
+      caller.abort();
+      const error = await pending;
+
+      expect(error).not.toBeInstanceOf(ApiError);
+    });
   });
 
   it('reports a failure without a body as a network error', async () => {

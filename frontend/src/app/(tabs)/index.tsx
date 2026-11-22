@@ -33,7 +33,11 @@ export default function HomeScreen() {
               width: 10,
               height: 10,
               borderRadius: 5,
-              backgroundColor: online ? colors.state.success : colors.state.error,
+              backgroundColor: health.isPending
+                ? colors.text.muted
+                : online
+                  ? colors.state.success
+                  : colors.state.error,
             }}
           />
           <Text variant="bodyStrong">{status}</Text>

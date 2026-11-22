@@ -26,6 +26,9 @@ export class ApiError extends Error {
   }
 }
 
+/** A request without an answer after this long fails as `timeout` instead of hanging. */
+export const REQUEST_TIMEOUT_MS = 10_000;
+
 type TokenProvider = () => string | null;
 
 let accessToken: TokenProvider = () => null;
@@ -58,12 +61,44 @@ export async function apiFetch<T>(url: string, options: RequestInit = {}): Promi
   if (token && !headers.has('Authorization')) {
     headers.set('Authorization', `Bearer ${token}`);
   }
-  const response = await fetch(`${apiOrigin()}${url}`, {
-    ...options,
-    headers,
-    credentials: 'include',
-  });
-  const body = await readBody(response);
+  const caller = options.signal;
+  const controller = new AbortController();
+  let timedOut = false;
+  const timer = setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, REQUEST_TIMEOUT_MS);
+  const cancel = () => controller.abort();
+  if (caller?.aborted) {
+    cancel();
+  }
+  caller?.addEventListener('abort', cancel);
+
+  let response: Response;
+  let body: unknown;
+  try {
+    response = await fetch(`${apiOrigin()}${url}`, {
+      ...options,
+      headers,
+      credentials: 'include',
+      signal: controller.signal,
+    });
+    body = await readBody(response);
+  } catch (error) {
+    if (caller?.aborted) {
+      throw error;
+    }
+    throw new ApiError({
+      type: 'about:blank',
+      title: timedOut ? 'Request timed out' : 'Network request failed',
+      status: 0,
+      code: timedOut ? 'timeout' : 'network_error',
+    });
+  } finally {
+    clearTimeout(timer);
+    caller?.removeEventListener('abort', cancel);
+  }
+
   if (!response.ok) {
     throw new ApiError(toProblem(response.status, body));
   }
