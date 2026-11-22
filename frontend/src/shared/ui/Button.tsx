@@ -47,7 +47,7 @@ export function Button({
           borderRadius: radius[12],
           paddingHorizontal: space[16],
           backgroundColor: primary
-            ? pressed
+            ? !inactive && (pressed || hovered)
               ? colors.accent.fillPressed
               : colors.accent.fill
             : variant === 'ghost'
@@ -56,9 +56,13 @@ export function Button({
                 ? colors.accent.subtle
                 : colors.bg.surfaceRaised,
           borderColor:
-            focused || hovered || selected ? colors.accent.fill : colors.border.default,
-          borderWidth: focused ? 2 : primary ? 0 : 1,
+            (!disabled && (focused || hovered)) || selected
+              ? colors.accent.fill
+              : colors.border.default,
+          borderWidth: focused && !disabled ? 2 : primary ? 0 : 1,
           opacity: disabled ? 0.45 : 1,
+          transform: [{ scale: pressed && !inactive ? 0.98 : 1 }],
+          cursor: inactive ? 'auto' : 'pointer',
         },
       ]}
     >

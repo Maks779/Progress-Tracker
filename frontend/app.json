@@ -35,7 +35,8 @@
           "imageWidth": 120
         }
       ],
-      "expo-localization"
+      "expo-localization",
+      "expo-secure-store"
     ],
     "scheme": "ember",
     "experiments": {

@@ -31,7 +31,9 @@
     "theme": "Motyw",
     "themeSystem": "Systemowy",
     "themeLight": "Jasny",
-    "themeDark": "Ciemny"
+    "themeDark": "Ciemny",
+    "account": "Konto",
+    "logOut": "Wyloguj się"
   },
   "notFound": {
     "title": "Poza utartym szlakiem.",
@@ -41,5 +43,102 @@
   "sessions_one": "{{count}} sesja",
   "sessions_few": "{{count}} sesje",
   "sessions_many": "{{count}} sesji",
-  "sessions_other": "{{count}} sesji"
+  "sessions_other": "{{count}} sesji",
+  "auth": {
+    "secure": "Bezpieczne z założenia",
+    "hero": {
+      "eyebrow": "Tracker postępów",
+      "title": "Cicha siła regularności.",
+      "body": "Miejsce na Twoją siłę, Twoje kilometry, Twoje książki. I na wszystko, czym się stajesz.",
+      "ringValue": "2",
+      "ringCaption": "z 3 treningów w tym tygodniu",
+      "restDay": "Odpoczynek nie psuje serii",
+      "better": "Trochę lepiej, co tydzień",
+      "footer": "Stworzone wokół Ciebie · Ember 1.0"
+    },
+    "welcome": {
+      "caption": "Twoje tempo. Twój postęp.",
+      "eyebrow": "Postęp w Twoim tempie",
+      "title": "Małe kroki. Trwała zmiana.",
+      "subtitle": "Trochę silniej. Trochę dalej. Zrób miejsce na to, co Cię napędza.",
+      "start": "Zaczynamy",
+      "haveAccount": "Mam już konto"
+    },
+    "fields": {
+      "name": "Imię",
+      "email": "E-mail",
+      "password": "Hasło",
+      "newPassword": "Nowe hasło",
+      "confirmPassword": "Powtórz nowe hasło"
+    },
+    "passwordHint": "Użyj co najmniej 8 znaków.",
+    "passwordHidden": "Hasło jest ukryte.",
+    "passwordShown": "Hasło jest widoczne.",
+    "showPassword": "Pokaż hasło",
+    "hidePassword": "Ukryj hasło",
+    "signUp": {
+      "eyebrow": "Załóż konto",
+      "title": "Zachowaj swoje postępy.",
+      "subtitle": "Jedno konto. Każda sesja bezpiecznie zsynchronizowana.",
+      "submit": "Utwórz konto",
+      "haveAccount": "Masz już konto?",
+      "logIn": "Zaloguj się"
+    },
+    "logIn": {
+      "eyebrow": "Witaj ponownie",
+      "title": "Wróć do swojego rytmu.",
+      "subtitle": "Twoje kolejne małe zwycięstwo czeka.",
+      "forgot": "Nie pamiętasz hasła?",
+      "submit": "Zaloguj się",
+      "noAccount": "Nie masz konta?",
+      "signUp": "Utwórz konto",
+      "expiredTitle": "Sesja wygasła",
+      "expiredBody": "Zaloguj się ponownie, aby kontynuować."
+    },
+    "forgot": {
+      "eyebrow": "Reset hasła",
+      "title": "Pomożemy Ci wrócić.",
+      "subtitle": "Podaj e-mail, a wyślemy bezpieczny link do zmiany hasła.",
+      "submit": "Wyślij link",
+      "sentTitle": "Sprawdź skrzynkę",
+      "sentBody": "Jeśli konto z adresem {{email}} istnieje, wysłaliśmy link. Wygasa po 30 minutach.",
+      "back": "Wróć do logowania",
+      "resend": "Wyślij ponownie",
+      "resendIn": "Wyślij ponownie za {{seconds}} s",
+      "otherEmail": "Użyj innego adresu"
+    },
+    "reset": {
+      "eyebrow": "Nowe hasło",
+      "title": "Ustaw nowe hasło.",
+      "subtitle": "Wylogujemy Cię na wszystkich urządzeniach.",
+      "submit": "Zapisz hasło",
+      "doneTitle": "Hasło zmienione",
+      "doneBody": "Zaloguj się nowym hasłem.",
+      "logIn": "Zaloguj się",
+      "invalidTitle": "Ten link już nie działa",
+      "invalidBody": "Link działa jeden raz i wygasa po 30 minutach.",
+      "requestNew": "Poproś o nowy link",
+      "checking": "Sprawdzamy link…"
+    },
+    "errors": {
+      "nameRequired": "Podaj imię.",
+      "nameTooLong": "Maksymalnie 50 znaków.",
+      "emailRequired": "Podaj adres e-mail.",
+      "emailInvalid": "Podaj poprawny adres e-mail.",
+      "emailTaken": "Konto z tym adresem już istnieje.",
+      "passwordRequired": "Podaj hasło.",
+      "passwordTooShort": "Użyj co najmniej 8 znaków.",
+      "passwordTooLong": "Maksymalnie 128 znaków.",
+      "invalidCredentials": "Nieprawidłowy e-mail lub hasło.",
+      "rateLimited": "Zbyt wiele prób. Spróbuj ponownie za kilka minut.",
+      "confirmPasswordRequired": "Powtórz nowe hasło.",
+      "passwordsDontMatch": "Hasła się różnią.",
+      "passwordTooCommon": "To hasło jest zbyt popularne. Wybierz dłuższe lub mniej przewidywalne."
+    }
+  },
+  "errors": {
+    "network": "Brak połączenia z serwerem. Sprawdź internet i spróbuj ponownie.",
+    "timeout": "Serwer odpowiada zbyt długo. Spróbuj ponownie.",
+    "unknown": "Coś poszło nie tak. Spróbuj ponownie."
+  }
 }

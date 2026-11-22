@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
+import { signOut } from '@/features/auth/session';
 import { LANGUAGE_NAMES, LANGUAGES } from '@/shared/i18n';
 import { type ThemePreference, useTheme } from '@/shared/theme/ThemeProvider';
 import { Button } from '@/shared/ui/Button';
@@ -18,6 +20,12 @@ const THEME_KEYS = {
 export default function ProfileScreen() {
   const { t, i18n } = useTranslation();
   const { preference, setPreference, space } = useTheme();
+  const [signingOut, setSigningOut] = useState(false);
+
+  const logOut = async () => {
+    setSigningOut(true);
+    await signOut();
+  };
 
   return (
     <Screen title={t('profile.title')}>
@@ -56,6 +64,17 @@ export default function ProfileScreen() {
             </View>
           ))}
         </View>
+      </Card>
+      <Card>
+        <Text variant="captionStrong" tone="muted">
+          {t('profile.account')}
+        </Text>
+        <Button
+          label={t('profile.logOut')}
+          variant="secondary"
+          loading={signingOut}
+          onPress={logOut}
+        />
       </Card>
     </Screen>
   );

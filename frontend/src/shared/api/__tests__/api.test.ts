@@ -1,5 +1,11 @@
 import { apiOrigin } from '../config';
-import { ApiError, REQUEST_TIMEOUT_MS, apiFetch, setAccessTokenProvider } from '../fetcher';
+import {
+  ApiError,
+  REQUEST_TIMEOUT_MS,
+  apiFetch,
+  setAccessTokenProvider,
+  setUnauthorizedHandler,
+} from '../fetcher';
 
 describe('apiOrigin', () => {
   it('uses EXPO_PUBLIC_API_URL when it is set', () => {
@@ -33,6 +39,65 @@ describe('apiFetch', () => {
     fetchMock.mockReset();
     global.fetch = fetchMock as unknown as typeof fetch;
     setAccessTokenProvider(() => null);
+    setUnauthorizedHandler(async () => false);
+  });
+
+  function sentHeaders(call: number): Headers {
+    return fetchMock.mock.calls[call][1].headers as Headers;
+  }
+
+  const unauthorized = {
+    type: 'about:blank',
+    title: 'Unauthorized',
+    status: 401,
+    code: 'unauthorized',
+  };
+
+  it('tells the server which kind of client it is', async () => {
+    fetchMock.mockResolvedValue(respond(200, { status: 'ok' }));
+
+    await apiFetch('/api/v1/health');
+
+    expect(sentHeaders(0).get('X-Client')).toBe('native');
+  });
+
+  describe('after a 401', () => {
+    it('renews the session once and repeats the request', async () => {
+      let token = 'expired-token';
+      setAccessTokenProvider(() => token);
+      setUnauthorizedHandler(async () => {
+        token = 'fresh-token';
+        return true;
+      });
+      fetchMock
+        .mockResolvedValueOnce(respond(401, unauthorized, 'application/problem+json'))
+        .mockResolvedValueOnce(respond(200, { name: 'Alex' }));
+
+      const result = await apiFetch<{ data: unknown }>('/api/v1/me');
+
+      expect(result.data).toEqual({ name: 'Alex' });
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+      expect(sentHeaders(1).get('Authorization')).toBe('Bearer fresh-token');
+    });
+
+    it('gives up when the session cannot be renewed', async () => {
+      fetchMock.mockResolvedValue(respond(401, unauthorized, 'application/problem+json'));
+
+      const error = (await apiFetch('/api/v1/me').catch((caught: unknown) => caught)) as ApiError;
+
+      expect(error.status).toBe(401);
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('never renews the session for the auth endpoints themselves', async () => {
+      const renew = jest.fn(async () => true);
+      setUnauthorizedHandler(renew);
+      fetchMock.mockResolvedValue(respond(401, unauthorized, 'application/problem+json'));
+
+      await apiFetch('/api/v1/auth/refresh').catch(() => undefined);
+
+      expect(renew).not.toHaveBeenCalled();
+    });
   });
 
   it('returns data and status', async () => {

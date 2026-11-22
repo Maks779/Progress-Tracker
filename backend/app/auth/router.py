@@ -12,6 +12,7 @@ from app.auth.schemas import (
     RefreshRequest,
     RegisterRequest,
     ResetPasswordRequest,
+    ResetTokenCheck,
     TokenResponse,
 )
 from app.config import get_settings
@@ -150,7 +151,19 @@ async def forgot_password(
     return Response(status_code=202)
 
 
+@router.post(
+    "/password/reset/check",
+    status_code=204,
+    summary="Check that a reset link is still unused and not expired",
+)
+async def check_reset_token(data: ResetTokenCheck, request: Request, db: DbSession) -> Response:
+    _limit(request, "reset-check")
+    await service.check_reset_token(db, data.token)
+    return Response(status_code=204)
+
+
 @router.post("/password/reset", status_code=204, summary="Set a new password with a reset token")
-async def reset_password(data: ResetPasswordRequest, db: DbSession) -> Response:
+async def reset_password(data: ResetPasswordRequest, request: Request, db: DbSession) -> Response:
+    _limit(request, "reset")
     await service.reset_password(db, data.token, data.new_password)
     return Response(status_code=204)

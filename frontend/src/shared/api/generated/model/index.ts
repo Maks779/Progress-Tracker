@@ -110,6 +110,7 @@ export * from './refreshRequest';
 export * from './registerRequest';
 export * from './registerRequestLanguage';
 export * from './resetPasswordRequest';
+export * from './resetTokenCheck';
 export * from './sessionListItem';
 export * from './sessionListItemTrackerType';
 export * from './sessionOut';
