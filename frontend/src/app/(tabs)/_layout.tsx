@@ -50,7 +50,7 @@ export default function TabsLayout() {
         name="log"
         options={{
           title: t('tabs.log'),
-          tabBarShowLabel: false,
+          tabBarLabel: () => null,
           tabBarAccessibilityLabel: t('tabs.log'),
           tabBarIcon: () => (
             <View

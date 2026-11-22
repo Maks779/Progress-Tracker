@@ -25,9 +25,9 @@ export default function ProfileScreen() {
         <Text variant="captionStrong" tone="muted">
           {t('profile.language')}
         </Text>
-        <View style={{ flexDirection: 'row', gap: space[8] }}>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space[8] }}>
           {LANGUAGES.map((language) => (
-            <View key={language} style={{ flex: 1 }}>
+            <View key={language} style={{ flexGrow: 1 }}>
               <Button
                 label={LANGUAGE_NAMES[language]}
                 variant="secondary"
@@ -43,9 +43,9 @@ export default function ProfileScreen() {
         <Text variant="captionStrong" tone="muted">
           {t('profile.theme')}
         </Text>
-        <View style={{ flexDirection: 'row', gap: space[8] }}>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space[8] }}>
           {THEMES.map((theme) => (
-            <View key={theme} style={{ flex: 1 }}>
+            <View key={theme} style={{ flexGrow: 1 }}>
               <Button
                 label={t(THEME_KEYS[theme])}
                 variant="secondary"
