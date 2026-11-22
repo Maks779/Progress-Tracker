@@ -59,5 +59,5 @@ async def export_csv(tracker_id: UUID, user: CurrentUser, db: DbSession) -> Resp
     return Response(
         content,
         media_type="text/csv; charset=utf-8",
-        headers={"Content-Disposition": f'attachment; filename="{exports.filename(tracker)}"'},
+        headers={"Content-Disposition": exports.content_disposition(tracker)},
     )

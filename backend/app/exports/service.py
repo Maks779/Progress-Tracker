@@ -1,8 +1,10 @@
 import csv
 import io
 import re
+import unicodedata
 from datetime import UTC, datetime
 from decimal import Decimal
+from urllib.parse import quote
 from uuid import UUID
 
 from pydantic import BaseModel
@@ -136,9 +138,24 @@ def _text(value: str | None) -> str:
     return f"'{text}" if text.startswith(FORMULA_STARTS) else text
 
 
+UNSAFE_IN_FILE_NAMES = re.compile(r'[\x00-\x1f\x7f<>:"/\\|?*]+')
+
+
 def filename(tracker: Tracker) -> str:
-    slug = re.sub(r"[^a-z0-9]+", "-", tracker.name.lower()).strip("-") or "tracker"
+    """ASCII file name for old clients: accents dropped ("Książki" -> ember-ksiazki.csv)."""
+    plain = unicodedata.normalize("NFKD", tracker.name.replace("ł", "l").replace("Ł", "L"))
+    ascii_name = plain.encode("ascii", "ignore").decode().lower()
+    slug = re.sub(r"[^a-z0-9]+", "-", ascii_name).strip("-") or "tracker"
     return f"ember-{slug}.csv"
+
+
+def content_disposition(tracker: Tracker) -> str:
+    """Download header with the ASCII name and the real one in UTF-8 (RFC 6266), so browsers
+    save "ember-Книги.csv" instead of losing every non-Latin letter.
+    """
+    name = UNSAFE_IN_FILE_NAMES.sub("-", tracker.name).strip(" .-") or "tracker"
+    real = quote(f"ember-{name}.csv", safe="")
+    return f"attachment; filename=\"{filename(tracker)}\"; filename*=UTF-8''{real}"
 
 
 async def export_csv(db: AsyncSession, user: UserAccount, tracker_id: UUID) -> str:

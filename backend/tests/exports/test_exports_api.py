@@ -1,5 +1,6 @@
 import csv
 import io
+from urllib.parse import unquote
 from uuid import uuid4
 
 import pytest
@@ -104,7 +105,7 @@ async def test_reading_csv_has_pages(api: Api):
         ("Atomic Habits", "144", "144"),
         ("Atomic Habits", "168", "24"),
     ]
-    assert 'filename="ember-ksi-ki.csv"' in response.headers["content-disposition"]
+    assert 'filename="ember-ksiazki.csv"' in response.headers["content-disposition"]
 
 
 async def test_counter_and_cardio_csv(api: Api):
@@ -210,6 +211,32 @@ async def test_csv_leaves_numbers_and_plain_text_alone(api: Api, gym: dict):
 
     [row] = parse_csv(response.text)
     assert (row["weight_kg"], row["reps"], row["note"]) == ("62.5", "8", "Felt strong")
+
+
+@pytest.mark.parametrize(
+    ("name", "ascii_name", "real_name"),
+    [
+        ("Gym", "ember-gym.csv", "ember-Gym.csv"),
+        ("Książki", "ember-ksiazki.csv", "ember-Książki.csv"),
+        ("Łódź run", "ember-lodz-run.csv", "ember-Łódź run.csv"),
+        ("Книги", "ember-tracker.csv", "ember-Книги.csv"),
+        ("Читання 📚", "ember-tracker.csv", "ember-Читання 📚.csv"),
+        ('a/b:c*?"<>|d', "ember-a-b-c-d.csv", "ember-a-b-c-d.csv"),
+    ],
+)
+async def test_csv_file_keeps_the_tracker_name(
+    api: Api, name: str, ascii_name: str, real_name: str
+):
+    tracker = await create_tracker(api.client, api.headers, "cardio", name=name)
+
+    response = await api.client.get(
+        f"/api/v1/trackers/{tracker['id']}/export.csv", headers=api.headers
+    )
+
+    header = response.headers["content-disposition"]
+    assert header.startswith(f"attachment; filename=\"{ascii_name}\"; filename*=UTF-8''")
+    assert unquote(header.split("filename*=UTF-8''", 1)[1]) == real_name
+    assert header.isascii()
 
 
 async def test_csv_of_a_foreign_tracker_is_not_found(api: Api, gym: dict):
