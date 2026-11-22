@@ -120,8 +120,20 @@ def _number(value: Decimal | int | None) -> str:
     return str(value)
 
 
+FORMULA_STARTS = ("=", "+", "-", "@", "\t", "\r", "\n")
+HIDDEN_CELL_START = re.compile(r"([,;\t\r\n][\"' ]*)([=+\-@])")
+
+
 def _text(value: str | None) -> str:
-    return value or ""
+    """User text as a spreadsheet cell, safe from CSV injection (OWASP).
+
+    Text that starts like a formula gets a leading `'`, so Excel, LibreOffice and Google
+    Sheets show it instead of running it. So does a formula character right after a separator,
+    quote or line break: a spreadsheet that splits on another separator (Excel uses `;` with
+    Polish or Ukrainian settings) would start a new cell there.
+    """
+    text = HIDDEN_CELL_START.sub(r"\1'\2", value or "")
+    return f"'{text}" if text.startswith(FORMULA_STARTS) else text
 
 
 def filename(tracker: Tracker) -> str:
@@ -130,12 +142,15 @@ def filename(tracker: Tracker) -> str:
 
 
 async def export_csv(db: AsyncSession, user: UserAccount, tracker_id: UUID) -> str:
-    """One tracker as CSV: a row per set for strength, a row per session otherwise."""
+    """One tracker as CSV: a row per set for strength, a row per session otherwise.
+
+    Every cell is quoted, as OWASP advises for CSV exports.
+    """
     tracker = await get_tracker(db, user.id, tracker_id)
     rows = await _active_sessions(db, user.id, tracker.id)
     output = io.StringIO()
     output.write("﻿")
-    writer = csv.writer(output, lineterminator="\n")
+    writer = csv.writer(output, lineterminator="\n", quoting=csv.QUOTE_ALL)
     base = ["session_id", "local_date", "started_at_utc", "duration_s"]
 
     def common(session: Session) -> list[str]:
@@ -169,7 +184,7 @@ async def export_csv(db: AsyncSession, user: UserAccount, tracker_id: UUID) -> s
                         [
                             *common(session),
                             _text(session.name),
-                            names.get(entry.exercise_id, ""),
+                            _text(names.get(entry.exercise_id)),
                             _number(entry.superset_group),
                             s.position + 1,
                             s.kind,
@@ -192,7 +207,7 @@ async def export_csv(db: AsyncSession, user: UserAccount, tracker_id: UUID) -> s
             writer.writerow(
                 [
                     *common(session),
-                    titles.get(entry.book_id, "") if entry else "",
+                    _text(titles.get(entry.book_id)) if entry else "",
                     _number(entry.end_page if entry else None),
                     _number(pages.get(session.id)),
                     _text(session.note),

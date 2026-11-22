@@ -4,6 +4,7 @@ from uuid import uuid4
 
 import pytest
 
+from app.exports import service as export_service
 from tests.helpers import Api, auth_headers, create_tracker
 from tests.sessions.conftest import at, entry, sets, strength
 
@@ -125,6 +126,90 @@ async def test_counter_and_cardio_csv(api: Api):
 
     assert (water_rows[0]["count"], water_rows[0]["unit"]) == ("6", "glasses")
     assert (run_rows[0]["duration_s"], run_rows[0]["distance_m"]) == ("1920", "5200")
+
+
+@pytest.mark.parametrize("note", ["=1+1", "+1 rep", "-2 kg", "@SUM(A1)", "=cmd|' /C calc'!A0"])
+async def test_csv_shows_formula_like_text_as_text(api: Api, gym: dict, note: str):
+    await api.put(
+        strength(gym["id"], [entry("bench_press", sets(("60", 5)))], 0, name=note, note=note)
+    )
+
+    response = await api.client.get(f"/api/v1/trackers/{gym['id']}/export.csv", headers=api.headers)
+
+    [row] = parse_csv(response.text)
+    assert row["note"] == f"'{note}"
+    assert row["session_name"] == f"'{note}"
+
+
+@pytest.mark.parametrize(
+    ("text", "safe"),
+    [("\tindented", "'\tindented"), ("\r=1+1", "'\r'=1+1"), ("\n@x", "'\n'@x")],
+)
+def test_cells_starting_with_a_tab_or_line_break_are_escaped_too(text: str, safe: str):
+    assert export_service._text(text) == safe
+
+
+async def test_csv_escapes_every_user_named_thing(api: Api, gym: dict):
+    exercise_id = str(uuid4())
+    custom = {"name": '=HYPERLINK("http://x")', "muscle_group": "shoulders", "equipment": "barbell"}
+    await api.client.put(f"/api/v1/exercises/{exercise_id}", json=custom, headers=api.headers)
+    lift = {**entry("bench_press", sets(("60", 5))), "exercise_id": exercise_id}
+    await api.put(strength(gym["id"], [lift]))
+    reading = await create_tracker(api.client, api.headers, "reading")
+    book_id = str(uuid4())
+    await api.client.put(
+        f"/api/v1/books/{book_id}", json={"title": "@risk", "total_pages": 100}, headers=api.headers
+    )
+    await api.put(
+        {"tracker_id": reading["id"], **at(0), "reading": {"book_id": book_id, "end_page": 10}}
+    )
+    counter = await create_tracker(api.client, api.headers, "general", counter_unit="+reps")
+    await api.put({"tracker_id": counter["id"], **at(0), "general": {"count": 3}})
+
+    async def rows(tracker_id: str) -> list[dict[str, str]]:
+        path = f"/api/v1/trackers/{tracker_id}/export.csv"
+        return parse_csv((await api.client.get(path, headers=api.headers)).text)
+
+    assert (await rows(gym["id"]))[0]["exercise"] == '\'=HYPERLINK("http://x")'
+    assert (await rows(reading["id"]))[0]["book"] == "'@risk"
+    assert (await rows(counter["id"]))[0]["unit"] == "'+reps"
+
+
+@pytest.mark.parametrize(
+    ("text", "safe"),
+    [
+        ("ok;=1+1", "ok;'=1+1"),
+        ("a,+1", "a,'+1"),
+        ("x; @SUM(A1)", "x; '@SUM(A1)"),
+        ('x;"=1+1"', 'x;"\'=1+1"'),
+        ('say "=1+1"', 'say "=1+1"'),
+        ("line\n-2", "line\n'-2"),
+        ("e-mail, 5-3 = 2", "e-mail, 5-3 = 2"),
+    ],
+)
+def test_a_cell_hidden_after_a_separator_is_escaped_too(text: str, safe: str):
+    assert export_service._text(text) == safe
+
+
+async def test_csv_quotes_every_cell(api: Api, gym: dict):
+    await api.put(strength(gym["id"], [entry("bench_press", sets(("60", 5)))], 0, note="ok;=1+1"))
+
+    response = await api.client.get(f"/api/v1/trackers/{gym['id']}/export.csv", headers=api.headers)
+
+    lines = response.text.removeprefix("\ufeff").splitlines()
+    assert '"ok;\'=1+1"' in lines[1]
+    assert all(line.startswith('"') and line.endswith('"') for line in lines)
+
+
+async def test_csv_leaves_numbers_and_plain_text_alone(api: Api, gym: dict):
+    await api.put(
+        strength(gym["id"], [entry("bench_press", sets(("62.5", 8)))], 0, note="Felt strong")
+    )
+
+    response = await api.client.get(f"/api/v1/trackers/{gym['id']}/export.csv", headers=api.headers)
+
+    [row] = parse_csv(response.text)
+    assert (row["weight_kg"], row["reps"], row["note"]) == ("62.5", "8", "Felt strong")
 
 
 async def test_csv_of_a_foreign_tracker_is_not_found(api: Api, gym: dict):
