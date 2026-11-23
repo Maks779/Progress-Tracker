@@ -12,6 +12,8 @@ export { default as House } from 'lucide-react-native/icons/house';
 export { default as Info } from 'lucide-react-native/icons/info';
 export { default as LogOut } from 'lucide-react-native/icons/log-out';
 export { default as Plus } from 'lucide-react-native/icons/plus';
+export { default as ShieldCheck } from 'lucide-react-native/icons/shield-check';
 export { default as Sparkles } from 'lucide-react-native/icons/sparkles';
 export { default as TrendingUp } from 'lucide-react-native/icons/trending-up';
+export { default as TriangleAlert } from 'lucide-react-native/icons/triangle-alert';
 export { default as UserRound } from 'lucide-react-native/icons/user-round';

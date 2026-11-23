@@ -27,13 +27,41 @@
   },
   "profile": {
     "title": "Twoja przestrzeń, twoje zasady.",
+    "caption": "Profil i ustawienia",
+    "loading": "Wczytujemy Twój profil",
+    "loadError": "Nie udało się wczytać profilu.",
+    "retry": "Spróbuj ponownie",
     "language": "Język",
     "theme": "Motyw",
-    "themeSystem": "Systemowy",
-    "themeLight": "Jasny",
-    "themeDark": "Ciemny",
-    "account": "Konto",
-    "logOut": "Wyloguj się"
+    "themes": {
+      "system": "Systemowy",
+      "light": "Jasny",
+      "dark": "Ciemny"
+    },
+    "weightUnit": "Jednostki wagi",
+    "distanceUnit": "Jednostki odległości",
+    "units": {
+      "kg": "kg",
+      "lb": "lb",
+      "km": "km",
+      "mi": "mi"
+    },
+    "syncNote": "Zmiany synchronizują się między urządzeniami. Dane są przeliczane, nigdy nie znikają.",
+    "unsynced": "Zapisano na tym urządzeniu. Zsynchronizujemy, gdy wrócisz do sieci.",
+    "logOut": "Wyloguj się",
+    "deleteAccount": "Usuń konto",
+    "personalTitle": "Postęp jest osobisty.",
+    "personalBody": "Twoje sesje pozostają prywatne, a dane należą do Ciebie.",
+    "version": "Ember 1.0",
+    "delete": {
+      "title": "Usunąć konto?",
+      "body": "Trwale usuniemy Twoje trackery, sesje, cele i rekordy oraz wylogujemy Cię na wszystkich urządzeniach.",
+      "permanent": "Tego nie da się cofnąć.",
+      "password": "Obecne hasło",
+      "wrongPassword": "To hasło jest nieprawidłowe.",
+      "confirm": "Usuń konto na zawsze",
+      "keep": "Zachowaj konto"
+    }
   },
   "notFound": {
     "title": "Poza utartym szlakiem.",

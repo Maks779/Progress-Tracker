@@ -1,4 +1,5 @@
-import { QueryClient } from '@tanstack/react-query';
+import { focusManager, QueryClient } from '@tanstack/react-query';
+import { AppState, Platform } from 'react-native';
 
 import { ApiError } from './fetcher';
 
@@ -15,4 +16,15 @@ export function createQueryClient(): QueryClient {
       },
     },
   });
+}
+
+/**
+ * On phones, coming back to the app counts as focus, as switching back to a tab does on the
+ * web, so data that went stale meanwhile (the profile and its settings) is fetched again.
+ */
+export function followAppFocus(): void {
+  if (Platform.OS === 'web') {
+    return;
+  }
+  AppState.addEventListener('change', (state) => focusManager.setFocused(state === 'active'));
 }

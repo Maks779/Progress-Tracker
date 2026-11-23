@@ -1,4 +1,4 @@
-import { Easing, FadeIn, FadeInDown, ReduceMotion } from 'react-native-reanimated';
+import { Easing, FadeIn, FadeInDown, ReduceMotion, SlideInDown } from 'react-native-reanimated';
 
 const STEP_MS = 90;
 
@@ -16,4 +16,20 @@ export function entrance(step: number) {
 /** A plain fade, e.g. the number inside a ring once the arc has filled. */
 export function fadeIn(delayMs: number) {
   return FadeIn.duration(350).delay(delayMs).reduceMotion(ReduceMotion.System);
+}
+
+const SHEET_MS = 200;
+
+/** A sheet rises from the bottom edge on phones (motion spec: 200 ms, ease-out, no bounce). */
+export function sheetEnter() {
+  return SlideInDown.duration(SHEET_MS).easing(Easing.out(Easing.cubic)).reduceMotion(ReduceMotion.System);
+}
+
+/** The same sheet as a centred dialog on wide screens, and the dimmed backdrop behind both. */
+export function dialogEnter() {
+  return FadeInDown.duration(SHEET_MS).easing(Easing.out(Easing.cubic)).reduceMotion(ReduceMotion.System);
+}
+
+export function backdropEnter() {
+  return FadeIn.duration(SHEET_MS).reduceMotion(ReduceMotion.System);
 }

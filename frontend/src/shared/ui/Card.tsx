@@ -1,12 +1,15 @@
 import type { ReactNode } from 'react';
-import { View, type ViewStyle } from 'react-native';
+import { View, type ViewProps, type ViewStyle } from 'react-native';
 
 import { useTheme } from '@/shared/theme/ThemeProvider';
 
-export function Card({ children, style }: { children: ReactNode; style?: ViewStyle }) {
+type Props = Omit<ViewProps, 'style'> & { children: ReactNode; style?: ViewStyle };
+
+export function Card({ children, style, ...rest }: Props) {
   const { colors, radius, space } = useTheme();
   return (
     <View
+      {...rest}
       style={[
         {
           backgroundColor: colors.bg.surface,

@@ -6,10 +6,13 @@ import { useTheme } from '@/shared/theme/ThemeProvider';
 
 import { Text } from './Text';
 
-type Props = { title: string; children?: ReactNode };
+type Props = { title: string; caption?: string; children?: ReactNode };
 
-/** A page: safe-area padding, the screen title and scrollable content, centred on wide screens. */
-export function Screen({ title, children }: Props) {
+/**
+ * A page: safe-area padding, the screen title (with an optional caption under it) and
+ * scrollable content, centred on wide screens.
+ */
+export function Screen({ title, caption, children }: Props) {
   const { colors, space } = useTheme();
   return (
     <SafeAreaView edges={['top']} style={[styles.root, { backgroundColor: colors.bg.base }]}>
@@ -18,6 +21,11 @@ export function Screen({ title, children }: Props) {
           <Text variant="h1" accessibilityRole="header">
             {title}
           </Text>
+          {caption ? (
+            <Text variant="caption" tone="muted" style={{ textTransform: 'uppercase', marginTop: 4 }}>
+              {caption}
+            </Text>
+          ) : null}
         </View>
         <View style={[styles.column, { gap: space[16] }]}>{children}</View>
       </ScrollView>

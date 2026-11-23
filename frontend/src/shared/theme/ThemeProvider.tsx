@@ -1,4 +1,4 @@
-import { createContext, type ReactNode, useContext, useMemo, useState } from 'react';
+import { createContext, type ReactNode, useContext, useMemo } from 'react';
 import { useColorScheme } from 'react-native';
 
 import { type Palette, palettes, radius, space, typography } from './tokens';
@@ -13,7 +13,6 @@ type ThemeValue = {
   radius: typeof radius;
   typography: typeof typography;
   preference: ThemePreference;
-  setPreference: (preference: ThemePreference) => void;
 };
 
 const ThemeContext = createContext<ThemeValue | null>(null);
@@ -28,9 +27,15 @@ export function resolveScheme(
   return system === 'light' ? 'light' : 'dark';
 }
 
-export function ThemeProvider({ children }: { children: ReactNode }) {
+/** The theme follows the user's choice from Settings; `system` follows the device. */
+export function ThemeProvider({
+  preference = 'system',
+  children,
+}: {
+  preference?: ThemePreference;
+  children: ReactNode;
+}) {
   const system = useColorScheme();
-  const [preference, setPreference] = useState<ThemePreference>('system');
   const value = useMemo<ThemeValue>(() => {
     const scheme = resolveScheme(preference, system);
     return {
@@ -40,7 +45,6 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       radius,
       typography,
       preference,
-      setPreference,
     };
   }, [preference, system]);
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
