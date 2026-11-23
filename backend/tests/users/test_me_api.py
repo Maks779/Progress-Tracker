@@ -121,3 +121,34 @@ async def test_delete_account_removes_the_user_and_tokens(client: AsyncClient, d
     assert await db.scalar(select(func.count()).select_from(RefreshToken)) == 0
     after = await client.get("/api/v1/me", headers=bearer(tokens["access_token"]))
     assert after.status_code == 401
+
+
+@pytest.mark.parametrize(
+    ("path", "body"),
+    [
+        ("/api/v1/me/delete", {"password": "wrong-password"}),
+        (
+            "/api/v1/me/password",
+            {"current_password": "wrong-password", "new_password": "brand-new-password"},
+        ),
+    ],
+)
+async def test_password_checks_are_limited_per_account(client: AsyncClient, path: str, body: dict):
+    headers = bearer((await register(client))["access_token"])
+
+    statuses = [(await client.post(path, json=body, headers=headers)).status_code for _ in range(6)]
+
+    assert statuses == [401] * 5 + [429]
+
+
+async def test_the_limit_of_one_account_does_not_touch_another(client: AsyncClient):
+    first = bearer((await register(client))["access_token"])
+    second = bearer((await register(client, email="sam@example.com"))["access_token"])
+    for _ in range(5):
+        await client.post("/api/v1/me/delete", json={"password": "wrong-password"}, headers=first)
+
+    response = await client.post(
+        "/api/v1/me/delete", json={"password": "wrong-password"}, headers=second
+    )
+
+    assert response.status_code == 401

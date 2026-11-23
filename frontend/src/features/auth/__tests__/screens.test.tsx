@@ -205,8 +205,7 @@ describe('Forgot password', () => {
   it('lets the user send again only after a minute', async () => {
     jest.useFakeTimers();
     await sendLink();
-    const waiting = await screen.findByRole('button', { name: 'Send again in 60 s' });
-    expect(waiting.props.accessibilityState.disabled).toBe(true);
+    expect(await screen.findByRole('button', { name: 'Send again in 60 s', disabled: true })).toBeTruthy();
 
     for (let second = 0; second < 60; second += 1) {
       await act(async () => {

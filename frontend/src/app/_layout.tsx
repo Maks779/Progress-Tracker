@@ -13,16 +13,20 @@ import { useEffect, useState } from 'react';
 
 import { installAuth, restoreSession } from '@/features/auth/session';
 import { useAuthStore } from '@/features/auth/store';
-import { createQueryClient } from '@/shared/api/queryClient';
+import { hydratePreferences, usePreferences } from '@/features/settings/preferences';
+import { usePreferencesSync } from '@/features/settings/usePreferencesSync';
+import { createQueryClient, followAppFocus } from '@/shared/api/queryClient';
 import { ThemeProvider, useTheme } from '@/shared/theme/ThemeProvider';
 
 SplashScreen.preventAutoHideAsync();
 installAuth();
+followAppFocus();
 
 function Navigator() {
   const { scheme, colors } = useTheme();
   const signedIn = useAuthStore((state) => state.status === 'signedIn');
   const expired = useAuthStore((state) => state.expired);
+  usePreferencesSync();
   return (
     <>
       <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
@@ -49,9 +53,12 @@ export default function RootLayout() {
     Inter_700Bold,
   });
   const status = useAuthStore((state) => state.status);
-  const ready = (fontsLoaded || fontError !== null) && status !== 'restoring';
+  const hydrated = usePreferences((state) => state.hydrated);
+  const theme = usePreferences((state) => state.values.theme);
+  const ready = (fontsLoaded || fontError !== null) && status !== 'restoring' && hydrated;
 
   useEffect(() => {
+    hydratePreferences();
     restoreSession();
   }, []);
 
@@ -72,7 +79,7 @@ export default function RootLayout() {
   }
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
+      <ThemeProvider preference={theme}>
         <Navigator />
       </ThemeProvider>
     </QueryClientProvider>

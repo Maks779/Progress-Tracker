@@ -27,13 +27,41 @@
   },
   "profile": {
     "title": "Your space, your rules.",
+    "caption": "Profile & settings",
+    "loading": "Loading your profile",
+    "loadError": "Couldn’t load your profile.",
+    "retry": "Try again",
     "language": "Language",
     "theme": "Theme",
-    "themeSystem": "System",
-    "themeLight": "Light",
-    "themeDark": "Dark",
-    "account": "Account",
-    "logOut": "Log out"
+    "themes": {
+      "system": "System",
+      "light": "Light",
+      "dark": "Dark"
+    },
+    "weightUnit": "Weight units",
+    "distanceUnit": "Distance units",
+    "units": {
+      "kg": "kg",
+      "lb": "lb",
+      "km": "km",
+      "mi": "mi"
+    },
+    "syncNote": "Changes sync across your devices. Your data is converted, never reset.",
+    "unsynced": "Saved on this device. It will sync when you’re back online.",
+    "logOut": "Log out",
+    "deleteAccount": "Delete account",
+    "personalTitle": "Progress is personal.",
+    "personalBody": "Your sessions stay private, and your data belongs to you.",
+    "version": "Ember 1.0",
+    "delete": {
+      "title": "Delete your account?",
+      "body": "This permanently deletes your trackers, sessions, goals and records, and signs you out on every device.",
+      "permanent": "This can’t be undone.",
+      "password": "Current password",
+      "wrongPassword": "This password is incorrect.",
+      "confirm": "Permanently delete account",
+      "keep": "Keep my account"
+    }
   },
   "notFound": {
     "title": "Off the beaten path.",

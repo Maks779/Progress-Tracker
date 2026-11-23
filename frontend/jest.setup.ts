@@ -15,6 +15,7 @@ jest.mock('react-native-reanimated', () => {
     ReduceMotion: { System: 'system', Always: 'always', Never: 'never' },
     FadeIn: builder(),
     FadeInDown: builder(),
+    SlideInDown: builder(),
     interpolate: () => 0,
     useSharedValue: (value: unknown) => ({ value }),
     useAnimatedStyle: () => ({}),
@@ -30,4 +31,8 @@ jest.mock('react-native-reanimated', () => {
 jest.mock(
   'react-native-safe-area-context',
   () => jest.requireActual('react-native-safe-area-context/jest/mock').default,
+);
+
+jest.mock('@react-native-async-storage/async-storage', () =>
+  require('@react-native-async-storage/async-storage/jest/async-storage-mock'),
 );

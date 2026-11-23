@@ -3,6 +3,7 @@ import { ActivityIndicator, Pressable, StyleSheet } from 'react-native';
 import { useTheme } from '@/shared/theme/ThemeProvider';
 import { controlHeight } from '@/shared/theme/tokens';
 
+import { showFocusRing } from './focusRing';
 import { Text } from './Text';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'destructive';
@@ -34,10 +35,12 @@ export function Button({
   const inactive = disabled || loading;
   return (
     <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={label}
+      role="button"
+      aria-label={label}
       accessibilityHint={accessibilityHint}
-      accessibilityState={{ disabled: inactive, busy: loading, selected }}
+      aria-disabled={inactive}
+      aria-busy={loading}
+      aria-selected={selected}
       disabled={inactive}
       onPress={onPress}
       style={({ pressed, focused, hovered }: { pressed: boolean; focused?: boolean; hovered?: boolean }) => [
@@ -56,20 +59,22 @@ export function Button({
                 ? colors.accent.subtle
                 : colors.bg.surfaceRaised,
           borderColor:
-            (!disabled && (focused || hovered)) || selected
+            (!disabled && (showFocusRing(focused) || hovered)) || selected
               ? colors.accent.fill
               : colors.border.default,
-          borderWidth: focused && !disabled ? 2 : primary ? 0 : 1,
+          borderWidth: showFocusRing(focused) && !disabled ? 2 : primary ? 0 : 1,
           opacity: disabled ? 0.45 : 1,
           transform: [{ scale: pressed && !inactive ? 0.98 : 1 }],
           cursor: inactive ? 'auto' : 'pointer',
+          outlineStyle: 'solid',
+          outlineWidth: 0,
         },
       ]}
     >
       {loading ? (
         <ActivityIndicator color={primary ? colors.accent.onFill : colors.text.primary} />
       ) : (
-        <Text variant="smallStrong" tone={primary ? 'onAccent' : 'primary'}>
+        <Text variant="smallStrong" tone={primary ? 'onAccent' : 'primary'} style={{ textAlign: 'center' }}>
           {label}
         </Text>
       )}
