@@ -16,6 +16,13 @@ class UpNext(BaseModel):
     estimated_duration_s: int | None
 
 
+class WeekDay(BaseModel):
+    """A day of the current week with sessions, and the trackers they were logged in."""
+
+    local_date: date
+    tracker_ids: list[UUID]
+
+
 class HomeStats(BaseModel):
     week_start: date
     main_tracker_id: UUID | None
@@ -25,6 +32,7 @@ class HomeStats(BaseModel):
     pages_read: int
     recent_sessions: list[SessionListItem]
     up_next: UpNext | None
+    week_days: list[WeekDay]
 
 
 class CalendarDay(BaseModel):

@@ -4123,6 +4123,13 @@
                 "type": "null"
               }
             ]
+          },
+          "week_days": {
+            "items": {
+              "$ref": "#/components/schemas/WeekDay"
+            },
+            "type": "array",
+            "title": "Week Days"
           }
         },
         "type": "object",
@@ -4134,7 +4141,8 @@
           "volume_kg",
           "pages_read",
           "recent_sessions",
-          "up_next"
+          "up_next",
+          "week_days"
         ],
         "title": "HomeStats"
       },
@@ -6036,6 +6044,30 @@
           "estimated_duration_s"
         ],
         "title": "UpNext"
+      },
+      "WeekDay": {
+        "properties": {
+          "local_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Local Date"
+          },
+          "tracker_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Tracker Ids"
+          }
+        },
+        "type": "object",
+        "required": [
+          "local_date",
+          "tracker_ids"
+        ],
+        "title": "WeekDay",
+        "description": "A day of the current week with sessions, and the trackers they were logged in."
       }
     },
     "securitySchemes": {

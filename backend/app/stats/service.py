@@ -27,6 +27,7 @@ from app.stats.schemas import (
     ProgressStats,
     ProgressTotals,
     UpNext,
+    WeekDay,
 )
 from app.trackers.models import Tracker
 from app.users.models import UserAccount
@@ -54,6 +55,15 @@ def volume(session: Session) -> Decimal:
             for s in entry.sets
         ]
     )
+
+
+def week_days(week: list[Session]) -> list[WeekDay]:
+    """Each day of the week with sessions, with its trackers in the order they were logged."""
+    trackers: dict[date, list[UUID]] = defaultdict(list)
+    for session in sorted(week, key=lambda s: (s.started_at, s.id)):
+        if session.tracker_id not in trackers[session.local_date]:
+            trackers[session.local_date].append(session.tracker_id)
+    return [WeekDay(local_date=day, tracker_ids=ids) for day, ids in sorted(trackers.items())]
 
 
 async def home(db: AsyncSession, user: UserAccount) -> HomeStats:
@@ -101,6 +111,7 @@ async def home(db: AsyncSession, user: UserAccount) -> HomeStats:
         pages_read=sum(pages.get(s.id, 0) for s in week),
         recent_sessions=recent.items,
         up_next=up_next,
+        week_days=week_days(week),
     )
 
 

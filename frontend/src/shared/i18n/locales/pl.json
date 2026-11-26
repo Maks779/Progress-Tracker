@@ -17,10 +17,86 @@
   },
   "home": {
     "title": "Ruszajmy dalej.",
-    "api": "Serwer",
-    "apiOnline": "Połączono",
-    "apiOffline": "Brak połączenia",
-    "apiChecking": "Sprawdzanie…"
+    "greeting": "Ruszajmy dalej, {{name}}.",
+    "loading": "Wczytywanie postępów…",
+    "loadErrorTitle": "Nie udało się wczytać strony głównej.",
+    "loadError": "Twoje zapisane dane są bezpieczne. Sprawdź połączenie i spróbuj ponownie.",
+    "retry": "Spróbuj ponownie",
+    "empty": {
+      "title": "Twój pierwszy tydzień zaczyna się teraz.",
+      "body": "Utwórz tracker i zrób miejsce na jedno małe zwycięstwo.",
+      "action": "Utwórz pierwszy tracker"
+    },
+    "ring": {
+      "zero": "Nowy tydzień.\nZacznij, kiedy chcesz.",
+      "more": "Jesteś w drodze.",
+      "one": "Został jeden krok.\nDasz radę.",
+      "met": "Cel osiągnięty.\nBrawo.",
+      "workouts_one": "{{value}} z {{count}} treningu w tym tygodniu",
+      "workouts_few": "{{value}} z {{count}} treningów w tym tygodniu",
+      "workouts_many": "{{value}} z {{count}} treningów w tym tygodniu",
+      "workouts_other": "{{value}} z {{count}} treningów w tym tygodniu",
+      "progress": "{{value}} z {{target}} w tym tygodniu",
+      "of": "z {{target}}",
+      "streak_one": "Seria: {{count}} tydz.",
+      "streak_few": "Seria: {{count}} tyg.",
+      "streak_many": "Seria: {{count}} tyg.",
+      "streak_other": "Seria: {{count}} tyg."
+    },
+    "setGoal": {
+      "title": "Twój pierścień czeka.",
+      "body": "Cel tygodniowy dla „{{tracker}}” wypełni ten pierścień i zacznie serię.",
+      "action": "Ustal cel tygodniowy"
+    },
+    "stats": {
+      "active": "Czas aktywności",
+      "activeUnit_one": "minuta w tym tygodniu",
+      "activeUnit_few": "minuty w tym tygodniu",
+      "activeUnit_many": "minut w tym tygodniu",
+      "activeUnit_other": "minuty w tym tygodniu",
+      "volume": "Objętość treningowa",
+      "volumeUnit": "{{unit}} w tym tygodniu",
+      "pages": "Przeczytane strony",
+      "pagesUnit_one": "strona w tym tygodniu",
+      "pagesUnit_few": "strony w tym tygodniu",
+      "pagesUnit_many": "stron w tym tygodniu",
+      "pagesUnit_other": "strony w tym tygodniu",
+      "pagesOf": "z {{target}} w tym tygodniu"
+    },
+    "recent": {
+      "title": "Ostatnie sesje",
+      "empty": "Tutaj pojawią się Twoje sesje."
+    },
+    "next": {
+      "title": "{{amount}} do kolejnego celu",
+      "week": "{{tracker}} · {{progress}} w tym tygodniu",
+      "day": "{{tracker}} · {{progress}} dziś"
+    },
+    "rhythm": {
+      "title": "Twój tygodniowy rytm",
+      "body": "Odpoczynek to część postępu. Twoja seria liczy się w tygodniach.",
+      "days": "Dni z sesjami w tym tygodniu: {{days}}",
+      "none": "W tym tygodniu jeszcze bez sesji"
+    },
+    "day": {
+      "today": "Dziś",
+      "yesterday": "Wczoraj"
+    },
+    "duration": {
+      "minutes": "{{minutes}} min",
+      "hours": "{{hours}} godz.",
+      "hoursMinutes": "{{hours}} godz. {{minutes}} min"
+    },
+    "weight": {
+      "kg_one": "{{formatted}} kg",
+      "kg_few": "{{formatted}} kg",
+      "kg_many": "{{formatted}} kg",
+      "kg_other": "{{formatted}} kg",
+      "lb_one": "{{formatted}} lb",
+      "lb_few": "{{formatted}} lb",
+      "lb_many": "{{formatted}} lb",
+      "lb_other": "{{formatted}} lb"
+    }
   },
   "history": {
     "title": "Twój wysiłek, zapisany.",
