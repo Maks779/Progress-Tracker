@@ -1114,7 +1114,7 @@
         "tags": [
           "trackers"
         ],
-        "summary": "Delete a tracker (soft)",
+        "summary": "Delete a tracker with its sessions and goals (soft)",
         "operationId": "delete_tracker",
         "security": [
           {
@@ -5615,7 +5615,7 @@
         "properties": {
           "items": {
             "items": {
-              "$ref": "#/components/schemas/TrackerOut"
+              "$ref": "#/components/schemas/TrackerSummary"
             },
             "type": "array",
             "title": "Items"
@@ -5747,6 +5747,133 @@
           "archived"
         ],
         "title": "TrackerOut"
+      },
+      "TrackerSummary": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "strength",
+              "cardio",
+              "reading",
+              "general"
+            ],
+            "title": "Type"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "color": {
+            "type": "string",
+            "enum": [
+              "strength",
+              "cardio",
+              "reading",
+              "general"
+            ],
+            "title": "Color"
+          },
+          "icon": {
+            "type": "string",
+            "title": "Icon"
+          },
+          "general_mode": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "duration",
+                  "counter"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "General Mode"
+          },
+          "counter_unit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Counter Unit"
+          },
+          "counter_unit_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Counter Unit Note"
+          },
+          "position": {
+            "type": "integer",
+            "title": "Position"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "session_count": {
+            "type": "integer",
+            "title": "Session Count"
+          },
+          "archived": {
+            "type": "boolean",
+            "title": "Archived",
+            "readOnly": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "type",
+          "name",
+          "description",
+          "color",
+          "icon",
+          "general_mode",
+          "counter_unit",
+          "counter_unit_note",
+          "position",
+          "created_at",
+          "updated_at",
+          "session_count",
+          "archived"
+        ],
+        "title": "TrackerSummary",
+        "description": "A tracker in the list, with the number of its saved sessions."
       },
       "TrackerUpdate": {
         "properties": {

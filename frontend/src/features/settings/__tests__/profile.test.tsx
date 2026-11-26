@@ -29,8 +29,10 @@ jest.mock('@/features/auth/session', () => ({
   forgetSession: jest.fn(),
 }));
 
+const mockPush = jest.fn();
 jest.mock('expo-router', () => ({
   Link: ({ children }: { children: unknown }) => children,
+  useRouter: () => ({ push: mockPush }),
 }));
 
 const readMe = useReadMe as jest.Mock;
@@ -96,6 +98,17 @@ describe('Profile', () => {
     expect(screen.getByText('alex@example.com')).toBeTruthy();
     expect(screen.getByText('AM', { includeHiddenElements: true })).toBeTruthy();
     expect(screen.queryByText('AM')).toBeNull();
+  });
+
+  it('opens goals and trackers from the links card', async () => {
+    profile();
+    await open();
+
+    await fireEvent.press(screen.getByRole('button', { name: 'Goals' }));
+    await fireEvent.press(screen.getByRole('button', { name: 'Trackers' }));
+
+    expect(mockPush).toHaveBeenNthCalledWith(1, '/profile/goals');
+    expect(mockPush).toHaveBeenNthCalledWith(2, '/profile/trackers');
   });
 
   it('offers a retry when the profile cannot be loaded', async () => {

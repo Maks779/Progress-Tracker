@@ -45,7 +45,7 @@ export function OnboardingScreen() {
   const chosen = KINDS.filter((kind) => selected.includes(kind));
   const choices: Choice[] = chosen.map((kind) => ({
     kind,
-    name: t(`onboarding.names.${kind}`),
+    name: t(`trackers.names.${kind}`),
     target: targets[kind],
   }));
 

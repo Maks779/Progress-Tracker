@@ -10,12 +10,11 @@ import {
   Dumbbell,
   Flame,
   type LucideIcon,
-  Minus,
-  Plus,
   Sparkles,
   Square,
   SquareCheck,
 } from '@/shared/ui/icons';
+import { Stepper } from '@/shared/ui/Stepper';
 import { Text } from '@/shared/ui/Text';
 
 import { RULES, type TrackerKind } from './plan';
@@ -30,7 +29,7 @@ export const KIND_ICONS: Record<TrackerKind, LucideIcon> = {
 /** "3 sessions / week" with the right plural in every language. */
 export function useTargetLabel() {
   const { t } = useTranslation();
-  return (kind: TrackerKind, count: number) => t(`onboarding.units.${RULES[kind].metric}`, { count });
+  return (kind: TrackerKind, count: number) => t(`goals.weekly.${RULES[kind].metric}`, { count });
 }
 
 type ChoiceProps = { kind: TrackerKind; checked: boolean; onToggle: () => void };
@@ -41,7 +40,7 @@ export function ChoiceCard({ kind, checked, onToggle }: ChoiceProps) {
   const { colors, radius, space } = useTheme();
   const Icon = KIND_ICONS[kind];
   const Box = checked ? SquareCheck : Square;
-  const title = t(`onboarding.kinds.${kind}.title`);
+  const title = t(`trackers.types.${kind}`);
   const body = t(`onboarding.kinds.${kind}.body`);
   return (
     <Pressable
@@ -77,36 +76,6 @@ export function ChoiceCard({ kind, checked, onToggle }: ChoiceProps) {
   );
 }
 
-function StepButton({ label, icon: Icon, disabled, onPress }: { label: string; icon: LucideIcon; disabled: boolean; onPress: () => void }) {
-  const { colors, radius } = useTheme();
-  return (
-    <Pressable
-      role="button"
-      aria-label={label}
-      aria-disabled={disabled}
-      disabled={disabled}
-      onPress={onPress}
-      style={({ hovered, focused }: { pressed: boolean; hovered?: boolean; focused?: boolean }): ViewStyle => ({
-        width: 48,
-        height: 48,
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderRadius: radius[12],
-        borderWidth: 1,
-        borderColor: colors.border.default,
-        backgroundColor: hovered && !disabled ? colors.bg.base : colors.bg.surfaceRaised,
-        opacity: disabled ? 0.4 : 1,
-        cursor: disabled ? 'auto' : 'pointer',
-        outlineStyle: 'solid',
-        outlineWidth: showFocusRing(focused) ? 2 : 0,
-        outlineColor: colors.accent.fill,
-      })}
-    >
-      <Icon color={colors.text.primary} size={20} strokeWidth={2} />
-    </Pressable>
-  );
-}
-
 type GoalProps = { kind: TrackerKind; name: string; value: number; onChange: (direction: 1 | -1) => void };
 
 /**
@@ -118,33 +87,20 @@ export function GoalCard({ kind, name, value, onChange }: GoalProps) {
   const { colors, radius, space } = useTheme();
   const label = useTargetLabel();
   const rule = RULES[kind];
-  const kindTitle = t(`onboarding.kinds.${kind}.title`);
+  const kindTitle = t(`trackers.types.${kind}`);
   const title = name === kindTitle ? kindTitle : `${kindTitle} · ${name}`;
   return (
     <Card style={{ gap: space[16], padding: space[24] }}>
       <Text variant="smallStrong">{title}</Text>
-      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-        <StepButton
-          label={`${t('onboarding.goal.decrease')}: ${title}`}
-          icon={Minus}
-          disabled={value <= rule.min}
-          onPress={() => onChange(-1)}
-        />
-        <View style={{ alignItems: 'center' }} aria-live="polite">
-          <Text variant="display" style={{ fontVariant: ['tabular-nums'] }}>
-            {value}
-          </Text>
-          <Text variant="small" tone="muted">
-            {label(kind, value)}
-          </Text>
-        </View>
-        <StepButton
-          label={`${t('onboarding.goal.increase')}: ${title}`}
-          icon={Plus}
-          disabled={value >= rule.max}
-          onPress={() => onChange(1)}
-        />
-      </View>
+      <Stepper
+        value={value}
+        unit={label(kind, value)}
+        canDecrease={value > rule.min}
+        canIncrease={value < rule.max}
+        decreaseLabel={`${t('onboarding.goal.decrease')}: ${title}`}
+        increaseLabel={`${t('onboarding.goal.increase')}: ${title}`}
+        onChange={onChange}
+      />
       <View style={{ height: 6, borderRadius: radius.full, backgroundColor: colors.bg.surfaceRaised }}>
         <View
           style={{

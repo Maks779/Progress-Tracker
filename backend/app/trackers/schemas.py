@@ -63,6 +63,12 @@ class TrackerOut(BaseModel):
         return self.archived_at is not None
 
 
+class TrackerSummary(TrackerOut):
+    """A tracker in the list, with the number of its saved sessions."""
+
+    session_count: int
+
+
 class TrackerCreate(BaseModel):
     model_config = ConfigDict(extra="forbid")
 

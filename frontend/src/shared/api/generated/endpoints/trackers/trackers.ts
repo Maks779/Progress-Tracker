@@ -614,7 +614,7 @@ export const getDeleteTrackerUrl = (trackerId: string,) => {
 }
 
 /**
- * @summary Delete a tracker (soft)
+ * @summary Delete a tracker with its sessions and goals (soft)
  */
 export const deleteTracker = async (trackerId: string, options?: Parameters<typeof apiFetch>[1]): Promise<deleteTrackerResponse> => {
 
@@ -665,7 +665,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type DeleteTrackerMutationError = Problem
     export type DeleteTrackerMutationVariables = {trackerId: string}
 
-    /** @summary Delete a tracker (soft) */
+    /** @summary Delete a tracker with its sessions and goals (soft) */
 export const useDeleteTracker = <TError = Problem,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteTracker>>, TError,DeleteTrackerMutationVariables, TContext>, request?: SecondParameter<typeof apiFetch>}
  , queryClient?: QueryClient): UseMutationResult<

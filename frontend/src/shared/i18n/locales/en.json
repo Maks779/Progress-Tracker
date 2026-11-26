@@ -94,6 +94,12 @@
       "loadError": "Couldn’t load your trackers.",
       "empty": "No trackers yet. Add one, and it can be exported here.",
       "noSharing": "This device can’t share files."
+    },
+    "links": {
+      "goals": "Goals",
+      "goalsHint": "Weekly rhythms and long-term targets",
+      "trackers": "Trackers",
+      "trackersHint": "What you track and how it looks"
     }
   },
   "notFound": {
@@ -211,27 +217,17 @@
     },
     "kinds": {
       "strength": {
-        "title": "Strength",
         "body": "Sets, reps & personal records"
       },
       "cardio": {
-        "title": "Cardio",
         "body": "Time, distance & endurance"
       },
       "reading": {
-        "title": "Reading",
         "body": "Books, pages & new ideas"
       },
       "general": {
-        "title": "General",
         "body": "Build your own rhythm"
       }
-    },
-    "names": {
-      "strength": "Gym",
-      "cardio": "Cardio",
-      "reading": "Reading",
-      "general": "Habit"
     },
     "goal": {
       "title": "Find your weekly rhythm.",
@@ -244,18 +240,286 @@
       "streakTitle": "A streak that respects rest.",
       "streakBody": "Meet your goal each week to build your streak. No daily pressure."
     },
-    "units": {
-      "sessions_one": "session / week",
-      "sessions_other": "sessions / week",
-      "pages_one": "page / week",
-      "pages_other": "pages / week"
-    },
     "ready": {
       "title": "Your next chapter starts here.",
       "subtitle": "Your trackers are ready. Your first week is a fresh start.",
       "ring": "you’re all set",
       "lineup": "Your starting lineup",
       "begin": "Let’s begin"
+    }
+  },
+  "trackers": {
+    "label": "Trackers",
+    "title": "Make it your own.",
+    "caption": "Your trackers",
+    "loading": "Loading your trackers",
+    "loadError": "Couldn’t load your trackers.",
+    "retry": "Try again",
+    "empty": "No active trackers. Create one to start logging.",
+    "create": "Create tracker",
+    "archived": "Archived",
+    "types": {
+      "strength": "Strength",
+      "cardio": "Cardio",
+      "reading": "Reading",
+      "general": "General"
+    },
+    "names": {
+      "strength": "Gym",
+      "cardio": "Cardio",
+      "reading": "Reading",
+      "general": "Habit"
+    },
+    "typeBodies": {
+      "strength": "Exercises, reps and weight",
+      "cardio": "Duration and distance",
+      "reading": "Books, pages and minutes",
+      "general": "A duration or a simple counter"
+    },
+    "space": {
+      "eyebrow": "A space for every kind of progress",
+      "body": "Track your sessions without turning your life into a checklist."
+    },
+    "new": {
+      "step": "New tracker · step {{step}} of 3",
+      "typeTitle": "Choose a tracker type.",
+      "nameTitle": "Give it a name.",
+      "lookTitle": "Make it feel like you.",
+      "continue": "Continue",
+      "toLook": "Choose color & icon",
+      "submit": "Create tracker",
+      "back": "Back",
+      "preview": "Live preview",
+      "previewLine": "{{type}} · Ready for your first session",
+      "typeChip": "{{type}} tracker"
+    },
+    "fields": {
+      "name": "Tracker name",
+      "nameHint": "A short, personal name works best.",
+      "description": "Description · optional",
+      "descriptionPlaceholder": {
+        "strength": "A little stronger, every week.",
+        "cardio": "Steady kilometres, clear head.",
+        "reading": "A few pages before bed.",
+        "general": "Small steps, every day."
+      },
+      "sessionsNote": "Everything you log becomes a session inside this tracker.",
+      "mode": "What do you count?",
+      "modes": {
+        "duration": "Time",
+        "counter": "A number"
+      },
+      "modeHint": "Time adds up minutes; a number counts things like glasses of water. This can’t be changed later.",
+      "modeFixed": "Chosen when the tracker was created.",
+      "unit": "Unit",
+      "unitHint": "What one step is called, e.g. glasses.",
+      "unitPlaceholder": "glasses",
+      "unitNote": "Unit note · optional",
+      "unitNotePlaceholder": "250 ml each",
+      "color": "Color",
+      "icon": "Icon"
+    },
+    "colors": {
+      "strength": "Ember",
+      "cardio": "Blue",
+      "reading": "Violet",
+      "general": "Teal"
+    },
+    "icons": {
+      "dumbbell": "Dumbbell",
+      "activity": "Pulse",
+      "bike": "Bike",
+      "footprints": "Footprints",
+      "waves": "Waves",
+      "mountain": "Mountain",
+      "book-open": "Open book",
+      "library": "Library",
+      "sparkles": "Sparkles",
+      "brain": "Brain",
+      "droplet": "Droplet",
+      "moon": "Moon",
+      "target": "Target",
+      "flame": "Flame",
+      "timer": "Timer",
+      "heart": "Heart"
+    },
+    "errors": {
+      "name": "Enter a name.",
+      "nameLong": "Use at most 40 characters.",
+      "description": "Use at most 200 characters.",
+      "unit": "Enter a unit.",
+      "unitLong": "Use at most 20 characters.",
+      "unitNote": "Use at most 40 characters.",
+      "notFound": "This tracker no longer exists."
+    },
+    "detail": {
+      "details": "Details",
+      "save": "Save changes",
+      "saved": "Changes saved.",
+      "goals": "Goals",
+      "noGoals": "No goals yet.",
+      "createGoal": "Create goal",
+      "mainTitle": "Your main tracker",
+      "makeMainTitle": "Main tracker",
+      "mainBody": "Home shows the main tracker’s weekly goal and streak.",
+      "makeMain": "Make it the main tracker",
+      "archiveBody": "Archived trackers leave your lists but keep their sessions in your history.",
+      "restoreBody": "Restore it to log sessions and follow its goals again.",
+      "archive": "Archive tracker",
+      "restore": "Restore tracker",
+      "delete": "Delete tracker",
+      "archivedNotice": "This tracker is archived. Its sessions stay in your history."
+    },
+    "delete": {
+      "title": "Delete {{name}}?",
+      "body": "Its sessions ({{sessions}}) and goals are deleted too and leave your history, stats and exports. To keep them, archive the tracker instead.",
+      "confirm": "Delete tracker",
+      "archiveInstead": "Archive instead",
+      "cancel": "Keep tracker"
+    }
+  },
+  "goals": {
+    "label": "Goals",
+    "back": "Back",
+    "title": "A rhythm that fits.",
+    "caption": "Goals · small steps, clear direction",
+    "loading": "Loading your goals",
+    "loadError": "Couldn’t load your goals.",
+    "retry": "Try again",
+    "empty": "No goals yet. A weekly goal starts your streak.",
+    "noTrackers": "Create a tracker first, then give it a goal.",
+    "create": "Create goal",
+    "createTracker": "Create tracker",
+    "kinds": {
+      "frequency": "Frequency",
+      "amount": "Amount",
+      "cumulative": "Cumulative"
+    },
+    "kindHints": {
+      "frequency": "How many sessions each week.",
+      "amount": "How much each day or week.",
+      "cumulative": "A total to reach by a date."
+    },
+    "periods": {
+      "day": "Per day",
+      "week": "Per week"
+    },
+    "metrics": {
+      "sessions": "Sessions",
+      "distance": "Distance",
+      "duration": "Time",
+      "pages": "Pages",
+      "books": "Books",
+      "count": "Count"
+    },
+    "status": {
+      "on_track": "On track",
+      "at_risk": "At risk",
+      "done": "Done",
+      "in_progress": "In progress",
+      "missed": "Missed"
+    },
+    "units": {
+      "km": "km",
+      "mi": "mi",
+      "min": "min",
+      "sessions_one": "{{formatted}} session",
+      "sessions_other": "{{formatted}} sessions",
+      "pages_one": "{{formatted}} page",
+      "pages_other": "{{formatted}} pages",
+      "books_one": "{{formatted}} book",
+      "books_other": "{{formatted}} books"
+    },
+    "distance": {
+      "km_one": "{{formatted}} km",
+      "km_other": "{{formatted}} km",
+      "mi_one": "{{formatted}} mi",
+      "mi_other": "{{formatted}} mi"
+    },
+    "unitWords": {
+      "sessions": "sessions",
+      "pages": "pages",
+      "books": "books"
+    },
+    "per": {
+      "week": "{{amount}} / week",
+      "day": "{{amount}} / day"
+    },
+    "weekly": {
+      "sessions_one": "session / week",
+      "sessions_other": "sessions / week",
+      "pages_one": "page / week",
+      "pages_other": "pages / week"
+    },
+    "footer": {
+      "week": "Weekly · Resets Monday",
+      "day": "Daily · Starts fresh each day",
+      "ends": "Cumulative · Ends {{date}}",
+      "ended": "Cumulative · Ended {{date}}",
+      "pinned": "Pinned"
+    },
+    "streak": {
+      "title_zero": "Your streak starts this week.",
+      "bodyStart": "Reach this week’s {{tracker}} goal to start a streak.",
+      "fallbackTitle": "Aim for repeatable, not perfect.",
+      "fallbackBody": "Weekly streaks count consecutive weeks where the goal is met. Rest days never reset your progress.",
+      "note": "Cumulative goals track a total by a date. They don’t count toward a weekly streak.",
+      "title_one": "One week of showing up.",
+      "title_other": "{{count}} weeks of showing up.",
+      "body_one": "Your {{tracker}} streak is {{count}} week. Reach this week’s goal to make it {{next}}.",
+      "body_other": "Your {{tracker}} streak is {{count}} weeks. Reach this week’s goal to make it {{next}}.",
+      "bodyMet_one": "You met this week’s goal. Your {{tracker}} streak is {{count}} week.",
+      "bodyMet_other": "You met this week’s goal. Your {{tracker}} streak is {{count}} weeks."
+    },
+    "form": {
+      "createTitle": "Create a goal",
+      "editTitle": "Edit goal",
+      "intention": "Set your intention",
+      "tracker": "Tracker",
+      "kind": "Goal type",
+      "period": "Period",
+      "metric": "What counts",
+      "name": "Goal name · optional",
+      "namePlaceholder": "20 books this year",
+      "target": "Target · {{unit}}",
+      "endDate": "End date",
+      "dateDone": "Done",
+      "decrease": "Fewer sessions",
+      "increase": "More sessions",
+      "hints": {
+        "week": "Your weekly goal resets every Monday.",
+        "day": "Your daily goal starts fresh every day.",
+        "cumulative": "Counts everything from today until the end date."
+      },
+      "changeHint": {
+        "week": "A new target counts from this week on; past weeks keep theirs.",
+        "day": "A new target counts from today on; past days keep theirs.",
+        "cumulative": "A new target or end date applies at once."
+      },
+      "pin": "Pin this goal",
+      "pinHint": "The tracker list and Home show the pinned weekly goal.",
+      "pinned": "Pinned: the tracker list and Home show this goal.",
+      "submit": "Create goal",
+      "save": "Save changes",
+      "cancel": "Cancel",
+      "delete": "Delete goal",
+      "openTwin": "Edit that goal",
+      "errors": {
+        "target": "Enter a number above zero, with at most two decimals.",
+        "targetWhole": "Enter a whole number above zero.",
+        "targetTooBig": "That target is too big.",
+        "endDate": "Choose an end date from today on.",
+        "nameLong": "Use at most 60 characters.",
+        "exists": "This tracker already has a goal like this.",
+        "notFound": "This goal no longer exists."
+      }
+    },
+    "delete": {
+      "title": "Delete this goal?",
+      "body": "Its progress history goes with it. Your sessions stay.",
+      "bodyStreak": "Its streak and progress history go with it. Your sessions stay.",
+      "confirm": "Delete goal",
+      "cancel": "Keep goal"
     }
   }
 }
