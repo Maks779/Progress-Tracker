@@ -20,8 +20,8 @@ type RingProps = { goal: GoalOut; tracker: TrackerSummary; wide: boolean; childr
 
 /**
  * The week at a glance, as on Home in the design: the ring with this week's progress of the
- * pinned goal, a line of encouragement, the numbers in words and the streak badge. Tablets and
- * desktop add the week's totals below (`children`).
+ * pinned goal, a line of encouragement, the numbers in words and the streak badge. Below it
+ * (`children`): Start workout and, on tablets and desktop, the week's totals.
  */
 export function RingCard({ goal, tracker, wide, children }: RingProps) {
   const { t } = useTranslation();
@@ -62,10 +62,13 @@ export function RingCard({ goal, tracker, wide, children }: RingProps) {
   );
 }
 
-type SetGoalProps = { tracker: TrackerSummary; onSetGoal: () => void };
+type SetGoalProps = { tracker: TrackerSummary; onSetGoal: () => void; children?: ReactNode };
 
-/** In place of the ring while the tracker has no weekly goal: what one would do, and the way to set it. */
-export function SetGoalCard({ tracker, onSetGoal }: SetGoalProps) {
+/**
+ * In place of the ring while the tracker has no weekly goal: what one would do, and the way to
+ * set it; `children` go below (Start workout).
+ */
+export function SetGoalCard({ tracker, onSetGoal, children }: SetGoalProps) {
   const { t } = useTranslation();
   const { colors, space } = useTheme();
   return (
@@ -78,6 +81,7 @@ export function SetGoalCard({ tracker, onSetGoal }: SetGoalProps) {
         </Text>
       </View>
       <Button label={t('home.setGoal.action')} onPress={onSetGoal} />
+      {children}
     </Card>
   );
 }

@@ -4,7 +4,7 @@ import { TextInput, type TextInputInstance, type TextInputProps, View } from 're
 import { useTheme } from '@/shared/theme/ThemeProvider';
 import { controlHeight } from '@/shared/theme/tokens';
 
-import { Check, CircleAlert } from './icons';
+import { Check, CircleAlert, type LucideIcon } from './icons';
 import { Text } from './Text';
 
 type Props = Omit<TextInputProps, 'style' | 'placeholderTextColor'> & {
@@ -13,6 +13,8 @@ type Props = Omit<TextInputProps, 'style' | 'placeholderTextColor'> & {
   hintMet?: boolean;
   error?: string;
   footer?: ReactNode;
+  /** An icon inside the field on the left, such as the search icon. */
+  icon?: LucideIcon;
   ref?: Ref<TextInputInstance>;
 };
 
@@ -26,6 +28,7 @@ export function TextField({
   hintMet = false,
   error,
   footer,
+  icon: Icon,
   ref,
   onFocus,
   onBlur,
@@ -42,35 +45,43 @@ export function TextField({
   return (
     <View style={{ gap: space[8] }}>
       <Text variant="smallStrong">{label}</Text>
-      <TextInput
-        ref={ref}
-        accessibilityLabel={label}
-        accessibilityHint={error ?? hint}
-        placeholderTextColor={colors.text.muted}
-        onFocus={(event) => {
-          setFocused(true);
-          onFocus?.(event);
-        }}
-        onBlur={(event) => {
-          setFocused(false);
-          onBlur?.(event);
-        }}
-        style={{
-          fontFamily: typography.body.fontFamily,
-          fontSize: typography.body.fontSize,
-          minHeight: controlHeight.regular,
-          paddingHorizontal: space[16],
-          borderRadius: radius[12],
-          borderWidth: 1,
-          borderColor,
-          backgroundColor: colors.bg.surfaceRaised,
-          color: colors.text.primary,
-          outlineStyle: 'solid',
-          outlineWidth: focused ? 1 : 0,
-          outlineColor: borderColor,
-        }}
-        {...input}
-      />
+      <View>
+        {Icon ? (
+          <View pointerEvents="none" style={{ position: 'absolute', left: space[16], top: 0, bottom: 0, justifyContent: 'center', zIndex: 1 }}>
+            <Icon color={colors.text.muted} size={18} strokeWidth={1.75} />
+          </View>
+        ) : null}
+        <TextInput
+          ref={ref}
+          accessibilityLabel={label}
+          accessibilityHint={error ?? hint}
+          placeholderTextColor={colors.text.muted}
+          onFocus={(event) => {
+            setFocused(true);
+            onFocus?.(event);
+          }}
+          onBlur={(event) => {
+            setFocused(false);
+            onBlur?.(event);
+          }}
+          style={{
+            fontFamily: typography.body.fontFamily,
+            fontSize: typography.body.fontSize,
+            minHeight: controlHeight.regular,
+            paddingLeft: Icon ? space[16] + 26 : space[16],
+            paddingRight: space[16],
+            borderRadius: radius[12],
+            borderWidth: 1,
+            borderColor,
+            backgroundColor: colors.bg.surfaceRaised,
+            color: colors.text.primary,
+            outlineStyle: 'solid',
+            outlineWidth: focused ? 1 : 0,
+            outlineColor: borderColor,
+          }}
+          {...input}
+        />
+      </View>
       {error ? (
         <View
           accessibilityLiveRegion="polite"

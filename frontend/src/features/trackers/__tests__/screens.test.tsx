@@ -29,11 +29,16 @@ jest.mock('@/shared/api/generated/endpoints/me/me', () => ({
 
 const mockRouter = { push: jest.fn(), replace: jest.fn(), back: jest.fn(), dismissTo: jest.fn(), canGoBack: () => true };
 let mockParams: Record<string, string> = {};
+const mockNavigate = jest.fn();
 jest.mock('expo-router', () => ({
   useRouter: () => mockRouter,
   useLocalSearchParams: () => mockParams,
+  useNavigation: () => ({ navigate: mockNavigate }),
   Link: ({ children }: { children: unknown }) => children,
 }));
+
+const mockEntry = { available: true, active: false, starting: false, open: jest.fn() };
+jest.mock('@/features/workout/start', () => ({ useWorkoutEntry: () => mockEntry }));
 
 function tracker(overrides: Partial<TrackerSummary>): TrackerSummary {
   return {
@@ -137,6 +142,8 @@ describe('Trackers', () => {
     expect(mockRouter.push).toHaveBeenCalledWith({ pathname: '/profile/trackers/[id]', params: { id: 'water' } });
     await fireEvent.press(screen.getByRole('button', { name: 'Create tracker' }));
     expect(mockRouter.push).toHaveBeenCalledWith('/profile/trackers/new');
+    await fireEvent.press(screen.getByRole('button', { name: 'Start workout' }));
+    expect(mockEntry.open).toHaveBeenCalled();
   });
 
   it('shows placeholders while loading and a retry when the list fails', async () => {

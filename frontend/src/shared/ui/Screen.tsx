@@ -13,7 +13,8 @@ import { Text } from './Text';
 /** `step` marks a step back inside the page (a form in steps), which desktop keeps. */
 type Back = { label: string; onPress: () => void; step?: boolean };
 
-type Props = { title: string; caption?: string; back?: Back; action?: ReactNode; children?: ReactNode };
+/** `caption` may be live text, such as the workout's elapsed time. */
+type Props = { title: string; caption?: ReactNode; back?: Back; action?: ReactNode; children?: ReactNode };
 
 function BackLink({ label, onPress }: Back) {
   const { colors, radius } = useTheme();
@@ -68,6 +69,8 @@ export function Screen({ title, caption, back, action, children }: Props) {
       <ScrollView
         contentContainerStyle={[styles.content, padding, { gap: space[24] }]}
         keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+        automaticallyAdjustKeyboardInsets
       >
         <View style={styles.column}>
           {showBack ? <BackLink label={back.label} onPress={back.onPress} /> : null}

@@ -17,6 +17,7 @@ import { useAuthStore } from '@/features/auth/store';
 import { useOnboardingGate } from '@/features/onboarding/useOnboardingGate';
 import { hydratePreferences, usePreferences } from '@/features/settings/preferences';
 import { usePreferencesSync } from '@/features/settings/usePreferencesSync';
+import { hydrateWorkout, useWorkout } from '@/features/workout/store';
 import { createQueryClient, followAppFocus } from '@/shared/api/queryClient';
 import { ThemeProvider, useTheme } from '@/shared/theme/ThemeProvider';
 
@@ -83,11 +84,13 @@ export default function RootLayout() {
   });
   const status = useAuthStore((state) => state.status);
   const hydrated = usePreferences((state) => state.hydrated);
+  const workoutLoaded = useWorkout((state) => state.hydrated);
   const theme = usePreferences((state) => state.values.theme);
-  const ready = (fontsLoaded || fontError !== null) && status !== 'restoring' && hydrated;
+  const ready = (fontsLoaded || fontError !== null) && status !== 'restoring' && hydrated && workoutLoaded;
 
   useEffect(() => {
     hydratePreferences();
+    hydrateWorkout();
     restoreSession();
   }, []);
 

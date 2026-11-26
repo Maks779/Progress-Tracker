@@ -1,10 +1,13 @@
 export type ProfilePage = '/profile' | '/profile/goals' | '/profile/trackers';
 
+/** A page a breadcrumb step can lead back to. */
+export type CrumbHref = ProfilePage | '/' | '/workout';
+
 export type Crumb = {
   /** Translation key of the label. */
   label: string;
   /** The page it leads to; the last crumb (the page on screen) has none. */
-  href?: ProfilePage;
+  href?: CrumbHref;
   /** Set on a tracker's page: the label is the tracker's name once it is known. */
   trackerId?: string;
 };
@@ -24,6 +27,9 @@ const SECTIONS: Record<string, string> = {
 export function trailFor(pathname: string): Crumb[] {
   const parts = pathname.split('/').filter(Boolean);
   const [section = '', area, page] = parts;
+  if (section === 'workout') {
+    return workoutTrail(area, parts.length);
+  }
   if (section !== 'profile') {
     return parts.length <= 1 && section in SECTIONS ? [{ label: SECTIONS[section] }] : [];
   }
@@ -48,6 +54,20 @@ export function trailFor(pathname: string): Crumb[] {
   return page === 'new'
     ? [profile, trackers, { label: 'nav.newTracker' }]
     : [profile, trackers, { label: 'nav.tracker', trackerId: page }];
+}
+
+function workoutTrail(page: string | undefined, depth: number): Crumb[] {
+  const home: Crumb = { label: 'tabs.home', href: '/' };
+  if (depth === 1) {
+    return [home, { label: 'nav.workout' }];
+  }
+  if (depth > 2) {
+    return [];
+  }
+  if (page === 'add-exercise') {
+    return [home, { label: 'nav.workout', href: '/workout' }, { label: 'nav.addExercise' }];
+  }
+  return page === 'summary' ? [home, { label: 'nav.summary' }] : [];
 }
 
 /** "Alex Morgan" -> "Alex M.", for the account chip in the top bar; works for any alphabet. */
