@@ -8,20 +8,21 @@ from app.database import DbSession
 from app.exports import service as exports
 from app.trackers import service
 from app.trackers.models import Tracker
-from app.trackers.schemas import TrackerCreate, TrackerOut, TrackerUpdate
+from app.trackers.schemas import TrackerCreate, TrackerOut, TrackerSummary, TrackerUpdate
 
 router = APIRouter(prefix="/trackers", tags=["trackers"])
 
 
 class TrackerList(BaseModel):
-    items: list[TrackerOut]
+    items: list[TrackerSummary]
 
 
 @router.get("", response_model=TrackerList, summary="List trackers")
 async def list_trackers(
     user: CurrentUser, db: DbSession, include_archived: bool = False
-) -> dict[str, list[Tracker]]:
-    return {"items": await service.list_trackers(db, user.id, include_archived)}
+) -> TrackerList:
+    trackers = await service.list_trackers(db, user.id, include_archived)
+    return TrackerList(items=await service.summaries(db, user.id, trackers))
 
 
 @router.post("", status_code=201, response_model=TrackerOut, summary="Create a tracker")
@@ -41,7 +42,9 @@ async def update_tracker(
     return await service.update_tracker(db, user, tracker_id, data)
 
 
-@router.delete("/{tracker_id}", status_code=204, summary="Delete a tracker (soft)")
+@router.delete(
+    "/{tracker_id}", status_code=204, summary="Delete a tracker with its sessions and goals (soft)"
+)
 async def delete_tracker(tracker_id: UUID, user: CurrentUser, db: DbSession) -> Response:
     await service.delete_tracker(db, user, tracker_id)
     return Response(status_code=204)

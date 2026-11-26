@@ -1,13 +1,16 @@
 from uuid import UUID
 
-from sqlalchemy import func, select
+from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app import clock
 from app.errors import field_error
+from app.goals.models import Goal
 from app.ownership import get_owned
+from app.sessions.models import ReadingEntry, Session
+from app.sessions.reading import refresh_finished
 from app.trackers.models import Tracker
-from app.trackers.schemas import TrackerCreate, TrackerUpdate
+from app.trackers.schemas import TrackerCreate, TrackerOut, TrackerSummary, TrackerUpdate
 from app.users.models import UserAccount
 
 
@@ -22,6 +25,24 @@ async def list_trackers(
     if not include_archived:
         query = query.where(Tracker.archived_at.is_(None))
     return list((await db.scalars(query)).all())
+
+
+async def summaries(
+    db: AsyncSession, user_id: UUID, trackers: list[Tracker]
+) -> list[TrackerSummary]:
+    """The trackers with the number of saved sessions in each."""
+    rows = await db.execute(
+        select(Session.tracker_id, func.count())
+        .where(Session.user_id == user_id, Session.deleted_at.is_(None))
+        .group_by(Session.tracker_id)
+    )
+    counts = {tracker_id: count for tracker_id, count in rows}
+    return [
+        TrackerSummary(
+            **dict(TrackerOut.model_validate(tracker)), session_count=counts.get(tracker.id, 0)
+        )
+        for tracker in trackers
+    ]
 
 
 async def get_tracker(db: AsyncSession, user_id: UUID, tracker_id: UUID) -> Tracker:
@@ -88,9 +109,31 @@ async def update_tracker(
 
 
 async def delete_tracker(db: AsyncSession, user: UserAccount, tracker_id: UUID) -> None:
+    """Soft-delete the tracker with its sessions and goals; archiving is the way to keep history.
+
+    Books read in its sessions get their finished date recomputed, as when one session goes.
+    """
     tracker = await get_tracker(db, user.id, tracker_id)
-    tracker.deleted_at = clock.utcnow()
+    now = clock.utcnow()
+    live_sessions = (Session.tracker_id == tracker.id, Session.deleted_at.is_(None))
+    books = set(
+        (
+            await db.scalars(
+                select(ReadingEntry.book_id)
+                .join(Session, Session.id == ReadingEntry.session_id)
+                .where(*live_sessions)
+            )
+        ).all()
+    )
+    tracker.deleted_at = now
+    await db.execute(update(Session).where(*live_sessions).values(deleted_at=now))
+    await db.execute(
+        update(Goal)
+        .where(Goal.tracker_id == tracker.id, Goal.deleted_at.is_(None))
+        .values(deleted_at=now, is_pinned=False)
+    )
     await db.flush()
+    await refresh_finished(db, user.id, books)
     await ensure_main_tracker(db, user)
     await db.commit()
 

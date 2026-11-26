@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
@@ -9,7 +10,7 @@ import { useBreakpoint } from '@/shared/theme/breakpoints';
 import { useTheme } from '@/shared/theme/ThemeProvider';
 import { Button } from '@/shared/ui/Button';
 import { Card } from '@/shared/ui/Card';
-import { Download, ShieldCheck } from '@/shared/ui/icons';
+import { Download, Layers, ShieldCheck, Target } from '@/shared/ui/icons';
 import { Screen } from '@/shared/ui/Screen';
 import { Text } from '@/shared/ui/Text';
 
@@ -46,6 +47,7 @@ export function ProfileScreen() {
   const { t } = useTranslation();
   const { space } = useTheme();
   const breakpoint = useBreakpoint();
+  const router = useRouter();
   const wide = breakpoint === 'expanded';
   const sideBySide = breakpoint === 'medium';
   const me = useReadMe();
@@ -76,6 +78,18 @@ export function ProfileScreen() {
   const links = (
     <LinksCard
       links={[
+        {
+          icon: Target,
+          title: t('profile.links.goals'),
+          hint: wide ? t('profile.links.goalsHint') : undefined,
+          onPress: () => router.push('/profile/goals'),
+        },
+        {
+          icon: Layers,
+          title: t('profile.links.trackers'),
+          hint: wide ? t('profile.links.trackersHint') : undefined,
+          onPress: () => router.push('/profile/trackers'),
+        },
         {
           icon: Download,
           title: t('profile.export.link'),

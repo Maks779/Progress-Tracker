@@ -32,8 +32,8 @@
  *
  * OpenAPI spec version: 0.1.0
  */
-import type { TrackerOut } from './trackerOut';
+import type { TrackerSummary } from './trackerSummary';
 
 export interface TrackerList {
-  items: TrackerOut[];
+  items: TrackerSummary[];
 }

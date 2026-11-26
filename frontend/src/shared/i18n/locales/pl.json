@@ -94,6 +94,12 @@
       "loadError": "Nie udało się wczytać trackerów.",
       "empty": "Nie masz jeszcze trackerów. Dodaj tracker, a pojawi się tutaj do eksportu.",
       "noSharing": "To urządzenie nie może udostępniać plików."
+    },
+    "links": {
+      "goals": "Cele",
+      "goalsHint": "Tygodniowe rytmy i długie cele",
+      "trackers": "Trackery",
+      "trackersHint": "Co śledzisz i jak to wygląda"
     }
   },
   "notFound": {
@@ -213,27 +219,17 @@
     },
     "kinds": {
       "strength": {
-        "title": "Siła",
         "body": "Serie, powtórzenia i rekordy"
       },
       "cardio": {
-        "title": "Cardio",
         "body": "Czas, dystans i wytrzymałość"
       },
       "reading": {
-        "title": "Czytanie",
         "body": "Książki, strony i nowe pomysły"
       },
       "general": {
-        "title": "Ogólne",
         "body": "Zbuduj własny rytm"
       }
-    },
-    "names": {
-      "strength": "Siłownia",
-      "cardio": "Cardio",
-      "reading": "Czytanie",
-      "general": "Nawyk"
     },
     "goal": {
       "title": "Znajdź swój tygodniowy rytm.",
@@ -248,7 +244,222 @@
       "streakTitle": "Seria, która szanuje odpoczynek.",
       "streakBody": "Osiągaj cel co tydzień, aby budować serię. Bez codziennej presji."
     },
+    "ready": {
+      "title": "Twój nowy rozdział zaczyna się tutaj.",
+      "subtitle": "Twoje trackery są gotowe. Pierwszy tydzień to świeży start.",
+      "ring": "wszystko gotowe",
+      "lineup": "Twój zestaw na start",
+      "begin": "Zaczynajmy"
+    }
+  },
+  "trackers": {
+    "label": "Trackery",
+    "title": "Dopasuj to do siebie.",
+    "caption": "Twoje trackery",
+    "loading": "Wczytujemy Twoje trackery",
+    "loadError": "Nie udało się wczytać trackerów.",
+    "retry": "Spróbuj ponownie",
+    "empty": "Nie masz aktywnych trackerów. Utwórz tracker, aby zacząć zapisywać.",
+    "create": "Utwórz tracker",
+    "archived": "Zarchiwizowane",
+    "types": {
+      "strength": "Siła",
+      "cardio": "Cardio",
+      "reading": "Czytanie",
+      "general": "Ogólne"
+    },
+    "names": {
+      "strength": "Siłownia",
+      "cardio": "Cardio",
+      "reading": "Czytanie",
+      "general": "Nawyk"
+    },
+    "typeBodies": {
+      "strength": "Ćwiczenia, powtórzenia i ciężar",
+      "cardio": "Czas i dystans",
+      "reading": "Książki, strony i minuty",
+      "general": "Czas albo prosty licznik"
+    },
+    "space": {
+      "eyebrow": "Miejsce na każdy rodzaj postępu",
+      "body": "Zapisuj sesje, nie zamieniając życia w listę kontrolną."
+    },
+    "new": {
+      "step": "Nowy tracker · krok {{step}} z 3",
+      "typeTitle": "Wybierz typ trackera.",
+      "nameTitle": "Nadaj mu nazwę.",
+      "lookTitle": "Niech wygląda jak Ty.",
+      "continue": "Dalej",
+      "toLook": "Wybierz kolor i ikonę",
+      "submit": "Utwórz tracker",
+      "back": "Wstecz",
+      "preview": "Podgląd na żywo",
+      "previewLine": "{{type}} · Gotowy na pierwszą sesję",
+      "typeChip": "Tracker: {{type}}"
+    },
+    "fields": {
+      "name": "Nazwa trackera",
+      "nameHint": "Najlepiej sprawdza się krótka, osobista nazwa.",
+      "description": "Opis · opcjonalnie",
+      "descriptionPlaceholder": {
+        "strength": "Trochę silniej z każdym tygodniem.",
+        "cardio": "Równe kilometry, czysta głowa.",
+        "reading": "Kilka stron przed snem.",
+        "general": "Małe kroki, codziennie."
+      },
+      "sessionsNote": "Każdy wpis staje się sesją w tym trackerze.",
+      "mode": "Co liczysz?",
+      "modes": {
+        "duration": "Czas",
+        "counter": "Liczbę"
+      },
+      "modeHint": "Czas sumuje minuty; liczba liczy rzeczy, np. szklanki wody. Później nie da się tego zmienić.",
+      "modeFixed": "Wybrane przy tworzeniu trackera.",
+      "unit": "Jednostka",
+      "unitHint": "Jak nazywa się jedna jednostka, np. szklanki.",
+      "unitPlaceholder": "szklanki",
+      "unitNote": "Notatka do jednostki · opcjonalnie",
+      "unitNotePlaceholder": "po 250 ml",
+      "color": "Kolor",
+      "icon": "Ikona"
+    },
+    "colors": {
+      "strength": "Żar",
+      "cardio": "Niebieski",
+      "reading": "Fioletowy",
+      "general": "Morski"
+    },
+    "icons": {
+      "dumbbell": "Hantel",
+      "activity": "Puls",
+      "bike": "Rower",
+      "footprints": "Ślady stóp",
+      "waves": "Fale",
+      "mountain": "Góra",
+      "book-open": "Otwarta książka",
+      "library": "Biblioteka",
+      "sparkles": "Iskry",
+      "brain": "Mózg",
+      "droplet": "Kropla",
+      "moon": "Księżyc",
+      "target": "Cel",
+      "flame": "Płomień",
+      "timer": "Minutnik",
+      "heart": "Serce"
+    },
+    "errors": {
+      "name": "Wpisz nazwę.",
+      "nameLong": "Użyj najwyżej 40 znaków.",
+      "description": "Użyj najwyżej 200 znaków.",
+      "unit": "Wpisz jednostkę.",
+      "unitLong": "Użyj najwyżej 20 znaków.",
+      "unitNote": "Użyj najwyżej 40 znaków.",
+      "notFound": "Ten tracker już nie istnieje."
+    },
+    "detail": {
+      "details": "Szczegóły",
+      "save": "Zapisz zmiany",
+      "saved": "Zmiany zapisane.",
+      "goals": "Cele",
+      "noGoals": "Nie ma jeszcze celów.",
+      "createGoal": "Utwórz cel",
+      "mainTitle": "Twój główny tracker",
+      "makeMainTitle": "Główny tracker",
+      "mainBody": "Ekran Start pokazuje cel tygodniowy i serię głównego trackera.",
+      "makeMain": "Ustaw jako główny",
+      "archiveBody": "Zarchiwizowane trackery znikają z list, ale ich sesje zostają w historii.",
+      "restoreBody": "Przywróć go, aby znów zapisywać sesje i śledzić jego cele.",
+      "archive": "Zarchiwizuj tracker",
+      "restore": "Przywróć tracker",
+      "delete": "Usuń tracker",
+      "archivedNotice": "Ten tracker jest zarchiwizowany. Jego sesje zostają w historii."
+    },
+    "delete": {
+      "title": "Usunąć „{{name}}”?",
+      "body": "Usunięte zostaną też jego sesje ({{sessions}}) i cele; znikną z historii, statystyk i eksportów. Aby je zachować, zarchiwizuj tracker.",
+      "confirm": "Usuń tracker",
+      "archiveInstead": "Zarchiwizuj zamiast tego",
+      "cancel": "Zostaw tracker"
+    }
+  },
+  "goals": {
+    "label": "Cele",
+    "back": "Wstecz",
+    "title": "Rytm, który pasuje.",
+    "caption": "Cele · małe kroki, jasny kierunek",
+    "loading": "Wczytujemy Twoje cele",
+    "loadError": "Nie udało się wczytać celów.",
+    "retry": "Spróbuj ponownie",
+    "empty": "Nie masz jeszcze celów. Cel tygodniowy rozpoczyna Twoją serię.",
+    "noTrackers": "Najpierw utwórz tracker, potem nadaj mu cel.",
+    "create": "Utwórz cel",
+    "createTracker": "Utwórz tracker",
+    "kinds": {
+      "frequency": "Częstość",
+      "amount": "Ilość",
+      "cumulative": "Łącznie"
+    },
+    "kindHints": {
+      "frequency": "Ile sesji w każdym tygodniu.",
+      "amount": "Ile każdego dnia lub tygodnia.",
+      "cumulative": "Suma do osiągnięcia do wybranej daty."
+    },
+    "periods": {
+      "day": "Dziennie",
+      "week": "Tygodniowo"
+    },
+    "metrics": {
+      "sessions": "Sesje",
+      "distance": "Dystans",
+      "duration": "Czas",
+      "pages": "Strony",
+      "books": "Książki",
+      "count": "Liczba"
+    },
+    "status": {
+      "on_track": "Zgodnie z planem",
+      "at_risk": "Zagrożony",
+      "done": "Gotowe",
+      "in_progress": "W toku",
+      "missed": "Nieosiągnięty"
+    },
     "units": {
+      "km": "km",
+      "mi": "mi",
+      "min": "min",
+      "sessions_one": "{{formatted}} sesja",
+      "sessions_few": "{{formatted}} sesje",
+      "sessions_many": "{{formatted}} sesji",
+      "sessions_other": "{{formatted}} sesji",
+      "pages_one": "{{formatted}} strona",
+      "pages_few": "{{formatted}} strony",
+      "pages_many": "{{formatted}} stron",
+      "pages_other": "{{formatted}} strony",
+      "books_one": "{{formatted}} książka",
+      "books_few": "{{formatted}} książki",
+      "books_many": "{{formatted}} książek",
+      "books_other": "{{formatted}} książki"
+    },
+    "distance": {
+      "km_one": "{{formatted}} km",
+      "km_few": "{{formatted}} km",
+      "km_many": "{{formatted}} km",
+      "km_other": "{{formatted}} km",
+      "mi_one": "{{formatted}} mi",
+      "mi_few": "{{formatted}} mi",
+      "mi_many": "{{formatted}} mi",
+      "mi_other": "{{formatted}} mi"
+    },
+    "unitWords": {
+      "sessions": "sesje",
+      "pages": "strony",
+      "books": "książki"
+    },
+    "per": {
+      "week": "{{amount}} / tydzień",
+      "day": "{{amount}} / dzień"
+    },
+    "weekly": {
       "sessions_one": "sesja / tydzień",
       "sessions_few": "sesje / tydzień",
       "sessions_many": "sesji / tydzień",
@@ -258,12 +469,81 @@
       "pages_many": "stron / tydzień",
       "pages_other": "stron / tydzień"
     },
-    "ready": {
-      "title": "Twój nowy rozdział zaczyna się tutaj.",
-      "subtitle": "Twoje trackery są gotowe. Pierwszy tydzień to świeży start.",
-      "ring": "wszystko gotowe",
-      "lineup": "Twój zestaw na start",
-      "begin": "Zaczynajmy"
+    "footer": {
+      "week": "Tygodniowy · Od nowa w poniedziałek",
+      "day": "Dzienny · Od nowa każdego dnia",
+      "ends": "Łączny · Do {{date}}",
+      "ended": "Łączny · Zakończony {{date}}",
+      "pinned": "Przypięty"
+    },
+    "streak": {
+      "title_zero": "Twoja seria zaczyna się w tym tygodniu.",
+      "bodyStart": "Osiągnij w tym tygodniu cel „{{tracker}}”, aby zacząć serię.",
+      "fallbackTitle": "Celuj w powtarzalność, nie w perfekcję.",
+      "fallbackBody": "Serie tygodniowe liczą kolejne tygodnie z osiągniętym celem. Dni odpoczynku nigdy nie zerują postępów.",
+      "note": "Cele łączne liczą sumę do wybranej daty. Nie wliczają się do serii tygodniowej.",
+      "title_one": "Tydzień regularności.",
+      "title_few": "{{count}} tygodnie regularności.",
+      "title_many": "{{count}} tygodni regularności.",
+      "title_other": "{{count}} tygodnia regularności.",
+      "body_one": "Seria „{{tracker}}” trwa {{count}} tydzień. Osiągnij cel w tym tygodniu, aby było ich {{next}}.",
+      "body_few": "Seria „{{tracker}}” trwa {{count}} tygodnie. Osiągnij cel w tym tygodniu, aby było ich {{next}}.",
+      "body_many": "Seria „{{tracker}}” trwa {{count}} tygodni. Osiągnij cel w tym tygodniu, aby było ich {{next}}.",
+      "body_other": "Seria „{{tracker}}” trwa {{count}} tygodnia. Osiągnij cel w tym tygodniu, aby było ich {{next}}.",
+      "bodyMet_one": "Cel na ten tydzień osiągnięty. Seria „{{tracker}}” trwa {{count}} tydzień.",
+      "bodyMet_few": "Cel na ten tydzień osiągnięty. Seria „{{tracker}}” trwa {{count}} tygodnie.",
+      "bodyMet_many": "Cel na ten tydzień osiągnięty. Seria „{{tracker}}” trwa {{count}} tygodni.",
+      "bodyMet_other": "Cel na ten tydzień osiągnięty. Seria „{{tracker}}” trwa {{count}} tygodnia."
+    },
+    "form": {
+      "createTitle": "Utwórz cel",
+      "editTitle": "Edytuj cel",
+      "intention": "Określ swój zamiar",
+      "tracker": "Tracker",
+      "kind": "Rodzaj celu",
+      "period": "Okres",
+      "metric": "Co liczymy",
+      "name": "Nazwa celu · opcjonalnie",
+      "namePlaceholder": "20 książek w tym roku",
+      "target": "Cel · {{unit}}",
+      "endDate": "Data końcowa",
+      "dateDone": "Gotowe",
+      "decrease": "Mniej sesji",
+      "increase": "Więcej sesji",
+      "hints": {
+        "week": "Cel tygodniowy zaczyna się od nowa w każdy poniedziałek.",
+        "day": "Cel dzienny zaczyna się od nowa każdego dnia.",
+        "cumulative": "Liczy wszystko od dziś do daty końcowej."
+      },
+      "changeHint": {
+        "week": "Nowy cel obowiązuje od tego tygodnia; poprzednie tygodnie zachowują swój.",
+        "day": "Nowy cel obowiązuje od dziś; poprzednie dni zachowują swój.",
+        "cumulative": "Nowy cel lub data końcowa obowiązują od razu."
+      },
+      "pin": "Przypnij ten cel",
+      "pinHint": "Lista trackerów i ekran Start pokazują przypięty cel tygodniowy.",
+      "pinned": "Przypięty: lista trackerów i ekran Start pokazują ten cel.",
+      "submit": "Utwórz cel",
+      "save": "Zapisz zmiany",
+      "cancel": "Anuluj",
+      "delete": "Usuń cel",
+      "openTwin": "Edytuj ten cel",
+      "errors": {
+        "target": "Wpisz liczbę większą od zera, najwyżej z dwoma miejscami po przecinku.",
+        "targetWhole": "Wpisz liczbę całkowitą większą od zera.",
+        "targetTooBig": "Ten cel jest za duży.",
+        "endDate": "Wybierz datę końcową od dziś.",
+        "nameLong": "Użyj najwyżej 60 znaków.",
+        "exists": "Ten tracker ma już taki cel.",
+        "notFound": "Ten cel już nie istnieje."
+      }
+    },
+    "delete": {
+      "title": "Usunąć ten cel?",
+      "body": "Zniknie też historia jego postępów. Twoje sesje zostaną.",
+      "bodyStreak": "Znikną też jego seria i historia postępów. Twoje sesje zostaną.",
+      "confirm": "Usuń cel",
+      "cancel": "Zostaw cel"
     }
   }
 }

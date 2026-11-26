@@ -37,7 +37,8 @@
       ],
       "expo-localization",
       "expo-secure-store",
-      "expo-sharing"
+      "expo-sharing",
+      "@react-native-community/datetimepicker"
     ],
     "scheme": "ember",
     "experiments": {

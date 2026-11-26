@@ -1,7 +1,10 @@
+from uuid import uuid4
+
 import pytest
 from httpx import AsyncClient
 
-from tests.helpers import auth_headers, create_tracker
+from tests.helpers import Api, auth_headers, create_tracker
+from tests.sessions.conftest import at, entry, sets, strength
 
 pytestmark = pytest.mark.anyio
 
@@ -206,3 +209,55 @@ async def test_main_tracker_must_belong_to_the_user(client: AsyncClient):
 
     assert response.status_code == 422
     assert response.json()["errors"][0]["code"] == "not_found"
+
+
+async def test_list_counts_the_saved_sessions_of_each_tracker(api: Api, gym: dict):
+    running = await create_tracker(api.client, api.headers, "cardio")
+    await api.put(strength(gym["id"], [entry("squat", sets(("100", 5)))], days_ago=1))
+    removed = await api.put(strength(gym["id"], [entry("squat", sets(("100", 5)))], days_ago=2))
+    await api.put(strength(gym["id"], [entry("bench_press", sets(("60", 8)))], days_ago=3))
+    await api.client.delete(f"/api/v1/sessions/{removed['session']['id']}", headers=api.headers)
+
+    items = (await api.get("/trackers"))["items"]
+
+    counts = {item["id"]: item["session_count"] for item in items}
+    assert counts == {gym["id"]: 2, running["id"]: 0}
+
+
+async def test_deleting_a_tracker_deletes_its_goals(api: Api, gym: dict):
+    running = await create_tracker(api.client, api.headers, "cardio")
+    weekly = {"kind": "frequency", "period": "week", "metric": "sessions", "target": 3}
+    for tracker in (gym, running):
+        response = await api.client.post(
+            "/api/v1/goals", json={"tracker_id": tracker["id"], **weekly}, headers=api.headers
+        )
+        assert response.status_code == 201, response.text
+
+    await api.client.delete(f"/api/v1/trackers/{gym['id']}", headers=api.headers)
+
+    goals = (await api.get("/goals"))["items"]
+    assert [goal["tracker_id"] for goal in goals] == [running["id"]]
+    assert (await api.get(f"/goals?tracker_id={gym['id']}"))["items"] == []
+
+
+async def test_deleting_a_tracker_deletes_its_sessions(api: Api, gym: dict):
+    reading = await create_tracker(api.client, api.headers, "reading")
+    book = (
+        await api.client.put(
+            f"/api/v1/books/{uuid4()}",
+            json={"title": "Atomic Habits", "total_pages": 320},
+            headers=api.headers,
+        )
+    ).json()
+    finished = await api.put(
+        {"tracker_id": reading["id"], **at(0), "reading": {"book_id": book["id"], "end_page": 320}}
+    )
+    await api.put(strength(gym["id"], [entry("squat", sets(("100", 5)))], days_ago=1))
+    before = await api.get(f"/books/{book['id']}")
+
+    await api.client.delete(f"/api/v1/trackers/{reading['id']}", headers=api.headers)
+
+    sessions = (await api.get("/sessions"))["items"]
+    assert before["finished_date"] == finished["session"]["local_date"]
+    assert [session["tracker_id"] for session in sessions] == [gym["id"]]
+    assert (await api.get(f"/books/{book['id']}"))["finished_date"] is None

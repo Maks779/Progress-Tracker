@@ -9,7 +9,7 @@ import { Text } from '@/shared/ui/Text';
 type Link = { icon: LucideIcon; title: string; hint?: string; onPress: () => void };
 
 /**
- * Rows that lead somewhere from Profile ("Export data"; "Goals & trackers" joins it later):
+ * Rows that lead somewhere from Profile (Goals, Trackers, Export data):
  * an icon, a title, an optional hint on wide screens and a chevron.
  */
 export function LinksCard({ links }: { links: Link[] }) {
