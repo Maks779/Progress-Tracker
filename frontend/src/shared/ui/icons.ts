@@ -16,6 +16,7 @@ export { default as ChevronRight } from 'lucide-react-native/icons/chevron-right
 export { default as Circle } from 'lucide-react-native/icons/circle';
 export { default as CircleAlert } from 'lucide-react-native/icons/circle-alert';
 export { default as CircleCheck } from 'lucide-react-native/icons/circle-check';
+export { default as CircleUserRound } from 'lucide-react-native/icons/circle-user-round';
 export { default as Clock } from 'lucide-react-native/icons/clock';
 export { default as Download } from 'lucide-react-native/icons/download';
 export { default as Droplet } from 'lucide-react-native/icons/droplet';

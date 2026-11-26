@@ -6,7 +6,7 @@ import { View } from 'react-native';
 import { signOut } from '@/features/auth/session';
 import { ExportSheet } from '@/features/export/ExportSheet';
 import { useReadMe } from '@/shared/api/generated/endpoints/me/me';
-import { useBreakpoint } from '@/shared/theme/breakpoints';
+import { SIDE_COLUMN_WIDTH, useBreakpoint, useTwoColumns } from '@/shared/theme/breakpoints';
 import { useTheme } from '@/shared/theme/ThemeProvider';
 import { Button } from '@/shared/ui/Button';
 import { Card } from '@/shared/ui/Card';
@@ -39,17 +39,19 @@ function PersonalCard() {
 }
 
 /**
- * Profile and settings. Phones and tablets get one column; desktop puts the account actions
- * and a short privacy note in a column on the right, as in the design. The account buttons
- * sit side by side only on tablets: elsewhere "Видалити акаунт" would not fit.
+ * Profile and settings. Phones, tablets and narrow desktop windows get one column; wide
+ * desktop windows put the account actions and a short privacy note in a column on the right,
+ * as in the design. The account buttons sit side by side only in the one-column layout of
+ * tablets and desktop: on phones and in the right column "Видалити акаунт" would not fit.
  */
 export function ProfileScreen() {
   const { t } = useTranslation();
   const { space } = useTheme();
   const breakpoint = useBreakpoint();
+  const twoColumns = useTwoColumns();
   const router = useRouter();
   const wide = breakpoint === 'expanded';
-  const sideBySide = breakpoint === 'medium';
+  const sideBySide = breakpoint !== 'compact' && !twoColumns;
   const me = useReadMe();
   const [signingOut, setSigningOut] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -120,10 +122,10 @@ export function ProfileScreen() {
 
   return (
     <Screen title={t('profile.title')} caption={t('profile.caption')}>
-      {wide ? (
+      {twoColumns ? (
         <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: space[24] }}>
           <View style={{ flex: 1, gap: space[24] }}>{main}</View>
-          <View style={{ width: 352, gap: space[24] }}>
+          <View style={{ width: SIDE_COLUMN_WIDTH, gap: space[24] }}>
             {links}
             {actions}
             <PersonalCard />
