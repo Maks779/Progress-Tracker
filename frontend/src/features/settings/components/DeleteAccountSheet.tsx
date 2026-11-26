@@ -10,6 +10,7 @@ import { errorMessageKey } from '@/features/auth/errors';
 import { forgetSession } from '@/features/auth/session';
 import { ApiError } from '@/shared/api/fetcher';
 import { deleteAccount } from '@/shared/api/generated/endpoints/me/me';
+import { useExclusive } from '@/shared/hooks/useExclusive';
 import { useTheme } from '@/shared/theme/ThemeProvider';
 import { Button } from '@/shared/ui/Button';
 import { TriangleAlert } from '@/shared/ui/icons';
@@ -57,7 +58,7 @@ export function DeleteAccountSheet({ visible, onClose }: Props) {
     onClose();
   }
 
-  const submit = handleSubmit(async ({ password }) => {
+  const submit = useExclusive(handleSubmit(async ({ password }) => {
     setFormError(null);
     try {
       await deleteAccount({ password });
@@ -69,7 +70,7 @@ export function DeleteAccountSheet({ visible, onClose }: Props) {
         setFormError(errorMessageKey(error));
       }
     }
-  });
+  }));
 
   return (
     <Sheet visible={visible} title={t('profile.delete.title')} onClose={close}>

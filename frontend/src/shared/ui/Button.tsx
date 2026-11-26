@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet } from 'react-native';
 
 import { useTheme } from '@/shared/theme/ThemeProvider';
@@ -10,7 +11,7 @@ export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'destructive';
 
 type Props = {
   label: string;
-  onPress: () => void;
+  onPress: () => unknown;
   variant?: ButtonVariant;
   size?: 'regular' | 'compact';
   disabled?: boolean;
@@ -19,7 +20,11 @@ type Props = {
   accessibilityHint?: string;
 };
 
-/** Buttons from the Figma library: 48 px regular, 44 px compact, keyboard focus ring on web. */
+/**
+ * Buttons from the Figma library: 48 px regular, 44 px compact, keyboard focus ring on web.
+ * When `onPress` returns a promise, taps are ignored until it settles: the button greys out
+ * only after the next render, and a second tap in the same frame would run the action again.
+ */
 export function Button({
   label,
   onPress,
@@ -33,6 +38,24 @@ export function Button({
   const { colors, radius, space } = useTheme();
   const primary = variant === 'primary';
   const inactive = disabled || loading;
+  const running = useRef(false);
+
+  const press = () => {
+    if (running.current) {
+      return;
+    }
+    const result = onPress();
+    if (result instanceof Promise) {
+      running.current = true;
+      const release = () => {
+        running.current = false;
+      };
+      result.then(release, (error: unknown) => {
+        release();
+        throw error;
+      });
+    }
+  };
   return (
     <Pressable
       role="button"
@@ -42,7 +65,7 @@ export function Button({
       aria-busy={loading}
       aria-selected={selected}
       disabled={inactive}
-      onPress={onPress}
+      onPress={press}
       style={({ pressed, focused, hovered }: { pressed: boolean; focused?: boolean; hovered?: boolean }) => [
         styles.base,
         {

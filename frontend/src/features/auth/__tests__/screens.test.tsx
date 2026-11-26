@@ -151,6 +151,23 @@ describe('Log in', () => {
     expect(await screen.findByText('Email or password is incorrect.')).toBeTruthy();
   });
 
+  it('sends one request when the button and the keyboard fire together', async () => {
+    let finish: () => void = () => undefined;
+    (logIn as jest.Mock).mockReturnValue(new Promise<void>((resolve) => (finish = resolve)));
+    await open(LogInScreen);
+    await fireEvent.changeText(screen.getByLabelText('Email'), 'alex@example.com');
+    await fireEvent.changeText(screen.getByLabelText('Password'), 'correct-horse');
+
+    await fireEvent.press(screen.getByRole('button', { name: 'Log in' }));
+    await fireEvent.press(screen.getByRole('button', { name: 'Log in' }));
+    await fireEvent(screen.getByLabelText('Password'), 'submitEditing');
+    await act(async () => {
+      finish();
+    });
+
+    expect(logIn).toHaveBeenCalledTimes(1);
+  });
+
   it('tells why the user has to log in again', async () => {
     useAuthStore.setState({ expired: true });
 

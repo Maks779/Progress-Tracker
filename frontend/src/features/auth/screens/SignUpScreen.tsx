@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { type TextInputInstance, View } from 'react-native';
 
 import { ApiError } from '@/shared/api/fetcher';
+import { useExclusive } from '@/shared/hooks/useExclusive';
 import { useTheme } from '@/shared/theme/ThemeProvider';
 import { Button } from '@/shared/ui/Button';
 import { Notice } from '@/shared/ui/Notice';
@@ -37,7 +38,7 @@ export function SignUpScreen() {
 
   const password = useWatch({ control, name: 'password' });
 
-  const submit = handleSubmit(async ({ name, email, password }) => {
+  const submit = useExclusive(handleSubmit(async ({ name, email, password }) => {
     setFormError(null);
     try {
       await signUp(name, email, password);
@@ -50,7 +51,7 @@ export function SignUpScreen() {
         setFormError(errorMessageKey(error));
       }
     }
-  });
+  }));
 
   return (
     <AuthLayout

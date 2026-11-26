@@ -8,6 +8,7 @@ import { PasswordVisibility } from '@/features/auth/components/PasswordVisibilit
 import { errorMessageKey, isCommonPasswordError } from '@/features/auth/errors';
 import { ApiError } from '@/shared/api/fetcher';
 import { changePassword } from '@/shared/api/generated/endpoints/me/me';
+import { useExclusive } from '@/shared/hooks/useExclusive';
 import { Button } from '@/shared/ui/Button';
 import { Notice } from '@/shared/ui/Notice';
 import { Sheet } from '@/shared/ui/Sheet';
@@ -52,7 +53,7 @@ export function ChangePasswordSheet({ onClose }: Props) {
     }
   }
 
-  const submit = handleSubmit(async (values) => {
+  const submit = useExclusive(handleSubmit(async (values) => {
     setFormError(null);
     try {
       await changePassword({ current_password: values.currentPassword, new_password: values.password });
@@ -66,7 +67,7 @@ export function ChangePasswordSheet({ onClose }: Props) {
         setFormError(errorMessageKey(error));
       }
     }
-  });
+  }));
 
   const secret = {
     secureTextEntry: !showPasswords,
