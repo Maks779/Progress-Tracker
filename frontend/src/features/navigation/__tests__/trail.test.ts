@@ -30,8 +30,17 @@ describe('trailFor', () => {
     expect(trailFor('/profile/trackers/gym')).toEqual([profile, trackers, { label: 'nav.tracker', trackerId: 'gym' }]);
   });
 
+  it('leads from the workout pages back to Home and the workout', () => {
+    const home = { label: 'tabs.home', href: '/' };
+    expect(trailFor('/workout')).toEqual([home, { label: 'nav.workout' }]);
+    expect(trailFor('/workout/add-exercise')).toEqual([home, { label: 'nav.workout', href: '/workout' }, { label: 'nav.addExercise' }]);
+    expect(trailFor('/workout/summary')).toEqual([home, { label: 'nav.summary' }]);
+  });
+
   it('gives unknown paths no breadcrumb', () => {
     expect(trailFor('/nowhere')).toEqual([]);
+    expect(trailFor('/workout/abc')).toEqual([]);
+    expect(trailFor('/workout/summary/abc')).toEqual([]);
     expect(trailFor('/history/2026')).toEqual([]);
     expect(trailFor('/profile/books')).toEqual([]);
     expect(trailFor('/profile/goals/abc/edit')).toEqual([]);

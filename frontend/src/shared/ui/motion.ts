@@ -33,3 +33,13 @@ export function dialogEnter() {
 export function backdropEnter() {
   return FadeIn.duration(SHEET_MS).reduceMotion(ReduceMotion.System);
 }
+
+const REVEAL_MS = 200;
+
+/** A personal record badge appears on Summary (motion spec "PR reveal": 200 ms, ease-out), one after another. */
+export function recordReveal(step: number) {
+  return FadeInDown.duration(REVEAL_MS)
+    .delay(300 + step * STEP_MS)
+    .easing(Easing.out(Easing.cubic))
+    .reduceMotion(ReduceMotion.System);
+}

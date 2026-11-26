@@ -4,6 +4,8 @@ import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, View, type ViewStyle } from 'react-native';
 
+import { WorkoutButton } from '@/features/workout/components/WorkoutButton';
+import { useWorkoutEntry } from '@/features/workout/start';
 import { useReadMe } from '@/shared/api/generated/endpoints/me/me';
 import { SIDEBAR_WIDTH } from '@/shared/theme/breakpoints';
 import { useTheme } from '@/shared/theme/ThemeProvider';
@@ -28,7 +30,7 @@ import { openProfilePage } from '../openProfilePage';
 import type { ProfilePage } from '../trail';
 
 const SECTIONS: { name: string; label: string; icon: LucideIcon; href: string }[] = [
-  { name: 'index', label: 'tabs.home', icon: House, href: '/' },
+  { name: '(home)', label: 'tabs.home', icon: House, href: '/' },
   { name: 'history', label: 'tabs.history', icon: CalendarDays, href: '/history' },
   { name: 'progress', label: 'tabs.progress', icon: ChartNoAxesCombined, href: '/progress' },
   { name: 'profile', label: 'tabs.profile', icon: UserRound, href: '/profile' },
@@ -109,8 +111,8 @@ function Account({ onPress }: { onPress: () => void }) {
 /**
  * The desktop navigation from the design, in place of the tab bar: the logo, the four sections
  * (the same as the phone tabs, so the section of the page on screen is highlighted, and a
- * second press goes back to its first page), Goals and Trackers as shortcuts into Profile, and
- * the account at the bottom. It scrolls when the window is too low for all of it.
+ * second press goes back to its first page), Start workout (Resume workout while one is under
+ * way), Goals and Trackers as shortcuts into Profile, and the account at the bottom. It scrolls when the window is too low for all of it.
  */
 export function Sidebar({ state, emitter, navigateToTab, insets }: BottomTabBarProps) {
   const { t } = useTranslation();
@@ -124,6 +126,12 @@ export function Sidebar({ state, emitter, navigateToTab, insets }: BottomTabBarP
       navigateToTab(route.key);
     }
   };
+  const entry = useWorkoutEntry(() => {
+    const home = state.routes.find((route) => route.name === '(home)');
+    if (home) {
+      navigateToTab(home.key);
+    }
+  });
   const open = (page: ProfilePage) =>
     openProfilePage(page, pathname, () => {
       const profile = state.routes.find((route) => route.name === 'profile');
@@ -177,6 +185,11 @@ export function Sidebar({ state, emitter, navigateToTab, insets }: BottomTabBarP
             );
           })}
         </View>
+        {entry.available ? (
+          <View style={{ marginTop: space[32] }}>
+            <WorkoutButton entry={entry} />
+          </View>
+        ) : null}
         <View style={{ marginTop: space[32], gap: space[8] }}>
           {SHORTCUTS.map(({ page, label, icon: Icon }) => (
             <SidebarLink key={page} href={page} bleed onPress={() => open(page)}>

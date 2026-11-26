@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { signOut } from '@/features/auth/session';
+import { workout } from '@/features/workout/store';
 import { ExportSheet } from '@/features/export/ExportSheet';
 import { useReadMe } from '@/shared/api/generated/endpoints/me/me';
 import { SIDE_COLUMN_WIDTH, useBreakpoint, useTwoColumns } from '@/shared/theme/breakpoints';
@@ -62,6 +63,7 @@ export function ProfileScreen() {
 
   const logOut = async () => {
     setSigningOut(true);
+    workout.clear();
     await signOut();
   };
 

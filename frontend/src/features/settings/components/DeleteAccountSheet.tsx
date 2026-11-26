@@ -8,6 +8,7 @@ import { z } from 'zod';
 import { PasswordVisibility } from '@/features/auth/components/PasswordVisibility';
 import { errorMessageKey } from '@/features/auth/errors';
 import { forgetSession } from '@/features/auth/session';
+import { workout } from '@/features/workout/store';
 import { ApiError } from '@/shared/api/fetcher';
 import { deleteAccount } from '@/shared/api/generated/endpoints/me/me';
 import { useExclusive } from '@/shared/hooks/useExclusive';
@@ -62,6 +63,7 @@ export function DeleteAccountSheet({ visible, onClose }: Props) {
     setFormError(null);
     try {
       await deleteAccount({ password });
+      workout.clear();
       await forgetSession();
     } catch (error) {
       if (error instanceof ApiError && error.code === 'invalid_credentials') {

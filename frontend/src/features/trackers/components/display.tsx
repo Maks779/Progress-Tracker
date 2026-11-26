@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, View, type ViewStyle } from 'react-native';
 
@@ -65,10 +66,10 @@ export function TrackerRow({ icon, color, name, detail, muted = false, onPress }
   );
 }
 
-type FeatureProps = { eyebrow: string; icon?: string; color?: string; name?: string; body: string };
+type FeatureProps = { eyebrow: string; icon?: string; color?: string; name?: string; body: string; children?: ReactNode };
 
-/** A side card with a small uppercase label, an optional tracker and a line under it. */
-export function FeatureCard({ eyebrow, icon, color, name, body }: FeatureProps) {
+/** A side card with a small uppercase label, an optional tracker, a line under it and an optional action. */
+export function FeatureCard({ eyebrow, icon, color, name, body, children }: FeatureProps) {
   const { space } = useTheme();
   return (
     <Card style={{ gap: space[16], padding: space[24] }}>
@@ -86,6 +87,7 @@ export function FeatureCard({ eyebrow, icon, color, name, body }: FeatureProps) 
       <Text variant="small" tone="muted">
         {body}
       </Text>
+      {children}
     </Card>
   );
 }

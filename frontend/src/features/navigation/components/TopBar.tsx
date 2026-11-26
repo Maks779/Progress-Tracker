@@ -17,11 +17,11 @@ import { Text } from '@/shared/ui/Text';
 import { currentProps, followLink, linkProps } from '@/shared/ui/webLink';
 
 import { openProfilePage } from '../openProfilePage';
-import { type ProfilePage, shortName, trailFor } from '../trail';
+import { type CrumbHref, shortName, trailFor } from '../trail';
 
 const PADDING = 40;
 
-function CrumbLink({ href, label }: { href: ProfilePage; label: string }) {
+function CrumbLink({ href, label }: { href: CrumbHref; label: string }) {
   const { colors, radius } = useTheme();
   return (
     <Pressable

@@ -2,6 +2,9 @@ import { useNavigation, usePathname } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
 import { openProfilePage, type ProfileHref } from '@/features/navigation/openProfilePage';
+import { UpNextCard } from '@/features/workout/components/UpNextCard';
+import { WorkoutButton } from '@/features/workout/components/WorkoutButton';
+import { useWorkoutEntry } from '@/features/workout/start';
 import { useListGoals } from '@/shared/api/generated/endpoints/goals/goals';
 import { useReadMe } from '@/shared/api/generated/endpoints/me/me';
 import { useHome } from '@/shared/api/generated/endpoints/stats/stats';
@@ -19,9 +22,10 @@ import { activeDays, firstName, nextGoal, pagesTarget, ringFor, weekDates } from
 
 /**
  * Home, the week at a glance (design: Home / Today): the ring with the main tracker's weekly
- * goal and streak, the recent sessions, the unmet goal closest to done and, on tablets and
- * desktop, the week's totals and its rhythm in a side column. Start workout, the quick log
- * buttons and "See all" come with the features they open.
+ * goal and streak and Start workout (Resume workout while one is under way), the recent
+ * sessions, the unmet goal closest to done and, on tablets and desktop, the week's totals, its
+ * rhythm and the workout up next in a side column. The quick log buttons and "See all" come
+ * with the features they open.
  */
 export function HomeScreen() {
   const { t, i18n } = useTranslation();
@@ -39,6 +43,7 @@ export function HomeScreen() {
   const goalItems = goals.data?.status === 200 ? goals.data.data.items : undefined;
   const today = toIsoDate(new Date());
   const open = (href: ProfileHref) => openProfilePage(href, pathname, () => navigation.navigate('profile'));
+  const entry = useWorkoutEntry(() => navigation.navigate('(home)'));
 
   const title = account ? t('home.greeting', { name: firstName(account.name) }) : t('home.title');
   const caption = new Intl.DateTimeFormat(i18n.language, { weekday: 'long', month: 'long', day: 'numeric' }).format(new Date());
@@ -95,13 +100,16 @@ export function HomeScreen() {
         <>
           {ring.kind === 'goal' ? (
             <RingCard goal={ring.goal} tracker={ring.tracker} wide={wide}>
+              <WorkoutButton entry={entry} />
               {wide ? <WeekStats stats={weekStats} /> : null}
             </RingCard>
           ) : (
             <SetGoalCard
               tracker={ring.tracker}
               onSetGoal={() => open(`/profile/goals/new?tracker=${ring.tracker.id}&from=home`)}
-            />
+            >
+              <WorkoutButton entry={entry} variant="secondary" />
+            </SetGoalCard>
           )}
           <RecentSessions
             items={stats.recent_sessions}
@@ -116,6 +124,7 @@ export function HomeScreen() {
           {wide ? (
             <WeeklyRhythm dates={weekDates(stats.week_start)} active={activeDays(stats.week_days, ring.tracker.id)} />
           ) : null}
+          {wide && stats.up_next && !entry.active ? <UpNextCard upNext={stats.up_next} entry={entry} /> : null}
         </>
       );
       body = <Columns tablet main={main} side={side} />;

@@ -54,7 +54,7 @@ export default function TabsLayout() {
         tabBarLabelStyle: { fontFamily: fonts.medium, fontSize: 12 },
       }}
     >
-      <Tabs.Screen name="index" options={{ title: t('tabs.home'), tabBarIcon: tabIcon(House) }} />
+      <Tabs.Screen name="(home)" options={{ title: t('tabs.home'), tabBarIcon: tabIcon(House) }} />
       <Tabs.Screen
         name="history"
         options={{ title: t('tabs.history'), tabBarIcon: tabIcon(CalendarDays) }}

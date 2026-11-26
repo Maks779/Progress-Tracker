@@ -1,8 +1,10 @@
-import { useRouter } from 'expo-router';
+import { useNavigation, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
 import { useGoalText } from '@/features/goals/format';
 import { headlineGoal } from '@/features/goals/rules';
+import { WorkoutButton } from '@/features/workout/components/WorkoutButton';
+import { useWorkoutEntry } from '@/features/workout/start';
 import { useListGoals } from '@/shared/api/generated/endpoints/goals/goals';
 import { useReadMe } from '@/shared/api/generated/endpoints/me/me';
 import { useListTrackers } from '@/shared/api/generated/endpoints/trackers/trackers';
@@ -19,12 +21,14 @@ import { FeatureCard, TrackerRow } from '../components/display';
 
 /**
  * Every tracker with its type, number of sessions and headline goal ("Strength · 18 sessions ·
- * 3 / week"), then the archived ones. The side card shows the main tracker.
+ * 3 / week"), then the archived ones. The side card shows the main tracker and Start workout.
  */
 export function TrackersScreen() {
   const { t } = useTranslation();
   const { space } = useTheme();
   const router = useRouter();
+  const navigation = useNavigation<{ navigate: (name: string) => void }>();
+  const entry = useWorkoutEntry(() => navigation.navigate('(home)'));
   const back = () => router.dismissTo('/profile');
   const goalText = useGoalText();
   const trackers = useListTrackers({ include_archived: true });
@@ -110,7 +114,9 @@ export function TrackersScreen() {
             color={main?.color}
             name={main?.name}
             body={t('trackers.space.body')}
-          />
+          >
+            <WorkoutButton entry={entry} />
+          </FeatureCard>
         }
       />
     </Screen>

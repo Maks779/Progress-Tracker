@@ -18,6 +18,9 @@ jest.mock('@/shared/api/generated/endpoints/trackers/trackers', () => ({ useList
 jest.mock('@/shared/api/generated/endpoints/goals/goals', () => ({ useListGoals: jest.fn() }));
 jest.mock('@/shared/api/generated/endpoints/me/me', () => ({ useReadMe: jest.fn() }));
 
+const mockEntry = { available: true, active: false, starting: false, open: jest.fn() };
+jest.mock('@/features/workout/start', () => ({ useWorkoutEntry: () => mockEntry }));
+
 const mockNavigate = jest.fn();
 let mockPathname = '/';
 jest.mock('expo-router', () => ({
@@ -149,6 +152,7 @@ beforeAll(async () => {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  Object.assign(mockEntry, { available: true, active: false, starting: false });
   mockWidth = 390;
   mockPathname = '/';
   usePreferences.setState((state) => ({ values: { ...state.values, weight_unit: 'kg', distance_unit: 'km' } }));
@@ -170,7 +174,34 @@ describe('Home', () => {
     expect(screen.getByText('Reading · 48 / 60 pages this week')).toBeTruthy();
     expect(screen.queryByText('Active time')).toBeNull();
     expect(screen.queryByText('Your weekly rhythm')).toBeNull();
-    expect(screen.queryByText('Start workout')).toBeNull();
+    expect(screen.queryByText('Up next')).toBeNull();
+    await fireEvent.press(screen.getByRole('button', { name: 'Start workout' }));
+    expect(mockEntry.open).toHaveBeenCalled();
+  });
+
+  it('offers to resume the workout under way', async () => {
+    mockEntry.active = true;
+    await open();
+
+    await fireEvent.press(screen.getByRole('button', { name: 'Resume workout' }));
+    expect(mockEntry.open).toHaveBeenCalled();
+    expect(screen.queryByRole('button', { name: 'Start workout' })).toBeNull();
+  });
+
+  it('shows the workout up next beside Home on wide screens, until one is under way', async () => {
+    mockWidth = 1440;
+    const upNext = { session_id: 'last', name: 'Lower body A', exercise_count: 4, estimated_duration_s: 2700 };
+    serve({ stats: { ...STATS, up_next: upNext } });
+    await open();
+
+    expect(screen.getByText('Up next')).toBeTruthy();
+    expect(screen.getByText('Lower body A')).toBeTruthy();
+    expect(screen.getByText(/4 exercises · around 45 min/)).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Preview workout' })).toBeTruthy();
+
+    mockEntry.active = true;
+    await open();
+    expect(screen.queryByText('Up next')).toBeNull();
   });
 
   it('adds the week’s totals and rhythm on tablets and desktop', async () => {
@@ -219,6 +250,7 @@ describe('Home', () => {
 
     expect(screen.getByText('Your ring is waiting.')).toBeTruthy();
     expect(screen.getByText('A weekly goal for Gym fills this ring and starts your streak.')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Start workout' })).toBeTruthy();
     await fireEvent.press(screen.getByRole('button', { name: 'Set a weekly goal' }));
     expect(mockNavigate).toHaveBeenCalledWith('profile');
     expect(router.dismissTo).toHaveBeenCalledWith('/profile');
@@ -226,8 +258,10 @@ describe('Home', () => {
   });
 
   it('follows another tracker’s weekly goal without a main tracker', async () => {
+    mockEntry.available = false;
     serve({ stats: { ...STATS, main_tracker_id: null }, trackers: [BOOKS], goals: [BOOKS_WEEKLY] });
     await open();
+    expect(screen.queryByRole('button', { name: 'Start workout' })).toBeNull();
 
     expect(screen.getByLabelText('48 of 60 pages this week')).toBeTruthy();
     expect(screen.getByText('You’re on your way.')).toBeTruthy();

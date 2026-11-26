@@ -1,8 +1,11 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Stack } from 'expo-router';
 import { act, fireEvent, renderRouter, screen, waitFor, within } from 'expo-router/testing-library';
 
+import HomeLayout, { unstable_settings as homeSettings } from '@/app/(tabs)/(home)/_layout';
 import TabsLayout from '@/app/(tabs)/_layout';
 import ProfileLayout, { unstable_settings } from '@/app/(tabs)/profile/_layout';
+import { useWorkout } from '@/features/workout/store';
 import { useListTrackers } from '@/shared/api/generated/endpoints/trackers/trackers';
 import i18n from '@/shared/i18n';
 import { ThemeProvider } from '@/shared/theme/ThemeProvider';
@@ -19,9 +22,12 @@ jest.mock('@/shared/theme/breakpoints', () => {
 });
 jest.mock('@/shared/api/generated/endpoints/me/me', () => ({
   useReadMe: () => ({
-    data: { status: 200, data: { name: 'Alex Morgan', email: 'alex@example.com' } },
+    data: { status: 200, data: { id: 'me', name: 'Alex Morgan', email: 'alex@example.com', main_tracker_id: 'gym' } },
     isPending: false,
   }),
+}));
+jest.mock('@/shared/api/generated/endpoints/stats/stats', () => ({
+  useHome: () => ({ data: { status: 200, data: { main_tracker_id: 'gym', up_next: null } } }),
 }));
 jest.mock('@/shared/api/generated/endpoints/trackers/trackers', () => ({ useListTrackers: jest.fn() }));
 
@@ -46,16 +52,23 @@ function stackOf(state: State | undefined, name: string): string[] | undefined {
   return undefined;
 }
 
+let client: QueryClient;
+
 function open(url: string) {
   return renderRouter(
     {
       _layout: () => (
-        <ThemeProvider>
-          <Stack screenOptions={{ headerShown: false }} />
-        </ThemeProvider>
+        <QueryClientProvider client={client}>
+          <ThemeProvider>
+            <Stack screenOptions={{ headerShown: false }} />
+          </ThemeProvider>
+        </QueryClientProvider>
       ),
       '(tabs)/_layout': TabsLayout,
-      '(tabs)/index': page('Home page'),
+      '(tabs)/(home)/_layout': { default: HomeLayout, unstable_settings: homeSettings },
+      '(tabs)/(home)/index': page('Home page'),
+      '(tabs)/(home)/workout/index': page('Workout page'),
+      '(tabs)/(home)/workout/add-exercise': page('Add exercise page'),
       '(tabs)/history': page('History page'),
       '(tabs)/log': page('Log page'),
       '(tabs)/progress': page('Progress page'),
@@ -81,9 +94,15 @@ beforeAll(async () => {
 
 beforeEach(() => {
   mockWidth = 1440;
+  client = new QueryClient();
+  useWorkout.setState({ hydrated: true, draft: null, summary: null });
   jest.mocked(useListTrackers).mockReturnValue({
-    data: { status: 200, data: { items: [{ id: 'gym', name: 'Gym' }] } },
+    data: { status: 200, data: { items: [{ id: 'gym', name: 'Gym', type: 'strength', archived: false }] } },
   } as unknown as ReturnType<typeof useListTrackers>);
+});
+
+afterEach(() => {
+  client.clear();
 });
 
 describe('desktop', () => {
@@ -161,6 +180,31 @@ describe('desktop', () => {
   it('keeps a step back inside a page', async () => {
     await open('/profile/trackers/new');
     expect(screen.getByRole('link', { name: 'Previous step' })).toBeTruthy();
+  });
+});
+
+describe('workout', () => {
+  it('starts from the sidebar on any page and opens over Home, then offers to resume it', async () => {
+    const app = await open('/profile/goals');
+    await press(within(sidebar()).getByRole('button', { name: 'Start workout' }));
+    await waitFor(() => expect(screen).toHavePathname('/workout'));
+    expect(within(sidebar()).getByRole('link', { name: 'Home', selected: true })).toBeTruthy();
+    expect(stackOf(app.getRouterState() as State, '(home)')).toEqual(['index', 'workout/index']);
+    expect(useWorkout.getState().draft).toMatchObject({ userId: 'me', trackerId: 'gym', name: 'Gym' });
+    expect(within(sidebar()).getByRole('button', { name: 'Resume workout' })).toBeTruthy();
+
+    await press(within(breadcrumb()).getByRole('link', { name: 'Home' }));
+    expect(screen).toHavePathname('/');
+    expect(useWorkout.getState().draft).not.toBeNull();
+  });
+
+  it('names the workout pages in the breadcrumb', async () => {
+    await open('/workout/add-exercise');
+    const trail = within(breadcrumb());
+    expect(trail.getByRole('link', { name: 'Home' })).toBeTruthy();
+    expect(trail.getByText('Add exercise')).toBeTruthy();
+    await press(trail.getByRole('link', { name: 'Workout' }));
+    expect(screen).toHavePathname('/workout');
   });
 });
 
