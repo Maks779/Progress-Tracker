@@ -1,10 +1,15 @@
 import type { TFunction } from 'i18next';
 import { useMemo } from 'react';
 
-import { useListExercises } from '@/shared/api/generated/endpoints/exercises/exercises';
-import type { ExerciseOut } from '@/shared/api/generated/model';
+import { useAccountId } from '@/features/auth/account';
+import { useOutbox } from '@/features/outbox/outbox';
+import type { OutboxItem } from '@/features/outbox/rules';
+import { CACHE_GC_TIME } from '@/shared/api/cache';
+import { isOffline } from '@/shared/api/connection';
+import { lastSets, useListExercises } from '@/shared/api/generated/endpoints/exercises/exercises';
+import type { ExerciseOut, ExerciseWrite } from '@/shared/api/generated/model';
 
-import type { ExerciseInfo } from './rules';
+import { type ExerciseInfo, type PreviousSet, previousFrom } from './rules';
 
 export const MUSCLE_GROUPS = ['chest', 'back', 'legs', 'shoulders', 'arms', 'core', 'full_body'] as const;
 export const EQUIPMENT = ['barbell', 'dumbbell', 'machine', 'cable', 'kettlebell', 'bodyweight', 'band', 'other'] as const;
@@ -67,13 +72,56 @@ export function filterExercises(
     });
 }
 
+/** A custom exercise created on this device that waits in the outbox, as the catalog lists it. */
+export function waitingExercise(id: string, body: ExerciseWrite): ExerciseOut {
+  return {
+    id,
+    key: null,
+    name: body.name,
+    is_custom: true,
+    muscle_group: body.muscle_group,
+    equipment: body.equipment,
+    mechanic: body.mechanic ?? null,
+    last_used_date: null,
+  };
+}
+
+/** The server's catalog plus the account's custom exercises that have not reached it yet. */
+export function withWaiting(items: ExerciseOut[], outbox: OutboxItem[], userId: string | undefined): ExerciseOut[] {
+  const known = new Set(items.map((exercise) => exercise.id));
+  const waiting = outbox
+    .filter((item) => item.kind === 'exercise' && item.userId === userId && item.failure === null && !known.has(item.id))
+    .map((item) => waitingExercise(item.id, item.body as ExerciseWrite));
+  return waiting.length > 0 ? [...items, ...waiting] : items;
+}
+
 /**
- * The exercise list (built-in and custom), kept for the whole visit: it changes only when a
- * custom exercise is added, and a workout keeps naming its exercises from it.
+ * The exercise list (built-in and custom), kept for the day and saved on the device, so the
+ * picker works offline: it changes only when a custom exercise is added, and a workout keeps
+ * naming its exercises from it. Custom exercises still waiting in the outbox are listed too.
  */
 export function useExerciseCatalog() {
-  const query = useListExercises({ query: { staleTime: 10 * 60_000, gcTime: 60 * 60_000 } });
-  const items = query.data?.status === 200 ? query.data.data.items : undefined;
+  const query = useListExercises({ query: { staleTime: 10 * 60_000, gcTime: CACHE_GC_TIME } });
+  const accountId = useAccountId();
+  const outbox = useOutbox((state) => state.items);
+  const server = query.data?.status === 200 ? query.data.data.items : undefined;
+  const items = useMemo(() => (server ? withWaiting(server, outbox, accountId) : undefined), [server, outbox, accountId]);
   const byId = useMemo(() => new Map((items ?? []).map((exercise) => [exercise.id, exercise])), [items]);
   return { query, items, byId };
+}
+
+/**
+ * The sets of the last session with this exercise, for the ghost values; none while offline
+ * (the request would only wait for its timeout) or when it cannot be loaded.
+ */
+export async function lastSetsOf(exerciseId: string): Promise<PreviousSet[]> {
+  if (isOffline()) {
+    return [];
+  }
+  try {
+    const response = await lastSets(exerciseId);
+    return response.status === 200 ? previousFrom(response.data.sets) : [];
+  } catch {
+    return [];
+  }
 }

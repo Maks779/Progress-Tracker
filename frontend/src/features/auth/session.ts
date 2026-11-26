@@ -9,6 +9,7 @@ import {
 import { login, logout, refresh, register } from '@/shared/api/generated/endpoints/auth/auth';
 import type { TokenResponse } from '@/shared/api/generated/model';
 import i18n, { isLanguage } from '@/shared/i18n';
+import { oneTabAtATime } from '@/shared/locks';
 
 import { refreshTokenStore } from './refreshToken';
 import { useAuthStore } from './store';
@@ -21,21 +22,14 @@ import { useAuthStore } from './store';
  */
 export type RefreshResult = 'refreshed' | 'rejected' | 'missing' | 'unreachable';
 
-type LockManager = { request<T>(name: string, task: () => Promise<T>): Promise<T> };
-
 let pending: Promise<RefreshResult> | null = null;
 
 async function accept(tokens: TokenResponse): Promise<void> {
   if (tokens.refresh_token) {
     await refreshTokenStore.set(tokens.refresh_token);
   }
+  await refreshTokenStore.remember();
   useAuthStore.getState().setSignedIn(tokens.access_token);
-}
-
-/** Browser tabs share one refresh cookie, so only one tab at a time may rotate it. */
-function oneTabAtATime<T>(task: () => Promise<T>): Promise<T> {
-  const locks = (globalThis.navigator as { locks?: LockManager } | undefined)?.locks;
-  return locks ? locks.request('ember-auth-refresh', task) : task();
 }
 
 async function exchange(): Promise<RefreshResult> {
@@ -62,21 +56,23 @@ async function exchange(): Promise<RefreshResult> {
 /**
  * Trades the refresh token for new tokens (the server rotates it every time). Callers that
  * ask at the same moment share one request: sending the same token twice would look like
- * token theft to the server, and it would revoke the session.
+ * token theft to the server, and it would revoke the session. Browser tabs share one refresh
+ * cookie, so only one tab at a time rotates it.
  */
 export function refreshSession(): Promise<RefreshResult> {
-  pending ??= oneTabAtATime(exchange).finally(() => {
+  pending ??= oneTabAtATime('ember-auth-refresh', exchange).finally(() => {
     pending = null;
   });
   return pending;
 }
 
 /**
- * Runs at app start. Signs in again with the saved refresh token. Offline, a phone with a
- * saved token stays signed in and renews the session once the server answers.
+ * Runs at app start. Signs in again with the saved refresh token. Offline, a device that holds
+ * a session (a saved token on phones, a remembered cookie on the web) stays signed in with the
+ * data saved on it and renews the session once the server answers.
  */
 export async function restoreSession(): Promise<void> {
-  const hadToken = (await refreshTokenStore.get()) !== null;
+  const hadToken = await refreshTokenStore.exists();
   const result = await refreshSession();
   if (result === 'refreshed') {
     return;

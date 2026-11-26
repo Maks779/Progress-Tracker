@@ -5,9 +5,11 @@ import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 import { z } from 'zod';
 
+import { useAccountId } from '@/features/auth/account';
 import { PasswordVisibility } from '@/features/auth/components/PasswordVisibility';
 import { errorMessageKey } from '@/features/auth/errors';
 import { forgetSession } from '@/features/auth/session';
+import { forgetAccount } from '@/features/outbox/outbox';
 import { workout } from '@/features/workout/store';
 import { ApiError } from '@/shared/api/fetcher';
 import { deleteAccount } from '@/shared/api/generated/endpoints/me/me';
@@ -30,11 +32,13 @@ type Props = { visible: boolean; onClose: () => void };
 
 /**
  * Deleting the account needs the current password, and the server checks it again. On
- * success every device is signed out and the app returns to Welcome.
+ * success every device is signed out, the workout and the changes waiting to be sent leave
+ * this device, and the app returns to Welcome.
  */
 export function DeleteAccountSheet({ visible, onClose }: Props) {
   const { t } = useTranslation();
   const { colors, space } = useTheme();
+  const accountId = useAccountId();
   const [showPassword, setShowPassword] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const {
@@ -64,6 +68,9 @@ export function DeleteAccountSheet({ visible, onClose }: Props) {
     try {
       await deleteAccount({ password });
       workout.clear();
+      if (accountId) {
+        await forgetAccount(accountId);
+      }
       await forgetSession();
     } catch (error) {
       if (error instanceof ApiError && error.code === 'invalid_credentials') {

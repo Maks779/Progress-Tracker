@@ -2,7 +2,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen } from '@testing-library/react-native';
 
-import { forgetSession } from '@/features/auth/session';
+import { forgetSession, signOut } from '@/features/auth/session';
+import { useAuthStore } from '@/features/auth/store';
+import { enqueue, useOutbox } from '@/features/outbox/outbox';
 import { ApiError } from '@/shared/api/fetcher';
 import {
   changePassword,
@@ -84,7 +86,11 @@ beforeEach(async () => {
     hydrated: true,
   });
   profile();
+  useAuthStore.setState({ status: 'signedIn' });
+  useOutbox.setState({ hydrated: true, items: [], syncing: false, retryAt: null });
 });
+
+const BODY = { tracker_id: 'gym', started_at: '2026-11-26T17:00:00Z', local_date: '2026-11-26' };
 
 afterAll(async () => {
   await i18n.changeLanguage('en');
@@ -145,6 +151,34 @@ describe('Profile', () => {
   });
 });
 
+describe('Log out', () => {
+  it('signs out at once when nothing waits to be sent', async () => {
+    await enqueue({ kind: 'session', id: 'theirs', userId: 'other', body: BODY });
+    await open();
+    await fireEvent.press(screen.getByRole('button', { name: 'Log out' }));
+    expect(signOut).toHaveBeenCalled();
+    expect(useOutbox.getState().items.map((item) => item.id)).toEqual(['theirs']);
+  });
+
+  it('asks first when changes have not reached the server, and deletes them from the device', async () => {
+    await enqueue({ kind: 'session', id: 'mine', userId: '1', body: BODY });
+    await enqueue({ kind: 'exercise', id: 'curl', userId: '1', body: { name: 'Spider curl', muscle_group: 'arms', equipment: 'dumbbell' } });
+    await open();
+
+    await fireEvent.press(screen.getByRole('button', { name: 'Log out' }));
+    expect(screen.getByText('Log out with unsynced changes?')).toBeTruthy();
+    expect(screen.getByText(/^2 changes made on this device haven’t reached the server yet/)).toBeTruthy();
+    await fireEvent.press(screen.getByRole('button', { name: 'Stay logged in' }));
+    expect(signOut).not.toHaveBeenCalled();
+
+    await fireEvent.press(screen.getByRole('button', { name: 'Log out' }));
+    await fireEvent.press(screen.getByRole('button', { name: 'Log out anyway' }));
+    expect(signOut).toHaveBeenCalled();
+    expect(useOutbox.getState().items).toEqual([]);
+    expect(await AsyncStorage.getAllKeys()).not.toContain('ember.outbox.session.mine');
+  });
+});
+
 describe('Delete account', () => {
   async function openSheet() {
     await open();
@@ -182,6 +216,18 @@ describe('Delete account', () => {
 
     expect(deleteAccount).toHaveBeenCalledWith({ password: 'correct-horse' });
     expect(forgetSession).toHaveBeenCalled();
+  });
+
+  it('leaves none of the account’s waiting changes on the device', async () => {
+    (deleteAccount as jest.Mock).mockResolvedValue({ status: 204, data: undefined });
+    await enqueue({ kind: 'session', id: 'mine', userId: '1', body: BODY });
+    await openSheet();
+
+    await fireEvent.changeText(screen.getByLabelText('Current password'), 'correct-horse');
+    await fireEvent.press(screen.getByRole('button', { name: 'Permanently delete account' }));
+
+    expect(forgetSession).toHaveBeenCalled();
+    expect(useOutbox.getState().items).toEqual([]);
   });
 
   it('tells when there were too many attempts', async () => {

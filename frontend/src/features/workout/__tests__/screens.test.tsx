@@ -3,12 +3,17 @@ import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import { router } from 'expo-router';
 import type { ReactElement } from 'react';
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import { useAuthStore } from '@/features/auth/store';
+import { sessionKey, useOutbox } from '@/features/outbox/outbox';
 import { usePreferences } from '@/features/settings/preferences';
+import { useConnection } from '@/shared/api/connection';
 import { ApiError } from '@/shared/api/fetcher';
 import { lastSets, putExercise, useListExercises } from '@/shared/api/generated/endpoints/exercises/exercises';
 import { putSession, useListSessions } from '@/shared/api/generated/endpoints/sessions/sessions';
 import { useListTrackers } from '@/shared/api/generated/endpoints/trackers/trackers';
-import type { ExerciseOut, GoalOut, RecordOut, SessionSaved } from '@/shared/api/generated/model';
+import type { ExerciseOut, GoalOut, RecordOut, SessionSaved, SessionWrite } from '@/shared/api/generated/model';
 import i18n from '@/shared/i18n';
 import { ThemeProvider } from '@/shared/theme/ThemeProvider';
 
@@ -16,7 +21,7 @@ import { type PreviousSet, type WorkoutDraft } from '../rules';
 import { AddExerciseScreen } from '../screens/AddExerciseScreen';
 import { SummaryScreen } from '../screens/SummaryScreen';
 import { WorkoutScreen } from '../screens/WorkoutScreen';
-import { buildExercise, useWorkout } from '../store';
+import { buildExercise, useWorkout, workout } from '../store';
 
 const mockRedirect = jest.fn();
 jest.mock('expo-router', () => ({
@@ -32,6 +37,7 @@ jest.mock('@/shared/api/generated/endpoints/sessions/sessions', () => ({
   useListSessions: jest.fn(),
   getSession: jest.fn(),
   useGetSession: jest.fn(),
+  getGetSessionQueryKey: (id: string) => [`/api/v1/sessions/${id}`],
 }));
 jest.mock('@/shared/api/generated/endpoints/exercises/exercises', () => ({
   useListExercises: jest.fn(),
@@ -98,15 +104,20 @@ async function show(element: ReactElement) {
 
 const state = () => useWorkout.getState();
 const press = (element: Parameters<typeof fireEvent.press>[0]) => act(() => fireEvent.press(element));
+const offlineError = () => new ApiError({ type: 'about:blank', title: 'Offline', status: 0, code: 'network_error' });
 
 beforeAll(async () => {
   await i18n.changeLanguage('en');
 });
 
-beforeEach(() => {
+beforeEach(async () => {
   jest.clearAllMocks();
+  await AsyncStorage.clear();
   mockWidth = 390;
   client = new QueryClient();
+  useAuthStore.setState({ status: 'signedIn' });
+  useConnection.setState({ online: true, reachable: true });
+  useOutbox.setState({ hydrated: true, items: [], syncing: false, retryAt: null });
   usePreferences.setState((current) => ({ values: { ...current.values, weight_unit: 'kg' } }));
   useWorkout.setState({ hydrated: true, draft: draft(), summary: null });
   jest.mocked(useListTrackers).mockReturnValue({
@@ -234,15 +245,50 @@ describe('Workout', () => {
     expect(mockRedirect).toHaveBeenCalledWith('/workout/summary');
   });
 
-  it('keeps the workout on the device when the server cannot be reached', async () => {
-    jest.mocked(putSession).mockRejectedValue(new ApiError({ type: 'about:blank', title: 'Offline', status: 0, code: 'network_error' }));
+  it('saves the workout on the device when the server cannot be reached and opens the summary', async () => {
+    jest.mocked(putSession).mockRejectedValue(offlineError());
     await show(<WorkoutScreen />);
 
     await press(screen.getByRole('checkbox', { name: 'Barbell row, Set 1, done' }));
     await press(screen.getByRole('button', { name: 'Finish' }));
     await press(screen.getByRole('button', { name: 'Finish & see summary' }));
-    expect(screen.getByText(/Couldn’t reach the server. Your workout stays on this device/)).toBeTruthy();
+    expect(state()).toMatchObject({ draft: null, summary: { sessionId: 'session-1', saved: null } });
+    expect(state().summary?.body.strength?.exercises).toHaveLength(1);
+    expect(useOutbox.getState().items).toEqual([expect.objectContaining({ kind: 'session', id: 'session-1', userId: 'me', failure: null })]);
+    expect(useOutbox.getState().retryAt).not.toBeNull();
+    expect(await AsyncStorage.getItem(sessionKey('session-1'))).not.toBeNull();
+  });
+
+  it('says before Finish that an offline workout is saved on the device', async () => {
+    useConnection.setState({ online: false });
+    await show(<WorkoutScreen />);
+
+    await press(screen.getByRole('checkbox', { name: 'Barbell row, Set 1, done' }));
+    await press(screen.getByRole('button', { name: 'Finish' }));
+    expect(screen.getByText('The workout will be saved on this device and synced when you’re back online.')).toBeTruthy();
+    await press(screen.getByRole('button', { name: 'Finish & see summary' }));
+    expect(putSession).not.toHaveBeenCalled();
+    expect(state().summary?.saved).toBeNull();
+  });
+
+  it('stays open when the server refuses the workout because its tracker is gone', async () => {
+    jest.mocked(putSession).mockRejectedValue(
+      new ApiError({
+        type: 'about:blank',
+        title: 'Invalid',
+        status: 422,
+        code: 'validation_error',
+        errors: [{ field: 'tracker_id', code: 'not_found', message: 'Tracker not found.' }],
+      }),
+    );
+    await show(<WorkoutScreen />);
+
+    await press(screen.getByRole('checkbox', { name: 'Barbell row, Set 1, done' }));
+    await press(screen.getByRole('button', { name: 'Finish' }));
+    await press(screen.getByRole('button', { name: 'Finish & see summary' }));
+    expect(screen.getByText(/The tracker of this workout was deleted/)).toBeTruthy();
     expect(state().draft).not.toBeNull();
+    expect(useOutbox.getState().items).toEqual([]);
   });
 
   it('cannot finish before a set is checked', async () => {
@@ -337,6 +383,26 @@ describe('Add exercise', () => {
     expect(router.dismissTo).toHaveBeenCalledWith('/workout');
   });
 
+  it('creates an exercise offline, lists it at once and keeps it for the outbox', async () => {
+    jest.mocked(putExercise).mockImplementation(async () => {
+      useConnection.setState({ reachable: false });
+      throw offlineError();
+    });
+    await show(<AddExerciseScreen />);
+
+    await act(() => fireEvent.changeText(screen.getByLabelText('Search exercises'), 'Spider curl'));
+    await press(screen.getByRole('button', { name: 'Create “Spider curl”' }));
+    await press(screen.getByRole('button', { name: 'Create exercise' }));
+
+    expect(useOutbox.getState().items).toEqual([
+      expect.objectContaining({ kind: 'exercise', userId: 'me', body: { name: 'Spider curl', muscle_group: 'chest', equipment: 'barbell' } }),
+    ]);
+    expect(screen.getByRole('checkbox', { name: /^Spider curl, Chest, Barbell, Your exercise/, checked: true })).toBeTruthy();
+    await press(screen.getByRole('button', { name: 'Add selected exercise' }));
+    expect(state().draft?.exercises.at(-1)).toMatchObject({ info: { key: null, name: 'Spider curl', is_custom: true }, weighted: true });
+    expect(lastSets).not.toHaveBeenCalled();
+  });
+
   it('creates an exercise the catalog lacks and picks it', async () => {
     const created = exercise('spider', null, 'arms', 'dumbbell', { name: 'Spider curl', is_custom: true });
     jest.mocked(putExercise).mockResolvedValue({ status: 201, data: created, headers: new Headers() } as never);
@@ -398,8 +464,32 @@ describe('Summary', () => {
   const previous = (items: { id: string; started_at: string; headline: { metric: string; value: number } }[]) =>
     jest.mocked(useListSessions).mockReturnValue({ data: { status: 200, data: { items } } } as unknown as ReturnType<typeof useListSessions>);
 
+  const body: SessionWrite = {
+    tracker_id: 'gym',
+    started_at: '2026-11-26T17:00:00Z',
+    local_date: '2026-11-26',
+    duration_s: 2892,
+    name: 'Upper body A',
+    note: null,
+    strength: {
+      exercises: [
+        {
+          id: 'entry',
+          exercise_id: 'bench',
+          position: 0,
+          sets: [
+            { position: 0, weight_kg: 40, reps: 10, kind: 'warmup' },
+            { position: 1, weight_kg: 62.5, reps: 8, kind: 'working' },
+            { position: 2, weight_kg: 60, reps: 10, kind: 'working' },
+          ],
+        },
+      ],
+    },
+  };
+  const summary = (savedAnswer: SessionSaved | null) => ({ userId: 'me', trackerName: 'Gym', sessionId: 'session-1', body, saved: savedAnswer });
+
   beforeEach(() => {
-    useWorkout.setState({ draft: null, summary: { userId: 'me', trackerName: 'Gym', saved: saved() } });
+    useWorkout.setState({ draft: null, summary: summary(saved()) });
     previous([
       { id: 'session-1', started_at: '2026-11-26T17:00:00Z', headline: { metric: 'volume_kg', value: 4820 } },
       { id: 'older', started_at: '2026-11-24T17:00:00Z', headline: { metric: 'volume_kg', value: 4460 } },
@@ -424,7 +514,7 @@ describe('Summary', () => {
   });
 
   it('marks a first workout as the baseline', async () => {
-    useWorkout.setState({ summary: { userId: 'me', trackerName: 'Gym', saved: saved({ new_records: [], goals: [] }) } });
+    useWorkout.setState({ summary: summary(saved({ new_records: [], goals: [] })) });
     previous([{ id: 'session-1', started_at: '2026-11-26T17:00:00Z', headline: { metric: 'volume_kg', value: 4820 } }]);
     await show(<SummaryScreen />);
 
@@ -444,15 +534,44 @@ describe('Summary', () => {
     expect(state().summary).toBeNull();
   });
 
-  it('stays when the note cannot be saved', async () => {
-    jest.mocked(putSession).mockRejectedValue(new ApiError({ type: 'about:blank', title: 'Offline', status: 0, code: 'network_error' }));
+  it('keeps a note on the device when the server cannot be reached', async () => {
+    jest.mocked(putSession).mockRejectedValue(offlineError());
     await show(<SummaryScreen />);
 
     await act(() => fireEvent.changeText(screen.getByLabelText('Session note'), 'Felt strong.'));
     await press(screen.getByRole('button', { name: 'Save note' }));
-    expect(screen.getByText(/Your note isn’t saved yet/)).toBeTruthy();
+    expect(screen.getByText('Note saved on this device')).toBeTruthy();
+    expect(useOutbox.getState().items).toEqual([expect.objectContaining({ id: 'session-1', body: { ...body, note: 'Felt strong.' } })]);
     await press(screen.getByRole('button', { name: 'Done' }));
+    expect(router.dismissTo).toHaveBeenCalledWith('/');
+  });
+
+  it('stays when the server refuses the note', async () => {
+    jest.mocked(putSession).mockRejectedValue(new ApiError({ type: 'about:blank', title: 'Not found', status: 404, code: 'not_found' }));
+    await show(<SummaryScreen />);
+
+    await act(() => fireEvent.changeText(screen.getByLabelText('Session note'), 'Felt strong.'));
+    await press(screen.getByRole('button', { name: 'Done' }));
+    expect(screen.getByText('Couldn’t save the note. Try again.')).toBeTruthy();
     expect(router.dismissTo).not.toHaveBeenCalled();
     expect(state().summary).not.toBeNull();
+    expect(useOutbox.getState().items).toEqual([]);
+  });
+
+  it('shows the device’s numbers while the workout waits, and the records once it is sent', async () => {
+    useWorkout.setState({ summary: summary(null) });
+    await show(<SummaryScreen />);
+
+    expect(screen.getByText('Another one done.')).toBeTruthy();
+    expect(screen.getByText('Saved on this device.')).toBeTruthy();
+    expect(screen.getByLabelText('Volume · kg: 1,100')).toBeTruthy();
+    expect(screen.getByLabelText('Sets: 2')).toBeTruthy();
+    expect(screen.queryByText(/personal record/)).toBeNull();
+
+    await act(() => workout.sessionSaved(saved()));
+    expect(screen.getByText('Stronger than yesterday.')).toBeTruthy();
+    expect(screen.queryByText('Saved on this device.')).toBeNull();
+    expect(screen.getByText('3 new personal records')).toBeTruthy();
+    expect(screen.getByText('Weekly goal, done.')).toBeTruthy();
   });
 });

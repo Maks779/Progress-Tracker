@@ -13,6 +13,7 @@ import { fonts } from '@/shared/theme/tokens';
 import { showFocusRing } from '@/shared/ui/focusRing';
 import { UserRound } from '@/shared/ui/icons';
 import { Logo } from '@/shared/ui/Logo';
+import { OfflineBadge } from '@/shared/ui/OfflineBadge';
 import { Text } from '@/shared/ui/Text';
 import { currentProps, followLink, linkProps } from '@/shared/ui/webLink';
 
@@ -133,7 +134,8 @@ function AccountChip({ onPress }: { onPress: () => void }) {
 /**
  * The bar above every page on tablets and desktop, as in the design: on desktop the
  * breadcrumb (the sidebar carries the logo), on tablets the logo; the account chip on the
- * right opens Profile. Its content lines up with the page column below.
+ * right opens Profile, with the offline badge before it. Its content lines up with the page
+ * column below.
  */
 export function TopBar({ navigation }: Pick<BottomTabHeaderProps, 'navigation'>) {
   const { colors } = useTheme();
@@ -164,7 +166,10 @@ export function TopBar({ navigation }: Pick<BottomTabHeaderProps, 'navigation'>)
         }}
       >
         <View style={{ flex: 1, minWidth: 0 }}>{expanded ? <Breadcrumb /> : <Logo />}</View>
-        <AccountChip onPress={openProfile} />
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <OfflineBadge style={{ marginRight: 12 }} />
+          <AccountChip onPress={openProfile} />
+        </View>
       </View>
     </View>
   );

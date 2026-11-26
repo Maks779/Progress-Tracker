@@ -1,6 +1,10 @@
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import type { ComponentType } from 'react';
 
+import { useOutbox } from '@/features/outbox/outbox';
+import type { OutboxItem } from '@/features/outbox/rules';
+import type { WorkoutDraft } from '@/features/workout/rules';
+import { useWorkout } from '@/features/workout/store';
 import { ApiError } from '@/shared/api/fetcher';
 import {
   checkResetToken,
@@ -174,6 +178,21 @@ describe('Log in', () => {
     await open(LogInScreen);
 
     expect(screen.getByText('Your session has expired')).toBeTruthy();
+    expect(screen.getByText('Log in again to keep going.')).toBeTruthy();
+  });
+
+  it('says that the workout and the changes waiting on the device are safe', async () => {
+    useAuthStore.setState({ expired: true });
+    useWorkout.setState({ draft: { id: 'workout' } as WorkoutDraft });
+    useOutbox.setState({ items: [{ id: 'one' }, { id: 'two' }] as OutboxItem[] });
+
+    await open(LogInScreen);
+
+    expect(
+      screen.getByText('Log in again to keep going. Your workout is safe on this device. 2 changes waiting on this device sync once you’re back in.'),
+    ).toBeTruthy();
+    useWorkout.setState({ draft: null });
+    useOutbox.setState({ items: [] });
   });
 
   it('shows and hides the password', async () => {

@@ -1,6 +1,7 @@
 import { Platform } from 'react-native';
 
 import { apiOrigin } from './config';
+import { reportReachable } from './connection';
 
 export type ProblemFieldError = { field: string; code: string; message: string };
 
@@ -113,11 +114,13 @@ async function send<T>(url: string, options: RequestInit): Promise<T> {
       credentials: 'include',
       signal: controller.signal,
     });
+    reportReachable(true);
     body = await readBody(response);
   } catch (error) {
     if (caller?.aborted) {
       throw error;
     }
+    reportReachable(false);
     throw new ApiError({
       type: 'about:blank',
       title: timedOut ? 'Request timed out' : 'Network request failed',

@@ -665,9 +665,10 @@
       "open_one": "{{count}} unfinished set won’t count.",
       "open_other": "{{count}} unfinished sets won’t count.",
       "confirm": "Finish & see summary",
-      "offline": "Couldn’t reach the server. Your workout stays on this device; finish it again when you’re back online.",
       "trackerGone": "The tracker of this workout was deleted, so it can’t be saved. You can discard it.",
-      "failed": "Couldn’t save the workout. It stays on this device; try again."
+      "failed": "Couldn’t save the workout. It stays on this device; try again.",
+      "offlineTitle": "You’re offline.",
+      "offlineBody": "The workout will be saved on this device and synced when you’re back online."
     },
     "stats": {
       "elapsed": "Elapsed",
@@ -745,7 +746,6 @@
       "equipment": "Equipment",
       "save": "Create exercise",
       "cancel": "Cancel",
-      "offline": "Couldn’t reach the server. Creating an exercise needs a connection for now.",
       "failed": "Couldn’t create the exercise. Try again."
     },
     "upNext": {
@@ -783,8 +783,10 @@
       "noteSaved": "Note saved",
       "saveNote": "Save note",
       "done": "Done",
-      "noteOffline": "Couldn’t reach the server. Your note isn’t saved yet; try again when you’re online.",
-      "noteFailed": "Couldn’t save the note. Try again."
+      "noteFailed": "Couldn’t save the note. Try again.",
+      "waitingTitle": "Saved on this device.",
+      "waitingBody": "It syncs when you’re back online. Your records and weekly goal update then.",
+      "noteWaiting": "Note saved on this device"
     }
   },
   "exercises": {
@@ -862,5 +864,39 @@
       "band": "Band",
       "other": "Other"
     }
+  },
+  "sync": {
+    "offlineTitle": "You’re offline.",
+    "offlineBody_one": "Keep logging. {{count}} session is stored on this device and will sync when you reconnect.",
+    "offlineBody_other": "Keep logging. {{count}} sessions are stored on this device and will sync when you reconnect.",
+    "offlineBodyNone": "Keep logging. What you save is stored on this device and syncs when you reconnect.",
+    "waiting_one": "{{count}} change waiting to sync",
+    "waiting_other": "{{count}} changes waiting to sync",
+    "syncNow": "Sync now",
+    "syncing": "Syncing…",
+    "badge": "Offline",
+    "badgeLabel": "Offline. You’re seeing what was saved on this device.",
+    "aWorkout": "A workout",
+    "anExercise": "An exercise",
+    "failedTitle": "“{{name}}” couldn’t be saved",
+    "failed": {
+      "tracker_gone": "Its tracker was deleted on another device, so the server can’t keep it.",
+      "session_gone": "It was deleted on another device.",
+      "exercise_gone": "An exercise in it no longer exists.",
+      "refused": "The server didn’t accept it."
+    },
+    "retry": "Try again",
+    "remove": "Remove",
+    "removeTitle": "Remove “{{name}}”?",
+    "removeBody": "It never reached the server, so it will be gone for good.",
+    "keep": "Keep it",
+    "logOutTitle": "Log out with unsynced changes?",
+    "logOutBody_one": "{{count}} change made on this device hasn’t reached the server yet. Logging out deletes it from this device. To keep it, stay logged in until it syncs.",
+    "logOutBody_other": "{{count}} changes made on this device haven’t reached the server yet. Logging out deletes them from this device. To keep them, stay logged in until they sync.",
+    "logOutConfirm": "Log out anyway",
+    "logOutCancel": "Stay logged in",
+    "expiredWorkout": "Your workout is safe on this device.",
+    "expiredWaiting_one": "{{count}} change waiting on this device syncs once you’re back in.",
+    "expiredWaiting_other": "{{count}} changes waiting on this device sync once you’re back in."
   }
 }

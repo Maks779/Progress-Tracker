@@ -1,13 +1,12 @@
-import { useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 import Animated from 'react-native-reanimated';
 
-import { ApiError } from '@/shared/api/fetcher';
-import { putSession, useListSessions } from '@/shared/api/generated/endpoints/sessions/sessions';
-import type { GoalOut, RecordOut, SessionOut } from '@/shared/api/generated/model';
+import { deliverSession, removeItem, sessionKey, useOutbox } from '@/features/outbox/outbox';
+import { useListSessions } from '@/shared/api/generated/endpoints/sessions/sessions';
+import type { GoalOut, RecordOut } from '@/shared/api/generated/model';
 import { useBreakpoint, useSideColumn } from '@/shared/theme/breakpoints';
 import { useTheme } from '@/shared/theme/ThemeProvider';
 import { Badge } from '@/shared/ui/Badge';
@@ -25,32 +24,32 @@ import { TextField } from '@/shared/ui/TextField';
 import { NoWorkout } from '../components/NoWorkout';
 import { exerciseName, useExerciseCatalog } from '../exercises';
 import { useWorkoutText } from '../format';
-import { withNote } from '../rules';
+import { summaryFigures, type SummaryFigures, withNote } from '../rules';
 import { useActiveSummary } from '../start';
 import { workout, type WorkoutSummary } from '../store';
 
 const NOTE_MAX = 500;
 
 /** The volume of the tracker's workout before this one, once the list has loaded; null for a first workout. */
-function usePreviousVolume(session: SessionOut): number | null | undefined {
-  const list = useListSessions({ tracker_id: session.tracker_id, to_date: session.local_date, limit: 5 });
+function usePreviousVolume(figures: SummaryFigures): number | null | undefined {
+  const list = useListSessions({ tracker_id: figures.trackerId, to_date: figures.localDate, limit: 5 });
   if (list.data?.status !== 200) {
     return undefined;
   }
-  const before = list.data.data.items.find((item) => item.id !== session.id && item.started_at < session.started_at);
+  const before = list.data.data.items.find((item) => item.id !== figures.sessionId && item.started_at < figures.startedAt);
   if (!before) {
     return null;
   }
   return before.headline.metric === 'volume_kg' ? before.headline.value : 0;
 }
 
-function SummaryStats({ session }: { session: SessionOut }) {
+function SummaryStats({ figures, trackerName }: { figures: SummaryFigures; trackerName: string }) {
   const { t } = useTranslation();
   const { colors, space } = useTheme();
   const text = useWorkoutText();
   const wide = useBreakpoint() !== 'compact';
-  const previous = usePreviousVolume(session);
-  const volume = session.stats.volume_kg ?? 0;
+  const previous = usePreviousVolume(figures);
+  const volume = figures.volumeKg;
   let line: string | undefined;
   if (previous === null) {
     line = t('workout.summary.first');
@@ -61,14 +60,14 @@ function SummaryStats({ session }: { session: SessionOut }) {
         : t('workout.summary.steady');
   }
   const stats = [
-    { label: t('workout.stats.duration'), value: text.clock(session.duration_s ?? 0) },
+    { label: t('workout.stats.duration'), value: text.clock(figures.durationS) },
     { label: t('workout.stats.volume', { unit: text.unitLabel }), value: text.weightValue(volume) },
-    { label: t('workout.stats.setsLabel'), value: text.number(session.stats.working_sets ?? 0) },
+    { label: t('workout.stats.setsLabel'), value: text.number(figures.workingSets) },
   ];
   return (
     <Card style={{ padding: wide ? space[32] : space[16], gap: space[16] }}>
       <View style={{ alignSelf: 'flex-start' }}>
-        <Badge icon={Dumbbell} color={colors.tracker.strength} label={session.name ?? ''} />
+        <Badge icon={Dumbbell} color={colors.tracker.strength} label={figures.name ?? trackerName} />
       </View>
       <View style={{ flexDirection: 'row', gap: space[16] }}>
         {stats.map((stat) => (
@@ -156,7 +155,8 @@ function GoalCard({ goal }: { goal: GoalOut }) {
 /**
  * Summary after Finish (design: Workout / Summary): the session's duration, volume and sets,
  * how it compares with last time, the records it set, the weekly goal, and a note that can be
- * added now. Done returns to Home.
+ * added now. Done returns to Home. While the session waits on the device for a connection,
+ * the numbers are the device's own; the records and the goal appear once it is sent.
  */
 export function SummaryScreen() {
   const summary = useActiveSummary();
@@ -171,28 +171,27 @@ export function SummaryScreen() {
 function Summary({ summary, onLeave }: { summary: WorkoutSummary; onLeave: () => void }) {
   const { t } = useTranslation();
   const { colors, space } = useTheme();
-  const queryClient = useQueryClient();
   const side = useSideColumn(false) !== null;
-  const { session, new_records: records, goals = [] } = summary.saved;
-  const [note, setNote] = useState(session.note ?? '');
+  const figures = summaryFigures(summary.sessionId, summary.body, summary.saved?.session ?? null);
+  const records = summary.saved?.new_records ?? [];
+  const goals = summary.saved?.goals ?? [];
+  const waiting = useOutbox((state) => state.items.some((item) => item.kind === 'session' && item.id === summary.sessionId));
+  const [note, setNote] = useState(figures.note ?? '');
   const [error, setError] = useState<string | null>(null);
-  const changed = note.trim() !== (session.note ?? '');
-  const goal = goals.find((item) => item.is_pinned && item.period === 'week' && item.tracker_id === session.tracker_id);
+  const changed = note.trim() !== (figures.note ?? '');
+  const goal = goals.find((item) => item.is_pinned && item.period === 'week' && item.tracker_id === figures.trackerId);
 
   const saveNote = async (): Promise<boolean> => {
     setError(null);
-    try {
-      const response = await putSession(session.id, withNote(session, note));
-      if (response.status !== 200 && response.status !== 201) {
-        throw new Error(`Unexpected response ${response.status}`);
-      }
-      workout.updateSummary(response.data);
-      void queryClient.invalidateQueries();
-      return true;
-    } catch (cause) {
-      setError(t(cause instanceof ApiError && cause.status === 0 ? 'workout.summary.noteOffline' : 'workout.summary.noteFailed'));
+    const body = withNote(summary.body, note);
+    const result = await deliverSession(summary.sessionId, summary.userId, body);
+    if (result.status === 'refused') {
+      await removeItem(sessionKey(summary.sessionId));
+      setError(t('workout.summary.noteFailed'));
       return false;
     }
+    workout.summaryBody(body);
+    return true;
   };
   const done = async () => {
     if (changed && !(await saveNote())) {
@@ -212,8 +211,8 @@ function Summary({ summary, onLeave }: { summary: WorkoutSummary; onLeave: () =>
         multiline
         maxLength={NOTE_MAX}
         placeholder={t('workout.summary.notePlaceholder')}
-        hint={changed ? undefined : session.note ? t('workout.summary.noteSaved') : undefined}
-        hintMet={Boolean(session.note) && !changed}
+        hint={changed || !figures.note ? undefined : t(waiting ? 'workout.summary.noteWaiting' : 'workout.summary.noteSaved')}
+        hintMet={Boolean(figures.note) && !changed && !waiting}
       />
       {error ? <Notice tone="error" title={error} /> : null}
       <View style={{ flexDirection: side ? 'row' : 'column', gap: space[8] }}>
@@ -228,7 +227,10 @@ function Summary({ summary, onLeave }: { summary: WorkoutSummary; onLeave: () =>
   );
   const main = (
     <>
-      <SummaryStats session={session} />
+      <SummaryStats figures={figures} trackerName={summary.trackerName} />
+      {summary.saved ? null : (
+        <Notice tone="info" title={t('workout.summary.waitingTitle')} message={t('workout.summary.waitingBody')} />
+      )}
       {records.length > 0 ? <RecordsCard records={records} /> : null}
       {side ? null : (
         <>

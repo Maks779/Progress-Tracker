@@ -347,26 +347,48 @@ export function toSession(draft: WorkoutDraft, now: number): SessionWrite | unde
   };
 }
 
-/** A saved session sent back whole with a new note (PUT replaces the session as a whole). */
-export function withNote(session: SessionOut, note: string): SessionWrite {
+/** The session sent again with a new note (PUT replaces the session as a whole). */
+export function withNote(body: SessionWrite, note: string): SessionWrite {
+  return { ...body, note: note.trim() || null };
+}
+
+/** What Summary shows of a session: the server's numbers, or the device's own while it waits to be sent. */
+export type SummaryFigures = {
+  sessionId: string;
+  trackerId: string;
+  localDate: string;
+  startedAt: string;
+  name: string | null;
+  durationS: number;
+  volumeKg: number;
+  workingSets: number;
+  note: string | null;
+};
+
+export function summaryFigures(sessionId: string, body: SessionWrite, saved: SessionOut | null): SummaryFigures {
+  let volumeKg = 0;
+  let workingSets = 0;
+  for (const entry of body.strength?.exercises ?? []) {
+    for (const set of entry.sets) {
+      if (set.kind === 'warmup') {
+        continue;
+      }
+      workingSets += 1;
+      if (set.weight_kg !== null && set.weight_kg !== undefined) {
+        volumeKg += Number(set.weight_kg) * set.reps;
+      }
+    }
+  }
   return {
-    tracker_id: session.tracker_id,
-    started_at: session.started_at,
-    local_date: session.local_date,
-    duration_s: session.duration_s,
-    name: session.name,
-    note: note.trim() || null,
-    strength: session.strength
-      ? {
-          exercises: session.strength.exercises.map((entry) => ({
-            id: entry.id,
-            exercise_id: entry.exercise_id,
-            position: entry.position,
-            superset_group: entry.superset_group,
-            sets: entry.sets.map((set) => ({ position: set.position, weight_kg: set.weight_kg, reps: set.reps, kind: set.kind })),
-          })),
-        }
-      : null,
+    sessionId,
+    trackerId: body.tracker_id,
+    localDate: body.local_date,
+    startedAt: body.started_at,
+    name: saved?.name ?? body.name ?? null,
+    durationS: saved?.duration_s ?? body.duration_s ?? 0,
+    volumeKg: saved?.stats.volume_kg ?? volumeKg,
+    workingSets: saved?.stats.working_sets ?? workingSets,
+    note: body.note ?? null,
   };
 }
 

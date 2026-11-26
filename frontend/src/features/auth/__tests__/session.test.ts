@@ -23,6 +23,8 @@ jest.mock('../refreshToken', () => {
       clear: jest.fn(async () => {
         saved = null;
       }),
+      remember: jest.fn(async () => undefined),
+      exists: jest.fn(async () => saved !== null),
     },
   };
 });
