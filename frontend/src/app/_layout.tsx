@@ -10,9 +10,11 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
+import { ActivityIndicator, View } from 'react-native';
 
 import { installAuth, restoreSession } from '@/features/auth/session';
 import { useAuthStore } from '@/features/auth/store';
+import { useOnboardingGate } from '@/features/onboarding/useOnboardingGate';
 import { hydratePreferences, usePreferences } from '@/features/settings/preferences';
 import { usePreferencesSync } from '@/features/settings/usePreferencesSync';
 import { createQueryClient, followAppFocus } from '@/shared/api/queryClient';
@@ -22,19 +24,46 @@ SplashScreen.preventAutoHideAsync();
 installAuth();
 followAppFocus();
 
+/**
+ * Signed-out people see the auth screens; a signed-in account without trackers goes through
+ * onboarding first; everyone else gets the tabs. While the app checks for trackers it shows
+ * a spinner, so Home never flashes before onboarding. On native the first allowed screen in
+ * this order is the one that opens, so the order matters.
+ */
 function Navigator() {
   const { scheme, colors } = useTheme();
   const signedIn = useAuthStore((state) => state.status === 'signedIn');
   const expired = useAuthStore((state) => state.expired);
+  const onboarding = useOnboardingGate();
   usePreferencesSync();
+
+  if (signedIn && onboarding === 'unknown') {
+    return (
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.bg.base }}>
+        <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
+        <ActivityIndicator color={colors.accent.fill} />
+      </View>
+    );
+  }
+
+  const signedOutTarget = expired ? '/log-in' : '/welcome';
   return (
     <>
       <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
       <Stack
         screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg.base } }}
       >
-        <Stack.Protected guard={signedIn} redirectTo={expired ? '/log-in' : '/welcome'}>
+        <Stack.Protected
+          guard={signedIn && onboarding === 'done'}
+          redirectTo={signedIn ? '/onboarding' : signedOutTarget}
+        >
           <Stack.Screen name="(tabs)" />
+        </Stack.Protected>
+        <Stack.Protected
+          guard={signedIn && onboarding === 'needed'}
+          redirectTo={signedIn ? '/' : signedOutTarget}
+        >
+          <Stack.Screen name="onboarding" />
         </Stack.Protected>
         <Stack.Protected guard={!signedIn} redirectTo="/">
           <Stack.Screen name="(auth)" />

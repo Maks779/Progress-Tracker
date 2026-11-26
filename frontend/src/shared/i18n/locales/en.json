@@ -199,5 +199,63 @@
     "network": "Can’t reach the server. Check your connection and try again.",
     "timeout": "The server took too long to answer. Try again.",
     "unknown": "Something went wrong. Try again."
+  },
+  "onboarding": {
+    "step": "Step {{current}} / {{total}}",
+    "footer": "Made for consistency, not perfection.",
+    "choose": {
+      "title": "What do you want to track?",
+      "subtitle": "Choose your focus. You can always add more later.",
+      "continue": "Continue",
+      "none": "Choose at least one to continue."
+    },
+    "kinds": {
+      "strength": {
+        "title": "Strength",
+        "body": "Sets, reps & personal records"
+      },
+      "cardio": {
+        "title": "Cardio",
+        "body": "Time, distance & endurance"
+      },
+      "reading": {
+        "title": "Reading",
+        "body": "Books, pages & new ideas"
+      },
+      "general": {
+        "title": "General",
+        "body": "Build your own rhythm"
+      }
+    },
+    "names": {
+      "strength": "Gym",
+      "cardio": "Cardio",
+      "reading": "Reading",
+      "general": "Habit"
+    },
+    "goal": {
+      "title": "Find your weekly rhythm.",
+      "subtitle": "Set a goal that fits your life. Rest days are part of the plan.",
+      "submit_one": "Set weekly goal",
+      "submit_other": "Set weekly goals",
+      "back": "Back",
+      "decrease": "Fewer",
+      "increase": "More",
+      "streakTitle": "A streak that respects rest.",
+      "streakBody": "Meet your goal each week to build your streak. No daily pressure."
+    },
+    "units": {
+      "sessions_one": "session / week",
+      "sessions_other": "sessions / week",
+      "pages_one": "page / week",
+      "pages_other": "pages / week"
+    },
+    "ready": {
+      "title": "Your next chapter starts here.",
+      "subtitle": "Your trackers are ready. Your first week is a fresh start.",
+      "ring": "you’re all set",
+      "lineup": "Your starting lineup",
+      "begin": "Let’s begin"
+    }
   }
 }

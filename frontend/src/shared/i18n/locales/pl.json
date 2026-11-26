@@ -201,5 +201,69 @@
     "network": "Brak połączenia z serwerem. Sprawdź internet i spróbuj ponownie.",
     "timeout": "Serwer odpowiada zbyt długo. Spróbuj ponownie.",
     "unknown": "Coś poszło nie tak. Spróbuj ponownie."
+  },
+  "onboarding": {
+    "step": "Krok {{current}} / {{total}}",
+    "footer": "Stworzone dla regularności, nie perfekcji.",
+    "choose": {
+      "title": "Co chcesz śledzić?",
+      "subtitle": "Wybierz, na czym się skupisz. Więcej możesz dodać w każdej chwili.",
+      "continue": "Dalej",
+      "none": "Wybierz co najmniej jedną opcję, aby przejść dalej."
+    },
+    "kinds": {
+      "strength": {
+        "title": "Siła",
+        "body": "Serie, powtórzenia i rekordy"
+      },
+      "cardio": {
+        "title": "Cardio",
+        "body": "Czas, dystans i wytrzymałość"
+      },
+      "reading": {
+        "title": "Czytanie",
+        "body": "Książki, strony i nowe pomysły"
+      },
+      "general": {
+        "title": "Ogólne",
+        "body": "Zbuduj własny rytm"
+      }
+    },
+    "names": {
+      "strength": "Siłownia",
+      "cardio": "Cardio",
+      "reading": "Czytanie",
+      "general": "Nawyk"
+    },
+    "goal": {
+      "title": "Znajdź swój tygodniowy rytm.",
+      "subtitle": "Ustaw cel, który pasuje do Twojego życia. Dni odpoczynku są częścią planu.",
+      "submit_one": "Ustaw cel tygodniowy",
+      "submit_few": "Ustaw cele tygodniowe",
+      "submit_many": "Ustaw cele tygodniowe",
+      "submit_other": "Ustaw cele tygodniowe",
+      "back": "Wstecz",
+      "decrease": "Mniej",
+      "increase": "Więcej",
+      "streakTitle": "Seria, która szanuje odpoczynek.",
+      "streakBody": "Osiągaj cel co tydzień, aby budować serię. Bez codziennej presji."
+    },
+    "units": {
+      "sessions_one": "sesja / tydzień",
+      "sessions_few": "sesje / tydzień",
+      "sessions_many": "sesji / tydzień",
+      "sessions_other": "sesji / tydzień",
+      "pages_one": "strona / tydzień",
+      "pages_few": "strony / tydzień",
+      "pages_many": "stron / tydzień",
+      "pages_other": "stron / tydzień"
+    },
+    "ready": {
+      "title": "Twój nowy rozdział zaczyna się tutaj.",
+      "subtitle": "Twoje trackery są gotowe. Pierwszy tydzień to świeży start.",
+      "ring": "wszystko gotowe",
+      "lineup": "Twój zestaw na start",
+      "begin": "Zaczynajmy"
+    }
   }
 }

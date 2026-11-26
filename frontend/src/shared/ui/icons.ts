@@ -3,21 +3,27 @@
  * Importing from 'lucide-react-native' itself would bundle all ~1500 icons.
  */
 export type { LucideIcon } from 'lucide-react-native';
+export { default as Activity } from 'lucide-react-native/icons/activity';
+export { default as BookOpen } from 'lucide-react-native/icons/book-open';
 export { default as CalendarDays } from 'lucide-react-native/icons/calendar-days';
 export { default as ChartNoAxesCombined } from 'lucide-react-native/icons/chart-no-axes-combined';
 export { default as Check } from 'lucide-react-native/icons/check';
 export { default as ChevronRight } from 'lucide-react-native/icons/chevron-right';
 export { default as CircleAlert } from 'lucide-react-native/icons/circle-alert';
 export { default as Download } from 'lucide-react-native/icons/download';
+export { default as Dumbbell } from 'lucide-react-native/icons/dumbbell';
 export { default as FileJson } from 'lucide-react-native/icons/file-json';
 export { default as Flame } from 'lucide-react-native/icons/flame';
 export { default as House } from 'lucide-react-native/icons/house';
 export { default as Info } from 'lucide-react-native/icons/info';
 export { default as LogOut } from 'lucide-react-native/icons/log-out';
+export { default as Minus } from 'lucide-react-native/icons/minus';
 export { default as Pencil } from 'lucide-react-native/icons/pencil';
 export { default as Plus } from 'lucide-react-native/icons/plus';
 export { default as ShieldCheck } from 'lucide-react-native/icons/shield-check';
 export { default as Sparkles } from 'lucide-react-native/icons/sparkles';
+export { default as Square } from 'lucide-react-native/icons/square';
+export { default as SquareCheck } from 'lucide-react-native/icons/square-check';
 export { default as TrendingUp } from 'lucide-react-native/icons/trending-up';
 export { default as TriangleAlert } from 'lucide-react-native/icons/triangle-alert';
 export { default as UserRound } from 'lucide-react-native/icons/user-round';
