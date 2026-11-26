@@ -51,7 +51,7 @@
     "logOut": "Log out",
     "deleteAccount": "Delete account",
     "personalTitle": "Progress is personal.",
-    "personalBody": "Your sessions stay private, and your data belongs to you.",
+    "personalBody": "Your sessions stay private. Export your data whenever you want, in a format that belongs to you.",
     "version": "Ember 1.0",
     "delete": {
       "title": "Delete your account?",
@@ -80,6 +80,20 @@
       "doneTitle": "Password changed",
       "doneBody": "This device stays signed in; other devices were signed out.",
       "done": "Done"
+    },
+    "export": {
+      "link": "Export data",
+      "linkHint": "Download CSV or JSON",
+      "title": "Export your data",
+      "body": "Open formats that belong to you. JSON keeps everything; CSV opens in Excel, Numbers or Google Sheets.",
+      "everything": "Everything",
+      "everythingHint": "JSON · trackers, sessions, goals and books",
+      "trackers": "One tracker as CSV",
+      "csvHint": "CSV · one row per session or set",
+      "loading": "Loading your trackers",
+      "loadError": "Couldn’t load your trackers.",
+      "empty": "No trackers yet. Add one, and it can be exported here.",
+      "noSharing": "This device can’t share files."
     }
   },
   "notFound": {
