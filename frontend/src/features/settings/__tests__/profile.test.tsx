@@ -1,9 +1,15 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen } from '@testing-library/react-native';
 
 import { forgetSession } from '@/features/auth/session';
 import { ApiError } from '@/shared/api/fetcher';
-import { deleteAccount, useReadMe } from '@/shared/api/generated/endpoints/me/me';
+import {
+  changePassword,
+  deleteAccount,
+  updateMe,
+  useReadMe,
+} from '@/shared/api/generated/endpoints/me/me';
 import i18n from '@/shared/i18n';
 import { ThemeProvider } from '@/shared/theme/ThemeProvider';
 
@@ -12,6 +18,8 @@ import { ProfileScreen } from '../screens/ProfileScreen';
 
 jest.mock('@/shared/api/generated/endpoints/me/me', () => ({
   useReadMe: jest.fn(),
+  getReadMeQueryKey: () => ['/api/v1/me'],
+  changePassword: jest.fn(),
   deleteAccount: jest.fn(),
   updateMe: jest.fn(),
 }));
@@ -41,12 +49,27 @@ function profile(state: { data?: unknown; isPending?: boolean } = { data: { stat
   readMe.mockReturnValue({ isPending: false, refetch: jest.fn(), ...state });
 }
 
+let queryClient = new QueryClient();
+
 async function open() {
+  queryClient = new QueryClient();
   await render(
-    <ThemeProvider>
-      <ProfileScreen />
-    </ThemeProvider>,
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider>
+        <ProfileScreen />
+      </ThemeProvider>
+    </QueryClientProvider>,
   );
+}
+
+function apiError(status: number, code: string, fieldCode?: string) {
+  return new ApiError({
+    type: 'about:blank',
+    title: code,
+    status,
+    code,
+    errors: fieldCode ? [{ field: 'new_password', code: fieldCode, message: fieldCode }] : null,
+  });
 }
 
 beforeEach(async () => {
@@ -158,5 +181,115 @@ describe('Delete account', () => {
     await fireEvent.press(screen.getByRole('button', { name: 'Permanently delete account' }));
 
     expect(await screen.findByText('Too many attempts. Try again in a few minutes.')).toBeTruthy();
+  });
+});
+
+describe('Edit name', () => {
+  it('opens with the current name and refuses an empty one', async () => {
+    await open();
+    await fireEvent.press(screen.getByRole('button', { name: 'Edit name' }));
+    const field = screen.getByLabelText('Name');
+    expect(field.props.value).toBe('Alex Morgan');
+
+    await fireEvent.changeText(field, '   ');
+    await fireEvent.press(screen.getByRole('button', { name: 'Save' }));
+
+    expect(await screen.findByText('Enter your name.')).toBeTruthy();
+    expect(updateMe).not.toHaveBeenCalled();
+  });
+
+  it('saves the trimmed name and shows the server answer on the card', async () => {
+    const saved = { status: 200, headers: new Headers(), data: { ...ALEX, name: 'Alex M.' } };
+    (updateMe as jest.Mock).mockResolvedValue(saved);
+    await open();
+    await fireEvent.press(screen.getByRole('button', { name: 'Edit name' }));
+
+    await fireEvent.changeText(screen.getByLabelText('Name'), '  Alex M.  ');
+    await fireEvent.press(screen.getByRole('button', { name: 'Save' }));
+
+    expect(updateMe).toHaveBeenCalledWith({ name: 'Alex M.' });
+    expect(queryClient.getQueryData(['/api/v1/me'])).toBe(saved);
+    expect(screen.queryByText('Your name')).toBeNull();
+  });
+
+  it('keeps the sheet open and says why when the server cannot be reached', async () => {
+    (updateMe as jest.Mock).mockRejectedValue(apiError(0, 'network_error'));
+    await open();
+    await fireEvent.press(screen.getByRole('button', { name: 'Edit name' }));
+
+    await fireEvent.changeText(screen.getByLabelText('Name'), 'Sam');
+    await fireEvent.press(screen.getByRole('button', { name: 'Save' }));
+
+    expect(await screen.findByText('Can’t reach the server. Check your connection and try again.')).toBeTruthy();
+    expect(screen.getByText('Your name')).toBeTruthy();
+  });
+});
+
+describe('Change password', () => {
+  async function fill(current: string, password: string, repeat = password) {
+    await open();
+    await fireEvent.press(screen.getByRole('button', { name: 'Change password' }));
+    await fireEvent.changeText(screen.getByLabelText('Current password'), current);
+    await fireEvent.changeText(screen.getByLabelText('New password'), password);
+    await fireEvent.changeText(screen.getByLabelText('Repeat new password'), repeat);
+    const buttons = screen.getAllByRole('button', { name: 'Change password' });
+    await fireEvent.press(buttons[buttons.length - 1]);
+  }
+
+  it('asks for the same new password twice', async () => {
+    await fill('old-password-1', 'Quiet-Harbor-Maple-7', 'Quiet-Harbor-Maple-8');
+
+    expect(await screen.findByText('Passwords don’t match.')).toBeTruthy();
+    expect(changePassword).not.toHaveBeenCalled();
+  });
+
+  it('refuses a new password equal to the current one', async () => {
+    await fill('Quiet-Harbor-Maple-7', 'Quiet-Harbor-Maple-7');
+
+    expect(await screen.findByText('Choose a password different from the current one.')).toBeTruthy();
+    expect(changePassword).not.toHaveBeenCalled();
+  });
+
+  it('marks the current password when the server says it is wrong', async () => {
+    (changePassword as jest.Mock).mockRejectedValue(apiError(401, 'invalid_credentials'));
+
+    await fill('wrong-password', 'Quiet-Harbor-Maple-7');
+
+    expect(await screen.findByText('This password is incorrect.')).toBeTruthy();
+  });
+
+  it('marks the new password when it is too common', async () => {
+    (changePassword as jest.Mock).mockRejectedValue(apiError(422, 'validation_error', 'password_too_common'));
+
+    await fill('old-password-1', 'password123');
+
+    expect(
+      await screen.findByText('This password is too common. Try a longer or less predictable one.'),
+    ).toBeTruthy();
+  });
+
+  it('says this device stays signed in once the password is changed', async () => {
+    (changePassword as jest.Mock).mockResolvedValue({ status: 204, data: undefined });
+
+    await fill('old-password-1', 'Quiet-Harbor-Maple-7');
+
+    expect(changePassword).toHaveBeenCalledWith({
+      current_password: 'old-password-1',
+      new_password: 'Quiet-Harbor-Maple-7',
+    });
+    expect(await screen.findByText('Password changed')).toBeTruthy();
+    await fireEvent.press(screen.getByRole('button', { name: 'Done' }));
+    expect(screen.queryByText('Password changed')).toBeNull();
+  });
+
+  it('opens empty again after it was closed', async () => {
+    await open();
+    await fireEvent.press(screen.getByRole('button', { name: 'Change password' }));
+    await fireEvent.changeText(screen.getByLabelText('Current password'), 'typed');
+    await fireEvent.press(screen.getByRole('button', { name: 'Cancel' }));
+
+    await fireEvent.press(screen.getByRole('button', { name: 'Change password' }));
+
+    expect(screen.getByLabelText('Current password').props.value).toBe('');
   });
 });

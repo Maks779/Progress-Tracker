@@ -58,9 +58,28 @@
       "body": "This permanently deletes your trackers, sessions, goals and records, and signs you out on every device.",
       "permanent": "This can’t be undone.",
       "password": "Current password",
-      "wrongPassword": "This password is incorrect.",
       "confirm": "Permanently delete account",
       "keep": "Keep my account"
+    },
+    "editName": "Edit name",
+    "changePassword": "Change password",
+    "wrongPassword": "This password is incorrect.",
+    "name": {
+      "title": "Your name",
+      "save": "Save",
+      "cancel": "Cancel"
+    },
+    "password": {
+      "title": "Change password",
+      "body": "Other devices will be signed out. This one stays signed in.",
+      "current": "Current password",
+      "new": "New password",
+      "repeat": "Repeat new password",
+      "submit": "Change password",
+      "sameAsCurrent": "Choose a password different from the current one.",
+      "doneTitle": "Password changed",
+      "doneBody": "This device stays signed in; other devices were signed out.",
+      "done": "Done"
     }
   },
   "notFound": {

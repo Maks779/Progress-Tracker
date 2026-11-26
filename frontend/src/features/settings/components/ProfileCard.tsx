@@ -1,9 +1,11 @@
 import { useTranslation } from 'react-i18next';
-import { View } from 'react-native';
+import { Pressable, View, type ViewStyle } from 'react-native';
 
 import type { Me } from '@/shared/api/generated/model';
 import { useTheme } from '@/shared/theme/ThemeProvider';
 import { Card } from '@/shared/ui/Card';
+import { showFocusRing } from '@/shared/ui/focusRing';
+import { Pencil } from '@/shared/ui/icons';
 import { Text } from '@/shared/ui/Text';
 import { TextLink } from '@/shared/ui/TextLink';
 
@@ -17,10 +19,13 @@ export function initials(name: string): string {
     .join('');
 }
 
-type Props = { me: Me | undefined; loading: boolean; onRetry: () => void };
+type Props = { me: Me | undefined; loading: boolean; onRetry: () => void; onEditName: () => void };
 
-/** The account at the top of Profile: initials, name and email, with loading and error states. */
-export function ProfileCard({ me, loading, onRetry }: Props) {
+/**
+ * The account at the top of Profile: initials, name and email, and the pencil that edits the
+ * name; with loading and error states.
+ */
+export function ProfileCard({ me, loading, onRetry, onEditName }: Props) {
   const { t } = useTranslation();
   const { colors, radius, space } = useTheme();
   const circle = {
@@ -46,6 +51,25 @@ export function ProfileCard({ me, loading, onRetry }: Props) {
             {me.email}
           </Text>
         </View>
+        <Pressable
+          role="button"
+          aria-label={t('profile.editName')}
+          onPress={onEditName}
+          style={({ hovered, focused }: { pressed: boolean; hovered?: boolean; focused?: boolean }): ViewStyle => ({
+            width: 44,
+            height: 44,
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: radius.full,
+            backgroundColor: hovered ? colors.bg.surfaceRaised : 'transparent',
+            cursor: 'pointer',
+            outlineStyle: 'solid',
+            outlineWidth: showFocusRing(focused) ? 2 : 0,
+            outlineColor: colors.accent.fill,
+          })}
+        >
+          <Pencil color={colors.text.primary} size={20} strokeWidth={1.75} />
+        </Pressable>
       </Card>
     );
   }

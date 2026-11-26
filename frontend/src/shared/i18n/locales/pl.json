@@ -58,9 +58,28 @@
       "body": "Trwale usuniemy Twoje trackery, sesje, cele i rekordy oraz wylogujemy Cię na wszystkich urządzeniach.",
       "permanent": "Tego nie da się cofnąć.",
       "password": "Obecne hasło",
-      "wrongPassword": "To hasło jest nieprawidłowe.",
       "confirm": "Usuń konto na zawsze",
       "keep": "Zachowaj konto"
+    },
+    "editName": "Edytuj imię",
+    "changePassword": "Zmień hasło",
+    "wrongPassword": "To hasło jest nieprawidłowe.",
+    "name": {
+      "title": "Twoje imię",
+      "save": "Zapisz",
+      "cancel": "Anuluj"
+    },
+    "password": {
+      "title": "Zmień hasło",
+      "body": "Inne urządzenia zostaną wylogowane. To urządzenie pozostanie zalogowane.",
+      "current": "Obecne hasło",
+      "new": "Nowe hasło",
+      "repeat": "Powtórz nowe hasło",
+      "submit": "Zmień hasło",
+      "sameAsCurrent": "Wybierz hasło inne niż obecne.",
+      "doneTitle": "Hasło zmienione",
+      "doneBody": "To urządzenie pozostaje zalogowane; inne zostały wylogowane.",
+      "done": "Gotowe"
     }
   },
   "notFound": {
