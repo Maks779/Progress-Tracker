@@ -35,6 +35,7 @@
 import type { GoalOut } from './goalOut';
 import type { SessionListItem } from './sessionListItem';
 import type { UpNext } from './upNext';
+import type { WeekDay } from './weekDay';
 
 export interface HomeStats {
   week_start: string;
@@ -45,4 +46,5 @@ export interface HomeStats {
   pages_read: number;
   recent_sessions: SessionListItem[];
   up_next: UpNext | null;
+  week_days: WeekDay[];
 }

@@ -17,10 +17,86 @@
   },
   "home": {
     "title": "Рухаймося далі.",
-    "api": "Сервер",
-    "apiOnline": "Підключено",
-    "apiOffline": "Недоступний",
-    "apiChecking": "Перевіряємо…"
+    "greeting": "Рухаймося далі, {{name}}.",
+    "loading": "Завантажуємо твій прогрес…",
+    "loadErrorTitle": "Не вдалося завантажити головну.",
+    "loadError": "Твої збережені дані в безпеці. Перевір з’єднання й спробуй ще раз.",
+    "retry": "Спробувати ще раз",
+    "empty": {
+      "title": "Твій перший тиждень починається зараз.",
+      "body": "Створи трекер і дай місце одній маленькій перемозі.",
+      "action": "Створити перший трекер"
+    },
+    "ring": {
+      "zero": "Новий тиждень.\nПочни у своєму темпі.",
+      "more": "Ти вже в дорозі.",
+      "one": "Залишився один крок.\nУ тебе вийде.",
+      "met": "Ціль досягнуто.\nЧудово.",
+      "workouts_one": "{{value}} з {{count}} тренування цього тижня",
+      "workouts_few": "{{value}} з {{count}} тренувань цього тижня",
+      "workouts_many": "{{value}} з {{count}} тренувань цього тижня",
+      "workouts_other": "{{value}} з {{count}} тренувань цього тижня",
+      "progress": "{{value}} з {{target}} цього тижня",
+      "of": "з {{target}}",
+      "streak_one": "Серія: {{count}} тиж.",
+      "streak_few": "Серія: {{count}} тиж.",
+      "streak_many": "Серія: {{count}} тиж.",
+      "streak_other": "Серія: {{count}} тиж."
+    },
+    "setGoal": {
+      "title": "Твоє кільце чекає.",
+      "body": "Тижнева ціль для «{{tracker}}» заповнить це кільце й почне серію.",
+      "action": "Встановити тижневу ціль"
+    },
+    "stats": {
+      "active": "Активний час",
+      "activeUnit_one": "хвилина цього тижня",
+      "activeUnit_few": "хвилини цього тижня",
+      "activeUnit_many": "хвилин цього тижня",
+      "activeUnit_other": "хвилини цього тижня",
+      "volume": "Тренувальний об’єм",
+      "volumeUnit": "{{unit}} цього тижня",
+      "pages": "Прочитані сторінки",
+      "pagesUnit_one": "сторінка цього тижня",
+      "pagesUnit_few": "сторінки цього тижня",
+      "pagesUnit_many": "сторінок цього тижня",
+      "pagesUnit_other": "сторінки цього тижня",
+      "pagesOf": "з {{target}} цього тижня"
+    },
+    "recent": {
+      "title": "Останні сесії",
+      "empty": "Тут з’являться твої сесії."
+    },
+    "next": {
+      "title": "{{amount}} до наступної цілі",
+      "week": "{{tracker}} · {{progress}} цього тижня",
+      "day": "{{tracker}} · {{progress}} сьогодні"
+    },
+    "rhythm": {
+      "title": "Твій тижневий ритм",
+      "body": "Відпочинок — частина прогресу. Твоя серія вимірюється тижнями.",
+      "days": "Дні із сесіями цього тижня: {{days}}",
+      "none": "Цього тижня ще без сесій"
+    },
+    "day": {
+      "today": "Сьогодні",
+      "yesterday": "Учора"
+    },
+    "duration": {
+      "minutes": "{{minutes}} хв",
+      "hours": "{{hours}} год",
+      "hoursMinutes": "{{hours}} год {{minutes}} хв"
+    },
+    "weight": {
+      "kg_one": "{{formatted}} кг",
+      "kg_few": "{{formatted}} кг",
+      "kg_many": "{{formatted}} кг",
+      "kg_other": "{{formatted}} кг",
+      "lb_one": "{{formatted}} фунт",
+      "lb_few": "{{formatted}} фунти",
+      "lb_many": "{{formatted}} фунтів",
+      "lb_other": "{{formatted}} фунта"
+    }
   },
   "history": {
     "title": "Твої зусилля, записані.",

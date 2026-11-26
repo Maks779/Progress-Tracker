@@ -17,10 +17,74 @@
   },
   "home": {
     "title": "Let’s keep moving.",
-    "api": "Server",
-    "apiOnline": "Connected",
-    "apiOffline": "Not reachable",
-    "apiChecking": "Checking…"
+    "greeting": "Let’s keep moving, {{name}}.",
+    "loading": "Loading your progress…",
+    "loadErrorTitle": "Couldn’t load home.",
+    "loadError": "Your saved data is safe. Check your connection and try again.",
+    "retry": "Try again",
+    "empty": {
+      "title": "Your first week starts now.",
+      "body": "Create a tracker and make room for one small win.",
+      "action": "Create your first tracker"
+    },
+    "ring": {
+      "zero": "A fresh week.\nStart when you’re ready.",
+      "more": "You’re on your way.",
+      "one": "One more.\nYou’ve got this.",
+      "met": "Goal met.\nNice work.",
+      "workouts_one": "{{value}} of {{count}} workout this week",
+      "workouts_other": "{{value}} of {{count}} workouts this week",
+      "progress": "{{value}} of {{target}} this week",
+      "of": "of {{target}}",
+      "streak_one": "{{count}}-week streak",
+      "streak_other": "{{count}}-week streak"
+    },
+    "setGoal": {
+      "title": "Your ring is waiting.",
+      "body": "A weekly goal for {{tracker}} fills this ring and starts your streak.",
+      "action": "Set a weekly goal"
+    },
+    "stats": {
+      "active": "Active time",
+      "activeUnit_one": "minute this week",
+      "activeUnit_other": "minutes this week",
+      "volume": "Training volume",
+      "volumeUnit": "{{unit}} this week",
+      "pages": "Pages read",
+      "pagesUnit_one": "page this week",
+      "pagesUnit_other": "pages this week",
+      "pagesOf": "of {{target}} this week"
+    },
+    "recent": {
+      "title": "Recent sessions",
+      "empty": "Your sessions will appear here."
+    },
+    "next": {
+      "title": "{{amount}} to your next goal",
+      "week": "{{tracker}} · {{progress}} this week",
+      "day": "{{tracker}} · {{progress}} today"
+    },
+    "rhythm": {
+      "title": "Your weekly rhythm",
+      "body": "Rest is part of getting stronger. Your streak is measured in weeks.",
+      "days": "Days with sessions this week: {{days}}",
+      "none": "No sessions this week yet"
+    },
+    "day": {
+      "today": "Today",
+      "yesterday": "Yesterday"
+    },
+    "duration": {
+      "minutes": "{{minutes}} min",
+      "hours": "{{hours}} h",
+      "hoursMinutes": "{{hours}} h {{minutes}} min"
+    },
+    "weight": {
+      "kg_one": "{{formatted}} kg",
+      "kg_other": "{{formatted}} kg",
+      "lb_one": "{{formatted}} lb",
+      "lb_other": "{{formatted}} lb"
+    }
   },
   "history": {
     "title": "Your effort, recorded.",

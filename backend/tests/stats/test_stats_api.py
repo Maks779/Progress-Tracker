@@ -41,6 +41,7 @@ async def test_home_for_a_new_user_is_empty(api: Api, freeze):
         "pages_read": 0,
         "recent_sessions": [],
         "up_next": None,
+        "week_days": [],
     }
 
 
@@ -85,6 +86,35 @@ async def test_home_sums_the_current_week(api: Api, gym: dict, freeze):
         "exercise_count": 1,
         "estimated_duration_s": 2892,
     }
+    assert home["week_days"] == [
+        {"local_date": "2026-10-27", "tracker_ids": [gym["id"]]},
+        {"local_date": "2026-10-28", "tracker_ids": [reading["id"]]},
+        {"local_date": "2026-10-29", "tracker_ids": [gym["id"]]},
+    ]
+
+
+async def test_home_week_days_list_each_tracker_once_and_skip_deleted_sessions(
+    api: Api, gym: dict, freeze
+):
+    freeze(THURSDAY)
+    await lift(api, gym, days_ago=1)
+    reading, book_id = await read_book(api)
+    await api.put(
+        {
+            "tracker_id": reading["id"],
+            **at(1, hour=19),
+            "reading": {"book_id": book_id, "end_page": 10},
+        }
+    )
+    await lift(api, gym, days_ago=1)
+    removed = await lift(api, gym, days_ago=3)
+    await api.client.delete(f"/api/v1/sessions/{removed['session']['id']}", headers=api.headers)
+
+    home = await api.get("/stats/home")
+
+    assert home["week_days"] == [
+        {"local_date": "2026-10-28", "tracker_ids": [gym["id"], reading["id"]]},
+    ]
 
 
 async def test_calendar_lists_logged_days_with_types(api: Api, gym: dict, freeze):

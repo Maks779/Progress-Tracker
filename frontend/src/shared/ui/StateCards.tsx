@@ -3,6 +3,7 @@ import { View } from 'react-native';
 import { useTheme } from '@/shared/theme/ThemeProvider';
 
 import { Card } from './Card';
+import { CircleAlert } from './icons';
 import { Text } from './Text';
 import { TextLink } from './TextLink';
 
@@ -27,12 +28,22 @@ export function SkeletonCard({ label, rows = 3 }: { label: string; rows?: number
   );
 }
 
-/** A request failed: what could not load, and a way to try again. */
-export function ErrorCard({ message, retryLabel, onRetry }: { message: string; retryLabel: string; onRetry: () => void }) {
-  const { space } = useTheme();
+type ErrorProps = { title?: string; message: string; retryLabel: string; onRetry: () => void };
+
+/** A request failed: what could not load (with an alert icon when titled), and a way to try again. */
+export function ErrorCard({ title, message, retryLabel, onRetry }: ErrorProps) {
+  const { colors, space } = useTheme();
   return (
-    <Card style={{ gap: 0, paddingBottom: space[4] }}>
-      <Text variant="small" tone="muted" role="alert">
+    <Card style={{ gap: space[4], paddingBottom: space[4] }} role="alert">
+      {title ? (
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: space[8] }}>
+          <CircleAlert color={colors.state.error} size={20} strokeWidth={1.75} />
+          <Text variant="bodyStrong" style={{ flex: 1 }}>
+            {title}
+          </Text>
+        </View>
+      ) : null}
+      <Text variant="small" tone="muted">
         {message}
       </Text>
       <TextLink label={retryLabel} onPress={onRetry} align="start" />

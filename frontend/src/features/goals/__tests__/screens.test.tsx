@@ -29,7 +29,7 @@ jest.mock('@react-native-community/datetimepicker', () => ({
   DateTimePickerAndroid: { open: jest.fn() },
 }));
 
-const mockRouter = { push: jest.fn(), replace: jest.fn(), back: jest.fn(), dismissTo: jest.fn(), canGoBack: () => true };
+const mockRouter = { push: jest.fn(), replace: jest.fn(), back: jest.fn(), dismissTo: jest.fn(), navigate: jest.fn(), canGoBack: () => true };
 let mockParams: Record<string, string> = {};
 jest.mock('expo-router', () => ({
   useRouter: () => mockRouter,
@@ -169,6 +169,22 @@ describe('New goal', () => {
 
     expect(createGoal).toHaveBeenCalledWith({ tracker_id: 'gym', kind: 'frequency', period: 'week', metric: 'sessions', target: 4 });
     expect(mockRouter.back).toHaveBeenCalled();
+  });
+
+  it('returns to Home when Home opened the form, after saving or cancelling', async () => {
+    serve({ goals: [] });
+    mockParams = { tracker: 'gym', from: 'home' };
+    await open(<NewGoalScreen />);
+
+    await fireEvent.press(screen.getByRole('button', { name: 'Cancel' }));
+    expect(mockRouter.dismissTo).toHaveBeenCalledWith('/profile');
+    expect(mockRouter.navigate).toHaveBeenCalledWith('/');
+
+    jest.clearAllMocks();
+    await fireEvent.press(screen.getByRole('button', { name: 'Create goal' }));
+    expect(createGoal).toHaveBeenCalled();
+    expect(mockRouter.navigate).toHaveBeenCalledWith('/');
+    expect(mockRouter.back).not.toHaveBeenCalled();
   });
 
   it('turns kilometres and miles into metres for amount goals', async () => {

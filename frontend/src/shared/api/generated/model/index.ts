@@ -146,3 +146,4 @@ export * from './trackerUpdate';
 export * from './trackerUpdateColor';
 export * from './trackerUpdateIcon';
 export * from './upNext';
+export * from './weekDay';

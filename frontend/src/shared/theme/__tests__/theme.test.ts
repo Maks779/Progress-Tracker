@@ -1,4 +1,4 @@
-import { breakpointFor, hasTwoColumns } from '../breakpoints';
+import { breakpointFor, hasTwoColumns, sideColumnFor } from '../breakpoints';
 import { resolveScheme } from '../ThemeProvider';
 import { palettes } from '../tokens';
 
@@ -25,6 +25,23 @@ describe('hasTwoColumns', () => {
     [1440, true],
   ])('%i px: %s', (width, expected) => {
     expect(hasTwoColumns(width)).toBe(expected);
+  });
+});
+
+describe('sideColumnFor', () => {
+  it.each([
+    [390, true, null],
+    [727, true, null],
+    [728, true, 264],
+    [768, true, 264],
+    [768, false, null],
+    [1024, true, 264],
+    [1159, true, 264],
+    [1159, false, null],
+    [1160, true, 352],
+    [1160, false, 352],
+  ])('%i px, tablet column %s: %s', (width, onTablets, expected) => {
+    expect(sideColumnFor(width, onTablets)).toBe(expected);
   });
 });
 

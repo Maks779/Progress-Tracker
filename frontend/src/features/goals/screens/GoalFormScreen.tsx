@@ -118,6 +118,23 @@ function ReadOnly({ label, value }: { label: string; value: string }) {
   );
 }
 
+/**
+ * Where the goal form goes when it is done or left: back to Home when Home's "Set a weekly
+ * goal" opened it (`?from=home`), closing the form in the Profile tab; otherwise one page back.
+ */
+function useLeaveForm() {
+  const router = useRouter();
+  const { from } = useLocalSearchParams<{ from?: string }>();
+  const back = useGoBack('/profile/goals');
+  if (from !== 'home') {
+    return back;
+  }
+  return () => {
+    router.dismissTo('/profile');
+    router.navigate('/');
+  };
+}
+
 type FormProps = {
   trackers: TrackerSummary[];
   goals: GoalOut[];
@@ -136,7 +153,7 @@ function GoalForm({ trackers, goals, initialTrackerId, goal }: FormProps) {
   const { space } = useTheme();
   const router = useRouter();
   const queryClient = useQueryClient();
-  const leave = useGoBack('/profile/goals');
+  const leave = useLeaveForm();
   const text = useGoalText();
   const today = toIsoDate(new Date());
   const [trackerId, setTrackerId] = useState(initialTrackerId);
@@ -423,7 +440,7 @@ function GoalForm({ trackers, goals, initialTrackerId, goal }: FormProps) {
 
 function useGoalPage(includeArchived: boolean) {
   const { t } = useTranslation();
-  const back = useGoBack('/profile/goals');
+  const back = useLeaveForm();
   const trackers = useListTrackers(includeArchived ? { include_archived: true } : undefined);
   const goals = useListGoals();
   const trackerItems = trackers.data?.status === 200 ? trackers.data.data.items : undefined;
