@@ -51,7 +51,7 @@
     "logOut": "Wyloguj się",
     "deleteAccount": "Usuń konto",
     "personalTitle": "Postęp jest osobisty.",
-    "personalBody": "Twoje sesje pozostają prywatne, a dane należą do Ciebie.",
+    "personalBody": "Twoje sesje pozostają prywatne. Eksportuj dane, kiedy chcesz, w formacie, który należy do Ciebie.",
     "version": "Ember 1.0",
     "delete": {
       "title": "Usunąć konto?",
@@ -80,6 +80,20 @@
       "doneTitle": "Hasło zmienione",
       "doneBody": "To urządzenie pozostaje zalogowane; inne zostały wylogowane.",
       "done": "Gotowe"
+    },
+    "export": {
+      "link": "Eksport danych",
+      "linkHint": "Pobierz CSV lub JSON",
+      "title": "Eksportuj swoje dane",
+      "body": "Otwarte formaty, które należą do Ciebie. JSON zawiera wszystko; CSV otworzysz w Excelu, Numbers lub Arkuszach Google.",
+      "everything": "Wszystko",
+      "everythingHint": "JSON · trackery, sesje, cele i książki",
+      "trackers": "Jeden tracker jako CSV",
+      "csvHint": "CSV · wiersz na sesję lub serię",
+      "loading": "Wczytujemy Twoje trackery",
+      "loadError": "Nie udało się wczytać trackerów.",
+      "empty": "Nie masz jeszcze trackerów. Dodaj tracker, a pojawi się tutaj do eksportu.",
+      "noSharing": "To urządzenie nie może udostępniać plików."
     }
   },
   "notFound": {

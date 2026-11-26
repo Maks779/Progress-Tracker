@@ -3,18 +3,20 @@ import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { signOut } from '@/features/auth/session';
+import { ExportSheet } from '@/features/export/ExportSheet';
 import { useReadMe } from '@/shared/api/generated/endpoints/me/me';
 import { useBreakpoint } from '@/shared/theme/breakpoints';
 import { useTheme } from '@/shared/theme/ThemeProvider';
 import { Button } from '@/shared/ui/Button';
 import { Card } from '@/shared/ui/Card';
-import { ShieldCheck } from '@/shared/ui/icons';
+import { Download, ShieldCheck } from '@/shared/ui/icons';
 import { Screen } from '@/shared/ui/Screen';
 import { Text } from '@/shared/ui/Text';
 
 import { ChangePasswordSheet } from '../components/ChangePasswordSheet';
 import { DeleteAccountSheet } from '../components/DeleteAccountSheet';
 import { EditNameSheet } from '../components/EditNameSheet';
+import { LinksCard } from '../components/LinksCard';
 import { ProfileCard } from '../components/ProfileCard';
 import { SettingsCard } from '../components/SettingsCard';
 
@@ -51,6 +53,7 @@ export function ProfileScreen() {
   const [deleting, setDeleting] = useState(false);
   const [editingName, setEditingName] = useState(false);
   const [changingPassword, setChangingPassword] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const account = me.data?.status === 200 ? me.data.data : undefined;
 
   const logOut = async () => {
@@ -68,6 +71,19 @@ export function ProfileScreen() {
       />
       <SettingsCard />
     </>
+  );
+
+  const links = (
+    <LinksCard
+      links={[
+        {
+          icon: Download,
+          title: t('profile.export.link'),
+          hint: wide ? t('profile.export.linkHint') : undefined,
+          onPress: () => setExporting(true),
+        },
+      ]}
+    />
   );
 
   const actions = (
@@ -94,6 +110,7 @@ export function ProfileScreen() {
         <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: space[24] }}>
           <View style={{ flex: 1, gap: space[24] }}>{main}</View>
           <View style={{ width: 352, gap: space[24] }}>
+            {links}
             {actions}
             <PersonalCard />
           </View>
@@ -101,6 +118,7 @@ export function ProfileScreen() {
       ) : (
         <View style={{ gap: space[24] }}>
           {main}
+          {links}
           {actions}
         </View>
       )}
@@ -108,6 +126,7 @@ export function ProfileScreen() {
         <EditNameSheet name={account.name} onClose={() => setEditingName(false)} />
       ) : null}
       {changingPassword ? <ChangePasswordSheet onClose={() => setChangingPassword(false)} /> : null}
+      {exporting ? <ExportSheet onClose={() => setExporting(false)} /> : null}
       <DeleteAccountSheet visible={deleting} onClose={() => setDeleting(false)} />
     </Screen>
   );
