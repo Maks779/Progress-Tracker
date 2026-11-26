@@ -6,6 +6,15 @@
     "progress": "Progress",
     "profile": "Profile"
   },
+  "nav": {
+    "main": "Main menu",
+    "breadcrumb": "Breadcrumb",
+    "account": "{{name}}, profile",
+    "newGoal": "New goal",
+    "editGoal": "Edit goal",
+    "newTracker": "New tracker",
+    "tracker": "Tracker"
+  },
   "home": {
     "title": "Let’s keep moving.",
     "api": "Server",

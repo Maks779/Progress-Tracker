@@ -1,7 +1,10 @@
-import { Tabs } from 'expo-router';
+import { BottomTabBar, Tabs } from 'expo-router/js-tabs';
 import { useTranslation } from 'react-i18next';
 import { type ColorValue, View } from 'react-native';
 
+import { Sidebar } from '@/features/navigation/components/Sidebar';
+import { TopBar } from '@/features/navigation/components/TopBar';
+import { useBreakpoint } from '@/shared/theme/breakpoints';
 import { useTheme } from '@/shared/theme/ThemeProvider';
 import { fonts } from '@/shared/theme/tokens';
 import {
@@ -22,14 +25,24 @@ function tabIcon(Icon: LucideIcon) {
   return TabIcon;
 }
 
+/**
+ * The signed-in app. Phones get the bottom tab bar; tablets add the top bar (logo and account);
+ * desktop replaces the tab bar with the sidebar and shows the top bar with the breadcrumb.
+ */
 export default function TabsLayout() {
   const { t } = useTranslation();
   const { colors, radius } = useTheme();
+  const breakpoint = useBreakpoint();
+  const expanded = breakpoint === 'expanded';
 
   return (
     <Tabs
+      tabBar={(props) => (expanded ? <Sidebar {...props} /> : <BottomTabBar {...props} />)}
       screenOptions={{
-        headerShown: false,
+        headerShown: breakpoint !== 'compact',
+        header: ({ navigation }) => <TopBar navigation={navigation} />,
+        tabBarPosition: expanded ? 'left' : 'bottom',
+        sceneStyle: { backgroundColor: colors.bg.base },
         tabBarActiveTintColor: colors.accent.text,
         tabBarInactiveTintColor: colors.text.muted,
         tabBarStyle: {

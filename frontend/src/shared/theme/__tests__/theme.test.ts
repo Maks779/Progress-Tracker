@@ -1,4 +1,4 @@
-import { breakpointFor } from '../breakpoints';
+import { breakpointFor, hasTwoColumns } from '../breakpoints';
 import { resolveScheme } from '../ThemeProvider';
 import { palettes } from '../tokens';
 
@@ -13,6 +13,18 @@ describe('breakpointFor', () => {
     [1440, 'expanded'],
   ])('%i px is %s', (width, expected) => {
     expect(breakpointFor(width)).toBe(expected);
+  });
+});
+
+describe('hasTwoColumns', () => {
+  it.each([
+    [768, false],
+    [1024, false],
+    [1159, false],
+    [1160, true],
+    [1440, true],
+  ])('%i px: %s', (width, expected) => {
+    expect(hasTwoColumns(width)).toBe(expected);
   });
 });
 

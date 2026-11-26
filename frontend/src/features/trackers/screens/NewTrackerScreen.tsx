@@ -109,7 +109,7 @@ export function NewTrackerScreen() {
     }),
   );
 
-  const back = step === 1 ? { label: t('trackers.label'), onPress: leave } : { label: t('trackers.new.back'), onPress: () => setStep((step - 1) as Step) };
+  const back = step === 1 ? { label: t('trackers.label'), onPress: leave } : { label: t('trackers.new.back'), onPress: () => setStep((step - 1) as Step), step: true };
 
   let content;
   if (step === 1) {

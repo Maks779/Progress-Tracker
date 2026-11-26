@@ -6,6 +6,15 @@
     "progress": "Postępy",
     "profile": "Profil"
   },
+  "nav": {
+    "main": "Menu główne",
+    "breadcrumb": "Ścieżka nawigacyjna",
+    "account": "{{name}}, profil",
+    "newGoal": "Nowy cel",
+    "editGoal": "Edycja celu",
+    "newTracker": "Nowy tracker",
+    "tracker": "Tracker"
+  },
   "home": {
     "title": "Ruszajmy dalej.",
     "api": "Serwer",
