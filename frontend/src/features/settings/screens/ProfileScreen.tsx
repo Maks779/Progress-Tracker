@@ -12,7 +12,9 @@ import { ShieldCheck } from '@/shared/ui/icons';
 import { Screen } from '@/shared/ui/Screen';
 import { Text } from '@/shared/ui/Text';
 
+import { ChangePasswordSheet } from '../components/ChangePasswordSheet';
 import { DeleteAccountSheet } from '../components/DeleteAccountSheet';
+import { EditNameSheet } from '../components/EditNameSheet';
 import { ProfileCard } from '../components/ProfileCard';
 import { SettingsCard } from '../components/SettingsCard';
 
@@ -35,8 +37,8 @@ function PersonalCard() {
 
 /**
  * Profile and settings. Phones and tablets get one column; desktop puts the account actions
- * and a short privacy note in a column on the right, as in the design. The two account
- * buttons sit side by side only on tablets: elsewhere "Видалити акаунт" would not fit.
+ * and a short privacy note in a column on the right, as in the design. The account buttons
+ * sit side by side only on tablets: elsewhere "Видалити акаунт" would not fit.
  */
 export function ProfileScreen() {
   const { t } = useTranslation();
@@ -47,18 +49,22 @@ export function ProfileScreen() {
   const me = useReadMe();
   const [signingOut, setSigningOut] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [editingName, setEditingName] = useState(false);
+  const [changingPassword, setChangingPassword] = useState(false);
+  const account = me.data?.status === 200 ? me.data.data : undefined;
 
   const logOut = async () => {
     setSigningOut(true);
     await signOut();
   };
 
-  const account = (
+  const main = (
     <>
       <ProfileCard
-        me={me.data?.status === 200 ? me.data.data : undefined}
+        me={account}
         loading={me.isPending}
         onRetry={() => me.refetch()}
+        onEditName={() => setEditingName(true)}
       />
       <SettingsCard />
     </>
@@ -66,6 +72,13 @@ export function ProfileScreen() {
 
   const actions = (
     <View style={{ flexDirection: sideBySide ? 'row' : 'column', gap: space[16] }}>
+      <View style={sideBySide ? { flex: 1 } : undefined}>
+        <Button
+          label={t('profile.changePassword')}
+          variant="secondary"
+          onPress={() => setChangingPassword(true)}
+        />
+      </View>
       <View style={sideBySide ? { flex: 1 } : undefined}>
         <Button label={t('profile.logOut')} variant="secondary" loading={signingOut} onPress={logOut} />
       </View>
@@ -79,7 +92,7 @@ export function ProfileScreen() {
     <Screen title={t('profile.title')} caption={t('profile.caption')}>
       {wide ? (
         <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: space[24] }}>
-          <View style={{ flex: 1, gap: space[24] }}>{account}</View>
+          <View style={{ flex: 1, gap: space[24] }}>{main}</View>
           <View style={{ width: 352, gap: space[24] }}>
             {actions}
             <PersonalCard />
@@ -87,10 +100,14 @@ export function ProfileScreen() {
         </View>
       ) : (
         <View style={{ gap: space[24] }}>
-          {account}
+          {main}
           {actions}
         </View>
       )}
+      {editingName && account ? (
+        <EditNameSheet name={account.name} onClose={() => setEditingName(false)} />
+      ) : null}
+      {changingPassword ? <ChangePasswordSheet onClose={() => setChangingPassword(false)} /> : null}
       <DeleteAccountSheet visible={deleting} onClose={() => setDeleting(false)} />
     </Screen>
   );

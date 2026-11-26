@@ -11,6 +11,7 @@ export { default as Flame } from 'lucide-react-native/icons/flame';
 export { default as House } from 'lucide-react-native/icons/house';
 export { default as Info } from 'lucide-react-native/icons/info';
 export { default as LogOut } from 'lucide-react-native/icons/log-out';
+export { default as Pencil } from 'lucide-react-native/icons/pencil';
 export { default as Plus } from 'lucide-react-native/icons/plus';
 export { default as ShieldCheck } from 'lucide-react-native/icons/shield-check';
 export { default as Sparkles } from 'lucide-react-native/icons/sparkles';

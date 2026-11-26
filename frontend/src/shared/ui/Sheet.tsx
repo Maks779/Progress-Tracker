@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { KeyboardAvoidingView, Modal, Pressable, StyleSheet, View } from 'react-native';
+import { KeyboardAvoidingView, Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -20,7 +20,7 @@ type Props = {
  * A confirmation over the screen (delete account, discard workout): a sheet from the bottom
  * edge with a 24 px top radius on phones, a centred dialog on desktop. Tapping outside, the
  * Android back button, the VoiceOver escape gesture and Escape on the web close it; the
- * keyboard never covers its fields. The dimmed backdrop is hidden from screen readers and
+ * keyboard never covers its fields, and content taller than the screen scrolls. The dimmed backdrop is hidden from screen readers and
  * Tab, so the sheet's own buttons are the only way out for them.
  */
 export function Sheet({ visible, title, onClose, children }: Props) {
@@ -45,6 +45,7 @@ export function Sheet({ visible, title, onClose, children }: Props) {
             style={{
               width: '100%',
               maxWidth: wide ? 480 : undefined,
+              maxHeight: '92%',
               backgroundColor: colors.bg.surface,
               borderColor: colors.border.default,
               borderWidth: 1,
@@ -70,7 +71,13 @@ export function Sheet({ visible, title, onClose, children }: Props) {
             <Text variant="h3" accessibilityRole="header">
               {title}
             </Text>
-            {children}
+            <ScrollView
+              style={styles.content}
+              contentContainerStyle={{ gap: space[16] }}
+              keyboardShouldPersistTaps="handled"
+            >
+              {children}
+            </ScrollView>
           </Animated.View>
         </View>
       </KeyboardAvoidingView>
@@ -82,5 +89,6 @@ const styles = StyleSheet.create({
   fill: { flex: 1 },
   backdrop: { backgroundColor: 'rgba(0, 0, 0, 0.6)' },
   bottom: { justifyContent: 'flex-end' },
+  content: { flexGrow: 0 },
   centre: { justifyContent: 'center', alignItems: 'center', padding: 24 },
 });

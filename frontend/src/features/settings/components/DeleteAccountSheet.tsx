@@ -64,7 +64,7 @@ export function DeleteAccountSheet({ visible, onClose }: Props) {
       await forgetSession();
     } catch (error) {
       if (error instanceof ApiError && error.code === 'invalid_credentials') {
-        setError('password', { message: 'profile.delete.wrongPassword' }, { shouldFocus: true });
+        setError('password', { message: 'profile.wrongPassword' }, { shouldFocus: true });
       } else {
         setFormError(errorMessageKey(error));
       }

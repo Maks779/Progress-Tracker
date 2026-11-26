@@ -10,13 +10,19 @@ const email = z
   .min(1, 'auth.errors.emailRequired')
   .pipe(z.email('auth.errors.emailInvalid'));
 
-const newPassword = z
+export const newPassword = z
   .string()
   .min(8, 'auth.errors.passwordTooShort')
   .max(128, 'auth.errors.passwordTooLong');
 
+export const personName = z
+  .string()
+  .trim()
+  .min(1, 'auth.errors.nameRequired')
+  .max(50, 'auth.errors.nameTooLong');
+
 export const signUpSchema = z.object({
-  name: z.string().trim().min(1, 'auth.errors.nameRequired').max(50, 'auth.errors.nameTooLong'),
+  name: personName,
   email,
   password: newPassword,
 });
