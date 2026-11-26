@@ -4,6 +4,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
 import { forgotPassword } from '@/shared/api/generated/endpoints/auth/auth';
+import { useExclusive } from '@/shared/hooks/useExclusive';
 import { Button } from '@/shared/ui/Button';
 import { Notice } from '@/shared/ui/Notice';
 import { TextField } from '@/shared/ui/TextField';
@@ -49,11 +50,11 @@ export function ForgotPasswordScreen() {
     }
   }
 
-  const submit = handleSubmit(async ({ email }) => {
+  const submit = useExclusive(handleSubmit(async ({ email }) => {
     if (await send(email)) {
       setSentTo(email);
     }
-  });
+  }));
 
   async function resend() {
     if (!sentTo) {

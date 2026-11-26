@@ -7,6 +7,7 @@ import { ActivityIndicator, type TextInputInstance, View } from 'react-native';
 
 import { ApiError } from '@/shared/api/fetcher';
 import { checkResetToken, resetPassword } from '@/shared/api/generated/endpoints/auth/auth';
+import { useExclusive } from '@/shared/hooks/useExclusive';
 import { useTheme } from '@/shared/theme/ThemeProvider';
 import { Button } from '@/shared/ui/Button';
 import { Notice } from '@/shared/ui/Notice';
@@ -70,7 +71,7 @@ export function ResetPasswordScreen() {
     return () => request.abort();
   }, [token]);
 
-  const submit = handleSubmit(async ({ password }) => {
+  const submit = useExclusive(handleSubmit(async ({ password }) => {
     setFormError(null);
     try {
       await resetPassword({ token: token ?? '', new_password: password });
@@ -85,7 +86,7 @@ export function ResetPasswordScreen() {
         setFormError(errorMessageKey(error));
       }
     }
-  });
+  }));
 
   return (
     <AuthLayout

@@ -4,6 +4,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { type TextInputInstance, View } from 'react-native';
 
+import { useExclusive } from '@/shared/hooks/useExclusive';
 import { useTheme } from '@/shared/theme/ThemeProvider';
 import { Button } from '@/shared/ui/Button';
 import { Notice } from '@/shared/ui/Notice';
@@ -34,14 +35,14 @@ export function LogInScreen() {
     defaultValues: { email: '', password: '' },
   });
 
-  const submit = handleSubmit(async ({ email, password }) => {
+  const submit = useExclusive(handleSubmit(async ({ email, password }) => {
     setFormError(null);
     try {
       await logIn(email, password);
     } catch (error) {
       setFormError(errorMessageKey(error));
     }
-  });
+  }));
 
   return (
     <AuthLayout

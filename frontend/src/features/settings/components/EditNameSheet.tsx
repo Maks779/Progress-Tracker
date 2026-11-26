@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 
 import { errorMessageKey } from '@/features/auth/errors';
 import { getReadMeQueryKey, updateMe } from '@/shared/api/generated/endpoints/me/me';
+import { useExclusive } from '@/shared/hooks/useExclusive';
 import { Button } from '@/shared/ui/Button';
 import { Notice } from '@/shared/ui/Notice';
 import { Sheet } from '@/shared/ui/Sheet';
@@ -39,7 +40,7 @@ export function EditNameSheet({ name, onClose }: Props) {
     }
   }
 
-  const submit = handleSubmit(async (values) => {
+  const submit = useExclusive(handleSubmit(async (values) => {
     setFormError(null);
     try {
       const response = await updateMe({ name: values.name });
@@ -48,7 +49,7 @@ export function EditNameSheet({ name, onClose }: Props) {
     } catch (error) {
       setFormError(errorMessageKey(error));
     }
-  });
+  }));
 
   return (
     <Sheet visible title={t('profile.name.title')} onClose={close}>
