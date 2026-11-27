@@ -103,6 +103,13 @@ export function setProblems(set: DraftSet, weighted: boolean): SetProblem[] {
   return problems;
 }
 
+/** The checked working sets of an exercise, what its live records come from (spec §3.4). */
+export function checkedWorkingSets(exercise: DraftExercise): { weightKg: number | null; reps: number }[] {
+  return exercise.sets
+    .filter((set) => set.done && set.kind === 'working' && set.reps !== null)
+    .map((set) => ({ weightKg: set.weightKg, reps: set.reps ?? 0 }));
+}
+
 /** The number a working set shows (1, 2, …), counting working sets only; null for a warm-up. */
 export function setNumber(sets: DraftSet[], index: number): number | null {
   if (sets[index]?.kind !== 'working') {

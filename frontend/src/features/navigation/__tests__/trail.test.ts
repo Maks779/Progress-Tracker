@@ -43,6 +43,11 @@ describe('trailFor', () => {
     ]);
   });
 
+  it('leads from Records back to Progress', () => {
+    expect(trailFor('/progress/records')).toEqual([{ label: 'tabs.progress', href: '/progress' }, { label: 'nav.records' }]);
+    expect(trailFor('/progress/other')).toEqual([]);
+  });
+
   it('leads from a quick log back to Home', () => {
     expect(trailFor('/quick-log/abc')).toEqual([{ label: 'tabs.home', href: '/' }, { label: 'nav.quickLog' }]);
     expect(trailFor('/quick-log/abc/more')).toEqual([]);

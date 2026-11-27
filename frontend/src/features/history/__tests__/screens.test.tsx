@@ -51,7 +51,12 @@ jest.mock('@/shared/api/generated/endpoints/books/books', () => ({
   putBook: jest.fn(),
   getListBooksQueryKey: () => ['/api/v1/books'],
 }));
-jest.mock('@/shared/api/generated/endpoints/exercises/exercises', () => ({ useListExercises: jest.fn(), putExercise: jest.fn(), lastSets: jest.fn() }));
+jest.mock('@/shared/api/generated/endpoints/exercises/exercises', () => ({
+  useListExercises: jest.fn(),
+  putExercise: jest.fn(),
+  lastSets: jest.fn(),
+  useExerciseRecords: jest.fn(() => ({ data: undefined })),
+}));
 jest.mock('@/shared/api/generated/endpoints/sessions/sessions', () => ({
   useListSessions: jest.fn(),
   useGetSession: jest.fn(),

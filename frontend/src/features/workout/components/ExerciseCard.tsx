@@ -1,17 +1,23 @@
 import { Fragment, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AccessibilityInfo, Pressable, View, type ViewStyle } from 'react-native';
+import Animated from 'react-native-reanimated';
+
+import { useExerciseBests } from '@/features/progress/data';
+import { newRecords } from '@/features/progress/rules';
 
 import { useBreakpoint } from '@/shared/theme/breakpoints';
 import { useTheme } from '@/shared/theme/ThemeProvider';
+import { Badge } from '@/shared/ui/Badge';
 import { showFocusRing } from '@/shared/ui/focusRing';
 import { IconButton } from '@/shared/ui/IconButton';
-import { Ellipsis, Plus } from '@/shared/ui/icons';
+import { Ellipsis, Plus, Trophy } from '@/shared/ui/icons';
+import { recordReveal } from '@/shared/ui/motion';
 import { Text } from '@/shared/ui/Text';
 
 import type { DraftActions } from '../editor';
 import { useWorkoutText } from '../format';
-import { type DraftExercise, MAX_SETS, nextInSuperset, setNumber, setProblems } from '../rules';
+import { checkedWorkingSets, type DraftExercise, MAX_SETS, nextInSuperset, setNumber, setProblems } from '../rules';
 import { COLUMN, SetRow } from './SetRow';
 
 /** "+ Add set" under the rows: a dark full-width button, as in the design. */
@@ -61,12 +67,16 @@ type BlockProps = {
  * Exercise block from the design: the name with its "⋯" menu, the column headings and a row per
  * set, then "Add set". A set that cannot be checked yet marks its empty fields and says why.
  * In a saved session being edited every set counts: there is no Previous or Done column, and
- * `showProblems` marks every set that cannot be saved.
+ * `showProblems` marks every set that cannot be saved. In the workout, a checked set that beats
+ * the exercise's bests shows its record at once (F12), also offline from the bests saved on the
+ * device.
  */
 function ExerciseBlock({ index, exercise, exercises, name, actions, editing, showProblems, onMenu, onSetMenu }: BlockProps) {
   const { t } = useTranslation();
-  const { space } = useTheme();
+  const { colors, space } = useTheme();
   const text = useWorkoutText();
+  const bests = useExerciseBests(exercise.exerciseId, !editing);
+  const records = editing ? [] : newRecords(bests, checkedWorkingSets(exercise));
   const [attempted, setAttempted] = useState<string[]>([]);
   const highlight = editing ? null : nextInSuperset(exercises, index);
   const marked = (id: string) => showProblems || attempted.includes(id);
@@ -106,6 +116,23 @@ function ExerciseBlock({ index, exercise, exercises, name, actions, editing, sho
           <IconButton icon={Ellipsis} label={t('workout.exercise.menu', { name })} onPress={onMenu} />
         </View>
       </View>
+      {records.length > 0 ? (
+        <View accessibilityLiveRegion="polite" style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space[8] }}>
+          {records.map((record, position) => {
+            const label = text.recordBadge({ record_type: record.recordType, value: record.value, weight_kg: record.weightKg, reps: record.reps });
+            return (
+              <Animated.View
+                key={record.recordType}
+                entering={recordReveal(position)}
+                accessible
+                aria-label={t('workout.record.live', { record: label })}
+              >
+                <Badge icon={Trophy} color={colors.accent.text} label={label} />
+              </Animated.View>
+            );
+          })}
+        </View>
+      ) : null}
       <View style={{ flexDirection: 'row', gap: COLUMN.gap }} importantForAccessibility="no-hide-descendants" aria-hidden>
         {columns.map((column) => (
           <Text
