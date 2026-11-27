@@ -14,7 +14,8 @@ type Props = {
 
 /**
  * A text action ("Forgot password?", "Already a member? Log in") with a 44 px touch target,
- * underlined on hover. With `href` it is a real link: an anchor on the web, with history.
+ * underlined on hover. The target reaches past the line, so the link takes only a line of the
+ * layout. With `href` it is a real link: an anchor on the web, with history.
  */
 export function TextLink({ label, prefix, href, onPress, tone = 'accent', align = 'center' }: Props) {
   const content = (
@@ -23,6 +24,7 @@ export function TextLink({ label, prefix, href, onPress, tone = 'accent', align 
       onPress={onPress}
       style={{
         minHeight: 44,
+        marginVertical: -10,
         justifyContent: 'center',
         alignSelf: align === 'center' ? 'center' : 'flex-start',
         cursor: 'pointer',
@@ -32,7 +34,7 @@ export function TextLink({ label, prefix, href, onPress, tone = 'accent', align 
         <Text variant="small" tone="muted" style={{ textAlign: align === 'center' ? 'center' : 'left' }}>
           {prefix ? `${prefix} ` : ''}
           <Text
-            variant="smallStrong"
+            variant="smallMedium"
             tone={tone}
             style={{ textDecorationLine: hovered ? 'underline' : 'none' }}
           >

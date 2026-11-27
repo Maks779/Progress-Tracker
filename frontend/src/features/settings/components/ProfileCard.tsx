@@ -44,10 +44,10 @@ export function ProfileCard({ me, loading, onRetry, onEditName }: Props) {
           <Text variant="bodyStrong">{initials(me.name)}</Text>
         </View>
         <View style={{ flex: 1, gap: 2 }}>
-          <Text variant="bodyStrong" numberOfLines={1}>
+          <Text variant="h3" numberOfLines={1}>
             {me.name}
           </Text>
-          <Text variant="small" tone="muted" numberOfLines={1}>
+          <Text variant="caption" tone="muted" numberOfLines={1}>
             {me.email}
           </Text>
         </View>

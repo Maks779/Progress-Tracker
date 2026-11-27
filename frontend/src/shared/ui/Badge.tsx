@@ -23,7 +23,7 @@ export function Badge({ icon: Icon, label, color }: Props) {
       }}
     >
       <Icon color={color} size={14} strokeWidth={2} />
-      <Text variant="captionStrong">{label}</Text>
+      <Text variant="captionMedium">{label}</Text>
     </View>
   );
 }

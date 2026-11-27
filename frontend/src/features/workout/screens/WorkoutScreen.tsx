@@ -142,7 +142,7 @@ function ActiveWorkout({ draft, onLeave }: { draft: WorkoutDraft; onLeave: () =>
         <Columns main={main} side={sideColumn} />
       </Screen>
       {!side && draft.rest ? (
-        <View style={{ position: 'absolute', left: compact ? space[16] : space[40], right: compact ? space[16] : space[40], bottom: space[16] }}>
+        <View style={{ position: 'absolute', left: compact ? space[24] : space[40], right: compact ? space[24] : space[40], bottom: space[16] }}>
           <RestTimer rest={draft.rest} floating />
         </View>
       ) : null}

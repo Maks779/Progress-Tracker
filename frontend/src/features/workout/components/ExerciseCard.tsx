@@ -83,9 +83,11 @@ function ExerciseBlock({ index, exercise, exercises, name, onMenu, onSetMenu }: 
         <Text variant="h3" style={{ flex: 1 }} accessibilityRole="header">
           {name}
         </Text>
-        <IconButton icon={Ellipsis} label={t('workout.exercise.menu', { name })} onPress={onMenu} />
+        <View style={{ marginVertical: -10, marginRight: -10 }}>
+          <IconButton icon={Ellipsis} label={t('workout.exercise.menu', { name })} onPress={onMenu} />
+        </View>
       </View>
-      <View style={{ flexDirection: 'row', gap: COLUMN.gap, paddingLeft: 8 }} importantForAccessibility="no-hide-descendants" aria-hidden>
+      <View style={{ flexDirection: 'row', gap: COLUMN.gap }} importantForAccessibility="no-hide-descendants" aria-hidden>
         {[
           { label: t('workout.columns.set'), width: COLUMN.set },
           { label: t('workout.columns.previous'), flex: 1 },
@@ -98,7 +100,7 @@ function ExerciseBlock({ index, exercise, exercises, name, onMenu, onSetMenu }: 
             variant="caption"
             tone="muted"
             numberOfLines={1}
-            style={{ width: column.width, flex: column.flex, textAlign: column.flex ? 'left' : 'center' }}
+            style={{ width: column.width, flex: column.flex, textAlign: column.width === COLUMN.set || column.flex ? 'left' : 'center' }}
           >
             {column.label}
           </Text>
@@ -161,17 +163,20 @@ export function ExerciseCard({ members, exercises, nameOf, onMenu, onSetMenu }: 
         backgroundColor: colors.bg.surface,
         borderColor: colors.border.default,
         borderWidth: 1,
-        borderLeftWidth: superset ? 4 : 1,
-        borderLeftColor: superset ? colors.accent.fill : colors.border.default,
         borderRadius: radius[16],
+        overflow: 'hidden',
         padding: wide ? space[24] : 12,
+        paddingLeft: superset ? (wide ? space[24] : 12) + 3 : undefined,
         gap: space[16],
       }}
     >
       {superset ? (
-        <Text variant="captionStrong" tone="accent" style={{ textTransform: 'uppercase' }}>
-          {t('workout.superset.title')}
-        </Text>
+        <>
+          <View style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 4, backgroundColor: colors.accent.fill }} />
+          <Text variant="captionStrong" tone="accent" style={{ textTransform: 'uppercase', marginBottom: -space[8] }}>
+            {t('workout.superset.title')}
+          </Text>
+        </>
       ) : null}
       {members.map((member, position) => (
         <Fragment key={exercises[member].id}>

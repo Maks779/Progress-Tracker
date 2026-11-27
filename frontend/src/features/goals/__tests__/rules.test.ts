@@ -1,6 +1,7 @@
 import type { GoalOut } from '@/shared/api/generated/model';
 
 import {
+  freeGoal,
   fromCanonical,
   headlineGoal,
   initialTarget,
@@ -53,6 +54,18 @@ describe('which goals a tracker can have', () => {
     expect(metricsFor(cardio, 'cumulative')).toEqual(['distance', 'duration', 'sessions']);
     expect(metricsFor(reading, 'cumulative')).toEqual(['books', 'pages', 'duration']);
     expect(metricsFor(counter, 'cumulative')).toEqual(['count', 'sessions']);
+  });
+
+  it('starts a new goal on one the tracker does not have yet', () => {
+    const cardio = { type: 'cardio', general_mode: null } as const;
+    const strength = { type: 'strength', general_mode: null } as const;
+    const weekly = goal({ tracker_id: 'run' });
+    const weeklyDistance = goal({ tracker_id: 'run', kind: 'amount', period: 'week', metric: 'distance' });
+    expect(freeGoal(cardio, 'run', [])).toEqual({ kind: 'frequency', period: 'week', metric: 'sessions' });
+    expect(freeGoal(cardio, 'run', [weekly])).toEqual({ kind: 'amount', period: 'week', metric: 'distance' });
+    expect(freeGoal(cardio, 'run', [weekly, weeklyDistance])).toEqual({ kind: 'amount', period: 'week', metric: 'duration' });
+    expect(freeGoal(cardio, 'other', [weekly])).toEqual({ kind: 'frequency', period: 'week', metric: 'sessions' });
+    expect(freeGoal(strength, 'gym', [goal({ tracker_id: 'gym' })])).toEqual({ kind: 'cumulative', period: 'week', metric: 'sessions' });
   });
 
   it('starts from a sensible target for each kind', () => {

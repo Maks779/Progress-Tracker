@@ -28,7 +28,7 @@ function PersonalCard() {
   const { t } = useTranslation();
   const { colors, space } = useTheme();
   return (
-    <Card style={{ gap: space[16], padding: space[24] }}>
+    <Card style={{ gap: space[16], padding: space[16] }}>
       <ShieldCheck color={colors.accent.text} size={24} strokeWidth={1.75} />
       <Text variant="h3">{t('profile.personalTitle')}</Text>
       <Text variant="small" tone="muted">

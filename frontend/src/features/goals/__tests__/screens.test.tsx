@@ -234,8 +234,25 @@ describe('New goal', () => {
     expect(createGoal).not.toHaveBeenCalled();
   });
 
-  it('points to the goal that already exists instead of sending a twin', async () => {
+  it('starts on a tracker and goal that do not exist yet', async () => {
     await open(<NewGoalScreen />);
+    expect(screen.getByRole('button', { name: 'Tracker: Running' })).toBeTruthy();
+    expect(screen.getByRole('radio', { name: 'Frequency', checked: true })).toBeTruthy();
+    expect(screen.queryByText('This tracker already has a goal like this.')).toBeNull();
+    expect(screen.getByRole('button', { name: 'Create goal', disabled: false })).toBeTruthy();
+  });
+
+  it('starts on a cumulative goal for a tracker that already has its weekly goal', async () => {
+    mockParams = { tracker: 'gym' };
+    await open(<NewGoalScreen />);
+    expect(screen.getByRole('button', { name: 'Tracker: Gym' })).toBeTruthy();
+    expect(screen.getByRole('radio', { name: 'Cumulative', checked: true })).toBeTruthy();
+  });
+
+  it('points to the goal that already exists instead of sending a twin', async () => {
+    mockParams = { tracker: 'gym' };
+    await open(<NewGoalScreen />);
+    await fireEvent.press(screen.getByRole('radio', { name: 'Frequency' }));
 
     expect(screen.getByText('This tracker already has a goal like this.')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Create goal', disabled: true })).toBeTruthy();

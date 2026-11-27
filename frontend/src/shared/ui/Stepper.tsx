@@ -24,8 +24,8 @@ function StepButton({ label, icon: Icon, disabled, onPress }: StepButtonProps) {
         justifyContent: 'center',
         borderRadius: radius[12],
         borderWidth: 1,
-        borderColor: colors.border.default,
-        backgroundColor: hovered && !disabled ? colors.bg.base : colors.bg.surfaceRaised,
+        borderColor: hovered && !disabled ? colors.accent.fill : colors.border.default,
+        backgroundColor: colors.bg.surfaceRaised,
         opacity: disabled ? 0.4 : 1,
         cursor: disabled ? 'auto' : 'pointer',
         outlineStyle: 'solid',
@@ -60,7 +60,7 @@ export function Stepper({ value, unit, canDecrease, canIncrease, decreaseLabel, 
         <Text variant="display" style={{ fontVariant: ['tabular-nums'] }}>
           {value}
         </Text>
-        <Text variant="small" tone="muted" style={{ textAlign: 'center' }}>
+        <Text variant="small" tone="muted" style={{ textAlign: 'center', marginTop: 8 }}>
           {unit}
         </Text>
       </View>

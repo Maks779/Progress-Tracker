@@ -56,7 +56,7 @@ function TimerAction({ label, name, tone, onPress }: { label: string; name: stri
  */
 export function RestTimer({ rest, floating = false }: { rest: Rest; floating?: boolean }) {
   const { t } = useTranslation();
-  const { colors, radius, space } = useTheme();
+  const { colors, radius, scheme, space } = useTheme();
   const text = useWorkoutText();
   const now = useNow(250);
   const left = restLeft(rest, now);
@@ -90,7 +90,7 @@ export function RestTimer({ rest, floating = false }: { rest: Rest; floating?: b
         borderRadius: radius[16],
         borderWidth: 1,
         borderColor: colors.border.default,
-        backgroundColor: floating ? colors.bg.surfaceRaised : colors.bg.surface,
+        backgroundColor: colors.bg.surfaceRaised,
         ...(floating ? { boxShadow: '0 8px 24px rgba(0, 0, 0, 0.35)' } : null),
       }}
     >
@@ -108,7 +108,12 @@ export function RestTimer({ rest, floating = false }: { rest: Rest; floating?: b
         </Text>
       </View>
       <TimerAction label={t('workout.rest.more')} name={t('workout.rest.moreName')} tone="primary" onPress={() => workout.extendRest()} />
-      <TimerAction label={t('workout.rest.skip')} name={t('workout.rest.skipName')} tone="accent" onPress={() => workout.skipRest()} />
+      <TimerAction
+        label={t('workout.rest.skip')}
+        name={t('workout.rest.skipName')}
+        tone={scheme === 'light' ? 'primary' : 'accent'}
+        onPress={() => workout.skipRest()}
+      />
     </View>
   );
 }

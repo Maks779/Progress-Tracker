@@ -10,6 +10,7 @@ import { errorMessageKey } from '@/features/auth/errors';
 import { createTracker } from '@/shared/api/generated/endpoints/trackers/trackers';
 import { refreshAccountData } from '@/shared/api/refresh';
 import { useExclusive } from '@/shared/hooks/useExclusive';
+import { useBreakpoint } from '@/shared/theme/breakpoints';
 import { useTheme } from '@/shared/theme/ThemeProvider';
 import { Button } from '@/shared/ui/Button';
 import { Card } from '@/shared/ui/Card';
@@ -38,6 +39,7 @@ const TITLES: Record<Step, string> = { 1: 'trackers.new.typeTitle', 2: 'trackers
 export function NewTrackerScreen() {
   const { t } = useTranslation();
   const { colors, radius, space } = useTheme();
+  const compact = useBreakpoint() === 'compact';
   const router = useRouter();
   const queryClient = useQueryClient();
   const leave = () => router.dismissTo('/profile/trackers');
@@ -115,7 +117,7 @@ export function NewTrackerScreen() {
   if (step === 1) {
     content = (
       <>
-        <View role="radiogroup" aria-label={t('trackers.new.typeTitle')} style={{ gap: space[16] }}>
+        <View role="radiogroup" aria-label={t('trackers.new.typeTitle')} style={{ gap: space[24] }}>
           {TRACKER_TYPES.map((option) => (
             <TypeCard key={option} type={option} selected={option === type} onSelect={() => chooseType(option)} />
           ))}
@@ -129,7 +131,7 @@ export function NewTrackerScreen() {
         <View style={{ flexDirection: 'row' }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: space[8], paddingVertical: 4, paddingHorizontal: space[8], borderRadius: radius[8], backgroundColor: colors.bg.surfaceRaised }}>
             <TrackerGlyph icon={icon} color={color} size={16} />
-            <Text variant="captionStrong">{t('trackers.new.typeChip', { type: t(`trackers.types.${type}`) })}</Text>
+            <Text variant="caption">{t('trackers.new.typeChip', { type: t(`trackers.types.${type}`) })}</Text>
           </View>
         </View>
         <TrackerFields control={control} errors={errors} type={type} mode={mode} modeLocked={false} />
@@ -162,7 +164,7 @@ export function NewTrackerScreen() {
   return (
     <Screen key={step} title={t(TITLES[step])} caption={t('trackers.new.step', { step })} back={back}>
       <Columns
-        main={<Card style={{ gap: space[24], padding: space[24] }}>{content}</Card>}
+        main={<Card style={{ gap: space[24], padding: compact ? space[16] : space[32] }}>{content}</Card>}
         side={<PreviewCard type={type} name={name} icon={icon} color={color} />}
       />
     </Screen>

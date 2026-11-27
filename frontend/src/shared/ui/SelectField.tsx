@@ -29,7 +29,7 @@ export function SelectField<T extends string>({ label, options, value, onChange 
 
   return (
     <View style={{ gap: space[8] }}>
-      <Text variant="smallStrong">{label}</Text>
+      <Text variant="smallMedium">{label}</Text>
       <Pressable
         role="button"
         aria-label={`${label}: ${current?.label ?? ''}`}

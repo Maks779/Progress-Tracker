@@ -18,25 +18,26 @@ export function Chip({ label, selected, icon: Icon, onPress }: ChipProps) {
       aria-checked={selected}
       aria-label={label}
       onPress={onPress}
+      hitSlop={{ top: 6, bottom: 6 }}
       style={({ hovered, focused }: { pressed: boolean; hovered?: boolean; focused?: boolean }): ViewStyle => ({
         flexDirection: 'row',
         alignItems: 'center',
         gap: 4,
-        minHeight: 36,
-        paddingHorizontal: 12,
+        minHeight: 32,
+        paddingHorizontal: 10,
         borderRadius: radius[8],
         borderWidth: 1,
-        borderColor: selected || hovered ? colors.accent.fill : 'transparent',
+        borderColor: hovered ? colors.accent.fill : 'transparent',
         backgroundColor: selected ? colors.accent.subtle : colors.bg.surfaceRaised,
         cursor: 'pointer',
         outlineStyle: 'solid',
         outlineWidth: showFocusRing(focused) ? 2 : 0,
         outlineColor: colors.accent.fill,
-        marginVertical: 4,
+        marginVertical: 6,
       })}
     >
       {Shown ? <Shown color={colors.accent.text} size={14} strokeWidth={2} /> : null}
-      <Text variant="captionStrong">{label}</Text>
+      <Text variant="captionMedium">{label}</Text>
     </Pressable>
   );
 }
@@ -71,7 +72,7 @@ export function ChipGroup<T extends string>({ label, options, value, onChange, s
   }
   return (
     <View style={{ gap: space[8] }}>
-      <Text variant="smallStrong">{label}</Text>
+      <Text variant="smallMedium">{label}</Text>
       <View role="radiogroup" aria-label={label} style={{ flexDirection: 'row', flexWrap: 'wrap', columnGap: space[8] }}>
         {chips}
       </View>

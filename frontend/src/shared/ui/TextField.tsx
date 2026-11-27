@@ -44,7 +44,7 @@ export function TextField({
 
   return (
     <View style={{ gap: space[8] }}>
-      <Text variant="smallStrong">{label}</Text>
+      <Text variant="smallMedium">{label}</Text>
       <View>
         {Icon ? (
           <View pointerEvents="none" style={{ position: 'absolute', left: space[16], top: 0, bottom: 0, justifyContent: 'center', zIndex: 1 }}>
@@ -68,6 +68,8 @@ export function TextField({
             fontFamily: typography.body.fontFamily,
             fontSize: typography.body.fontSize,
             minHeight: controlHeight.regular,
+            paddingVertical: input.multiline ? 14 : undefined,
+            textAlignVertical: input.multiline ? 'top' : undefined,
             paddingLeft: Icon ? space[16] + 26 : space[16],
             paddingRight: space[16],
             borderRadius: radius[12],
@@ -85,9 +87,11 @@ export function TextField({
       {error ? (
         <View
           accessibilityLiveRegion="polite"
-          style={{ flexDirection: 'row', alignItems: 'center', gap: space[8] }}
+          style={{ flexDirection: 'row', alignItems: 'flex-start', gap: space[8] }}
         >
-          <CircleAlert color={colors.state.error} size={16} strokeWidth={2} />
+          <View style={{ flexShrink: 0 }}>
+            <CircleAlert color={colors.state.error} size={16} strokeWidth={2} />
+          </View>
           <Text variant="caption" style={{ flexShrink: 1 }}>
             {error}
           </Text>

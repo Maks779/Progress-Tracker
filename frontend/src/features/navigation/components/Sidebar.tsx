@@ -92,7 +92,7 @@ function Account({ onPress }: { onPress: () => void }) {
         <>
           <CircleUserRound color={colors.text.muted} size={24} strokeWidth={1.75} />
           <View style={{ flex: 1, paddingVertical: 8 }}>
-            <Text variant="smallStrong" numberOfLines={2}>
+            <Text variant="smallMedium" numberOfLines={2}>
               {name}
             </Text>
             {account ? (
@@ -116,7 +116,7 @@ function Account({ onPress }: { onPress: () => void }) {
  */
 export function Sidebar({ state, emitter, navigateToTab, insets }: BottomTabBarProps) {
   const { t } = useTranslation();
-  const { colors, space } = useTheme();
+  const { colors, scheme, space } = useTheme();
   const pathname = usePathname();
   const focusedKey = state.routes[state.index]?.key;
 
@@ -175,7 +175,11 @@ export function Sidebar({ state, emitter, navigateToTab, insets }: BottomTabBarP
                   return (
                     <>
                       <Icon color={tone} size={20} strokeWidth={1.75} />
-                      <Text variant="small" numberOfLines={1} style={{ flex: 1, fontFamily: fonts.medium, color: tone }}>
+                      <Text
+                        variant="small"
+                        numberOfLines={1}
+                        style={{ flex: 1, fontFamily: fonts.medium, color: current && scheme === 'light' ? colors.text.primary : tone }}
+                      >
                         {t(label)}
                       </Text>
                     </>

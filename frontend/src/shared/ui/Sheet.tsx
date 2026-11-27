@@ -68,7 +68,7 @@ export function Sheet({ visible, title, onClose, children }: Props) {
                 }}
               />
             )}
-            <Text variant="h3" accessibilityRole="header">
+            <Text variant="h2" accessibilityRole="header">
               {title}
             </Text>
             <ScrollView

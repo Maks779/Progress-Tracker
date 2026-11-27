@@ -94,7 +94,7 @@ export function WeekStats({ stats }: { stats: WeekStat[] }) {
   return (
     <View style={{ flexDirection: 'row', gap: space[16] }}>
       {stats.map((stat) => (
-        <View key={stat.label} style={{ flex: 1, gap: space[4] }} accessible accessibilityLabel={`${stat.label}: ${stat.value} ${stat.unit}`}>
+        <View key={stat.label} style={{ width: '30%', gap: space[4] }} accessible accessibilityLabel={`${stat.label}: ${stat.value} ${stat.unit}`}>
           <Text variant="caption" tone="muted" numberOfLines={1}>
             {stat.label}
           </Text>

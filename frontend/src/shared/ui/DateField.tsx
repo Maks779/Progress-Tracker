@@ -58,7 +58,7 @@ export function DateField({ label, value, minimum, doneLabel, error, onChange }:
 
   return (
     <View style={{ gap: space[8] }}>
-      <Text variant="smallStrong">{label}</Text>
+      <Text variant="smallMedium">{label}</Text>
       <Pressable
         role="button"
         aria-label={`${label}: ${formatDate(value, i18n.language)}`}

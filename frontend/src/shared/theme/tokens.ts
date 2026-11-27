@@ -66,8 +66,10 @@ export const typography = {
   body: style(fonts.regular, 16, 24),
   bodyStrong: style(fonts.semibold, 16, 24),
   small: style(fonts.regular, 14, 20),
+  smallMedium: style(fonts.medium, 14, 20),
   smallStrong: style(fonts.semibold, 14, 20),
   caption: style(fonts.regular, 12, 16),
+  captionMedium: style(fonts.medium, 12, 16),
   captionStrong: style(fonts.semibold, 12, 16),
 } as const;
 

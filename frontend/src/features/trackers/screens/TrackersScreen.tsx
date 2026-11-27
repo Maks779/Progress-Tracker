@@ -1,5 +1,6 @@
 import { useNavigation, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import { View } from 'react-native';
 
 import { useGoalText } from '@/features/goals/format';
 import { headlineGoal } from '@/features/goals/rules';
@@ -9,6 +10,7 @@ import { useListGoals } from '@/shared/api/generated/endpoints/goals/goals';
 import { useReadMe } from '@/shared/api/generated/endpoints/me/me';
 import { useListTrackers } from '@/shared/api/generated/endpoints/trackers/trackers';
 import type { TrackerSummary } from '@/shared/api/generated/model';
+import { useBreakpoint } from '@/shared/theme/breakpoints';
 import { useTheme } from '@/shared/theme/ThemeProvider';
 import { Button } from '@/shared/ui/Button';
 import { Card } from '@/shared/ui/Card';
@@ -53,6 +55,7 @@ export function TrackersScreen() {
   const open = (tracker: TrackerSummary) =>
     router.push({ pathname: '/profile/trackers/[id]', params: { id: tracker.id } });
   const create = () => router.push('/profile/trackers/new');
+  const cardPadding = useBreakpoint() === 'compact' ? space[16] : space[32];
 
   let list;
   if (trackers.isPending) {
@@ -62,7 +65,7 @@ export function TrackersScreen() {
   } else {
     list = (
       <>
-        <Card style={{ gap: space[8], padding: space[24] }}>
+        <Card style={{ gap: space[8], padding: cardPadding }}>
           {active.length === 0 ? (
             <Text tone="muted" style={{ paddingBottom: space[8] }}>
               {t('trackers.empty')}
@@ -79,10 +82,12 @@ export function TrackersScreen() {
               />
             ))
           )}
-          <Button label={t('trackers.create')} onPress={create} />
+          <View style={{ marginTop: space[16] }}>
+            <Button label={t('trackers.create')} onPress={create} />
+          </View>
         </Card>
         {archived.length > 0 ? (
-          <Card style={{ gap: space[8], padding: space[24] }}>
+          <Card style={{ gap: space[8], padding: cardPadding }}>
             <Text variant="h3" accessibilityRole="header">
               {t('trackers.archived')}
             </Text>

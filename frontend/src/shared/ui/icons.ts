@@ -32,6 +32,7 @@ export { default as Info } from 'lucide-react-native/icons/info';
 export { default as Layers } from 'lucide-react-native/icons/layers';
 export { default as Library } from 'lucide-react-native/icons/library';
 export { default as Link2 } from 'lucide-react-native/icons/link-2';
+export { default as LockKeyhole } from 'lucide-react-native/icons/lock-keyhole';
 export { default as LogOut } from 'lucide-react-native/icons/log-out';
 export { default as Minus } from 'lucide-react-native/icons/minus';
 export { default as Moon } from 'lucide-react-native/icons/moon';

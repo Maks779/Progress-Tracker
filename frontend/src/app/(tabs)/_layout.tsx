@@ -42,6 +42,7 @@ export default function TabsLayout() {
         headerShown: breakpoint !== 'compact',
         header: ({ navigation }) => <TopBar navigation={navigation} />,
         tabBarPosition: expanded ? 'left' : 'bottom',
+        tabBarLabelPosition: 'below-icon',
         sceneStyle: { backgroundColor: colors.bg.base },
         tabBarActiveTintColor: colors.accent.text,
         tabBarInactiveTintColor: colors.text.muted,
@@ -70,6 +71,7 @@ export default function TabsLayout() {
               style={{
                 width: 48,
                 height: 48,
+                marginTop: 8,
                 borderRadius: radius[12],
                 backgroundColor: colors.accent.fill,
                 alignItems: 'center',

@@ -39,7 +39,7 @@ export function ChoiceRow<T extends string>({ label, options, value, onChange }:
             }
       }
     >
-      <Text variant="body">{label}</Text>
+      <Text variant="small">{label}</Text>
       <View
         role="radiogroup"
         aria-label={label}
@@ -55,7 +55,7 @@ export function ChoiceRow<T extends string>({ label, options, value, onChange }:
           return (
             <Fragment key={option.value}>
               {index > 0 ? (
-                <Text variant="small" tone="muted" accessibilityElementsHidden importantForAccessibility="no">
+                <Text variant="caption" tone="muted" accessibilityElementsHidden importantForAccessibility="no">
                   /
                 </Text>
               ) : null}
@@ -80,13 +80,13 @@ export function ChoiceRow<T extends string>({ label, options, value, onChange }:
                 {({ hovered }: { pressed: boolean; hovered?: boolean }) => (
                   <>
                     <Text
-                      variant={selected ? 'smallStrong' : 'small'}
+                      variant={selected ? 'captionStrong' : 'caption'}
                       tone={selected ? 'primary' : 'muted'}
                       style={{ textDecorationLine: hovered && !selected ? 'underline' : 'none' }}
                     >
                       {option.label}
                     </Text>
-                    {selected ? <Check color={colors.text.primary} size={14} strokeWidth={2.5} /> : null}
+                    {selected ? <Check color={colors.text.primary} size={12} strokeWidth={2.5} /> : null}
                   </>
                 )}
               </Pressable>

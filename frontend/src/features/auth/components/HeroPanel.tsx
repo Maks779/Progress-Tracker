@@ -18,7 +18,7 @@ function Highlight({ icon: Icon, title, step }: { icon: LucideIcon; title: strin
       style={{
         flexDirection: 'row',
         alignItems: 'center',
-        alignSelf: 'flex-start',
+        alignSelf: 'stretch',
         gap: space[16],
         paddingVertical: 12,
         paddingLeft: 12,
@@ -51,14 +51,16 @@ function Highlight({ icon: Icon, title, step }: { icon: LucideIcon; title: strin
 /** The left half of the desktop welcome and auth screens. */
 export function HeroPanel() {
   const { t } = useTranslation();
-  const { space } = useTheme();
+  const { scheme, space } = useTheme();
   return (
-    <View style={{ flex: 1, maxWidth: 520, gap: space[32] }}>
-      <Animated.View entering={entrance(0)} style={{ gap: space[32] }}>
-        <Text variant="captionStrong" tone="accent" style={{ textTransform: 'uppercase' }}>
+    <View style={{ flex: 1, maxWidth: 520, gap: space[48] }}>
+      <Animated.View entering={entrance(0)} style={{ gap: space[40], maxWidth: 400 }}>
+        <Text variant="captionStrong" tone={scheme === 'light' ? 'primary' : 'accent'} style={{ textTransform: 'uppercase' }}>
           {t('auth.hero.eyebrow')}
         </Text>
-        <Text variant="display">{t('auth.hero.title')}</Text>
+        <Text variant="display" style={{ maxWidth: 360 }}>
+          {t('auth.hero.title')}
+        </Text>
         <Text variant="body" tone="muted">
           {t('auth.hero.body')}
         </Text>

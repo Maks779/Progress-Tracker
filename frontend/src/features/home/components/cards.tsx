@@ -60,15 +60,15 @@ export function RecentSessions({ items, trackers, today }: RecentProps) {
               >
                 <Icon color={colorFor(colors, look.color)} size={20} strokeWidth={1.75} />
               </View>
-              <View style={{ flex: 1, gap: 2 }}>
-                <Text variant="smallStrong" numberOfLines={1}>
+              <View style={{ flex: 1, gap: 6 }}>
+                <Text variant="smallMedium" numberOfLines={1}>
                   {item.name}
                 </Text>
                 <Text variant="caption" tone="muted" numberOfLines={1}>
                   {line}
                 </Text>
               </View>
-              <Text variant="smallStrong" style={{ fontVariant: ['tabular-nums'] }}>
+              <Text variant="smallMedium" style={{ fontVariant: ['tabular-nums'] }}>
                 {figure}
               </Text>
             </View>
@@ -92,7 +92,7 @@ export function NextGoalCard({ next }: { next: NextGoal }) {
     progress: goalText.progress(goal, tracker),
   });
   return (
-    <Card style={{ gap: space[16] }}>
+    <Card style={{ gap: 12 }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: space[8] }}>
         <Target color={color} size={20} strokeWidth={1.75} />
         <Text variant="smallStrong" style={{ flex: 1 }}>
@@ -162,7 +162,7 @@ export function HomeEmpty({ onCreate }: { onCreate: () => void }) {
   const { t } = useTranslation();
   const { colors, space } = useTheme();
   return (
-    <Card style={{ padding: space[24], gap: space[16] }}>
+    <Card style={{ padding: space[16], gap: space[16] }}>
       <Sparkles color={colors.accent.text} size={24} strokeWidth={1.75} />
       <View style={{ gap: space[8] }}>
         <Text variant="h3">{t('home.empty.title')}</Text>

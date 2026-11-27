@@ -33,6 +33,7 @@ export function WelcomeScreen() {
       title={t('auth.welcome.title')}
       subtitle={t('auth.welcome.subtitle')}
       caption={t('auth.welcome.caption')}
+      upperCaption
       large
     >
       {wide ? null : (
