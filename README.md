@@ -2,7 +2,6 @@
 
 A personal progress tracker focused on workouts (strength and cardio), with optional trackers for reading and other habits. One codebase for the web, Android and iOS.
 
-University project for the course **Programming Languages 2**.
 
 > **Status:** the backend API is in place (accounts, trackers, sessions, records, goals, statistics, export). The frontend is not started yet.
 
