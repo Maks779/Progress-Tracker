@@ -67,7 +67,8 @@ function WaitingCard({ count, syncing, onSync }: { count: number; syncing: boole
 }
 
 function itemName(item: OutboxItem, fallback: string): string {
-  return item.body.name?.trim() || fallback;
+  const name = item.kind === 'book' ? item.body.title : item.body.name;
+  return name?.trim() || fallback;
 }
 
 /** A change the server refused: why, Try again when that could help, and Remove (asks first). */
@@ -75,7 +76,7 @@ function FailedCard({ item }: { item: OutboxItem }) {
   const { t } = useTranslation();
   const { colors, space } = useTheme();
   const [confirming, setConfirming] = useState(false);
-  const name = itemName(item, t(item.kind === 'session' ? 'sync.aWorkout' : 'sync.anExercise'));
+  const name = itemName(item, t({ session: 'sync.aSession', exercise: 'sync.anExercise', book: 'sync.aBook' }[item.kind]));
   const key = itemKey(item);
   const retryable = item.failure === 'refused';
   return (

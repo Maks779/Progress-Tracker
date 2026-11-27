@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { type ColorValue, View } from 'react-native';
 
 import { Sidebar } from '@/features/navigation/components/Sidebar';
+import { openChooser } from '@/features/quicklog/chooser';
+import { TrackerChooser } from '@/features/quicklog/components/TrackerChooser';
 import { TopBar } from '@/features/navigation/components/TopBar';
 import { useBreakpoint } from '@/shared/theme/breakpoints';
 import { useTheme } from '@/shared/theme/ThemeProvider';
@@ -27,7 +29,8 @@ function tabIcon(Icon: LucideIcon) {
 
 /**
  * The signed-in app. Phones get the bottom tab bar; tablets add the top bar (logo and account);
- * desktop replaces the tab bar with the sidebar and shows the top bar with the breadcrumb.
+ * desktop replaces the tab bar with the sidebar and shows the top bar with the breadcrumb. The
+ * "+" in the tab bar is no page of its own: it opens "Log a session".
  */
 export default function TabsLayout() {
   const { t } = useTranslation();
@@ -36,61 +39,70 @@ export default function TabsLayout() {
   const expanded = breakpoint === 'expanded';
 
   return (
-    <Tabs
-      tabBar={(props) => (expanded ? <Sidebar {...props} /> : <BottomTabBar {...props} />)}
-      screenOptions={{
-        headerShown: breakpoint !== 'compact',
-        header: ({ navigation }) => <TopBar navigation={navigation} />,
-        tabBarPosition: expanded ? 'left' : 'bottom',
-        tabBarLabelPosition: 'below-icon',
-        sceneStyle: { backgroundColor: colors.bg.base },
-        tabBarActiveTintColor: colors.accent.text,
-        tabBarInactiveTintColor: colors.text.muted,
-        tabBarStyle: {
-          backgroundColor: colors.bg.surface,
-          borderTopColor: colors.border.default,
-          height: 80,
-          paddingTop: 8,
-        },
-        tabBarLabelStyle: { fontFamily: fonts.medium, fontSize: 12 },
-      }}
-    >
-      <Tabs.Screen name="(home)" options={{ title: t('tabs.home'), tabBarIcon: tabIcon(House) }} />
-      <Tabs.Screen
-        name="history"
-        options={{ title: t('tabs.history'), tabBarIcon: tabIcon(CalendarDays) }}
-      />
-      <Tabs.Screen
-        name="log"
-        options={{
-          title: t('tabs.log'),
-          tabBarLabel: () => null,
-          tabBarAccessibilityLabel: t('tabs.log'),
-          tabBarIcon: () => (
-            <View
-              style={{
-                width: 48,
-                height: 48,
-                marginTop: 8,
-                borderRadius: radius[12],
-                backgroundColor: colors.accent.fill,
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <Plus color={colors.accent.onFill} size={24} strokeWidth={2} />
-            </View>
-          ),
+    <>
+      <Tabs
+        tabBar={(props) => (expanded ? <Sidebar {...props} /> : <BottomTabBar {...props} />)}
+        screenOptions={{
+          headerShown: breakpoint !== 'compact',
+          header: ({ navigation }) => <TopBar navigation={navigation} />,
+          tabBarPosition: expanded ? 'left' : 'bottom',
+          tabBarLabelPosition: 'below-icon',
+          sceneStyle: { backgroundColor: colors.bg.base },
+          tabBarActiveTintColor: colors.accent.text,
+          tabBarInactiveTintColor: colors.text.muted,
+          tabBarStyle: {
+            backgroundColor: colors.bg.surface,
+            borderTopColor: colors.border.default,
+            height: 80,
+            paddingTop: 8,
+          },
+          tabBarLabelStyle: { fontFamily: fonts.medium, fontSize: 12 },
         }}
-      />
-      <Tabs.Screen
-        name="progress"
-        options={{ title: t('tabs.progress'), tabBarIcon: tabIcon(ChartNoAxesCombined) }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{ title: t('tabs.profile'), tabBarIcon: tabIcon(UserRound) }}
-      />
-    </Tabs>
+      >
+        <Tabs.Screen name="(home)" options={{ title: t('tabs.home'), tabBarIcon: tabIcon(House) }} />
+        <Tabs.Screen
+          name="history"
+          options={{ title: t('tabs.history'), tabBarIcon: tabIcon(CalendarDays) }}
+        />
+        <Tabs.Screen
+          name="log"
+          listeners={({ navigation }) => ({
+            tabPress: (event) => {
+              event.preventDefault();
+              openChooser((tab) => navigation.navigate(tab));
+            },
+          })}
+          options={{
+            title: t('tabs.log'),
+            tabBarLabel: () => null,
+            tabBarAccessibilityLabel: t('tabs.log'),
+            tabBarIcon: () => (
+              <View
+                style={{
+                  width: 48,
+                  height: 48,
+                  marginTop: 8,
+                  borderRadius: radius[12],
+                  backgroundColor: colors.accent.fill,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <Plus color={colors.accent.onFill} size={24} strokeWidth={2} />
+              </View>
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="progress"
+          options={{ title: t('tabs.progress'), tabBarIcon: tabIcon(ChartNoAxesCombined) }}
+        />
+        <Tabs.Screen
+          name="profile"
+          options={{ title: t('tabs.profile'), tabBarIcon: tabIcon(UserRound) }}
+        />
+      </Tabs>
+      <TrackerChooser />
+    </>
   );
 }

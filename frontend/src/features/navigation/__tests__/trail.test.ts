@@ -30,6 +30,11 @@ describe('trailFor', () => {
     expect(trailFor('/profile/trackers/gym')).toEqual([profile, trackers, { label: 'nav.tracker', trackerId: 'gym' }]);
   });
 
+  it('leads from a quick log back to Home', () => {
+    expect(trailFor('/quick-log/abc')).toEqual([{ label: 'tabs.home', href: '/' }, { label: 'nav.quickLog' }]);
+    expect(trailFor('/quick-log/abc/more')).toEqual([]);
+  });
+
   it('leads from the workout pages back to Home and the workout', () => {
     const home = { label: 'tabs.home', href: '/' };
     expect(trailFor('/workout')).toEqual([home, { label: 'nav.workout' }]);

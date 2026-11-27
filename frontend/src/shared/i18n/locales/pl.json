@@ -16,7 +16,8 @@
     "tracker": "Tracker",
     "workout": "Trening",
     "addExercise": "Dodaj ćwiczenie",
-    "summary": "Podsumowanie"
+    "summary": "Podsumowanie",
+    "quickLog": "Szybki zapis"
   },
   "home": {
     "title": "Ruszajmy dalej.",
@@ -104,10 +105,6 @@
   "history": {
     "title": "Twój wysiłek, zapisany.",
     "empty": "Tutaj pojawią się ukończone sesje."
-  },
-  "log": {
-    "title": "Dodaj sesję",
-    "empty": "Wybierz tracker, aby dodać sesję."
   },
   "progress": {
     "title": "Szerszy obraz.",
@@ -942,14 +939,14 @@
     "syncing": "Synchronizowanie…",
     "badge": "Offline",
     "badgeLabel": "Offline. Widzisz dane zapisane na tym urządzeniu.",
-    "aWorkout": "Trening",
     "anExercise": "Ćwiczenie",
     "failedTitle": "Nie udało się zapisać „{{name}}”",
     "failed": {
       "tracker_gone": "Jego tracker usunięto na innym urządzeniu, więc serwer nie może go przyjąć.",
       "session_gone": "Usunięto go na innym urządzeniu.",
       "exercise_gone": "Jedno z ćwiczeń w nim już nie istnieje.",
-      "refused": "Serwer tego nie przyjął."
+      "refused": "Serwer tego nie przyjął.",
+      "book_gone": "Jej książkę usunięto na innym urządzeniu."
     },
     "retry": "Spróbuj ponownie",
     "remove": "Usuń",
@@ -967,6 +964,159 @@
     "expiredWaiting_one": "{{count}} zmiana czekająca na tym urządzeniu zsynchronizuje się po zalogowaniu.",
     "expiredWaiting_few": "{{count}} zmiany czekające na tym urządzeniu zsynchronizują się po zalogowaniu.",
     "expiredWaiting_many": "{{count}} zmian czekających na tym urządzeniu zsynchronizuje się po zalogowaniu.",
-    "expiredWaiting_other": "{{count}} zmian czekających na tym urządzeniu zsynchronizuje się po zalogowaniu."
+    "expiredWaiting_other": "{{count}} zmian czekających na tym urządzeniu zsynchronizuje się po zalogowaniu.",
+    "aBook": "Książka",
+    "aSession": "Sesja"
+  },
+  "quickLog": {
+    "title": {
+      "default": "Szybki zapis",
+      "cardio": "Zapisz cardio",
+      "reading": "Zapisz czytanie",
+      "general": "Zapisz: {{name}}"
+    },
+    "caption": "Szybki zapis · {{date}}",
+    "close": "Zamknij",
+    "loading": "Wczytywanie trackera…",
+    "loadErrorTitle": "Nie udało się wczytać trackera.",
+    "loadError": "Twoje zapisane dane są bezpieczne. Sprawdź połączenie i spróbuj ponownie.",
+    "missing": "Tego trackera już tu nie ma. Mógł zostać zarchiwizowany lub usunięty na innym urządzeniu.",
+    "notQuick": "Treningi zapisujesz przyciskiem Rozpocznij trening.",
+    "back": "Wróć do ekranu głównego",
+    "tracker": "Tracker",
+    "duration": "Czas trwania",
+    "distance": "Dystans · {{unit}}",
+    "optional": "Opcjonalnie",
+    "pace": "Tempo {{pace}} / {{unit}}",
+    "minutes": "Czas trwania · minuty",
+    "minutesOptional": "Minuty · opcjonalnie",
+    "countUnit": "razy",
+    "less": "Mniej: {{unit}}",
+    "more": "Więcej: {{unit}}",
+    "note": "Notatka · opcjonalnie",
+    "notePlaceholder": {
+      "cardio": "Spokojne tempo wzdłuż rzeki.",
+      "duration": "Spokojny początek dnia.",
+      "counter": "Dolane po obiedzie."
+    },
+    "book": "Książka",
+    "changeBook": "Zmień książkę",
+    "pagesRead": "Przeczytane strony",
+    "currentPage": "Bieżąca strona",
+    "lastEnded": "Ostatnia sesja skończyła się na stronie {{page}}.",
+    "startsAt": "Zaczynasz od strony {{page}}.",
+    "when": {
+      "label": "Kiedy",
+      "today": "Dziś",
+      "yesterday": "Wczoraj",
+      "date": "Data",
+      "time": "Godzina",
+      "done": "Gotowe"
+    },
+    "save": {
+      "cardio": "Zapisz aktywność",
+      "reading": "Zapisz czytanie",
+      "duration": "Zapisz sesję",
+      "counter": "Zapisz sesję"
+    },
+    "saved": {
+      "cardio": "Aktywność zapisana. Dobra robota.",
+      "reading": "Czytanie zapisane. Dobra robota.",
+      "duration": "Sesja zapisana. Dobra robota.",
+      "counter": "Sesja zapisana. Dobra robota."
+    },
+    "savedOffline": "Zapisano na tym urządzeniu. Zsynchronizuje się, gdy wrócisz do sieci.",
+    "failed": {
+      "tracker_gone": "Ten tracker usunięto na innym urządzeniu, więc sesji nie da się zapisać.",
+      "book_gone": "Tę książkę usunięto na innym urządzeniu. Wybierz inną.",
+      "refused": "Nie udało się zapisać sesji. Sprawdź wartości i datę, a potem spróbuj ponownie."
+    },
+    "problems": {
+      "duration": {
+        "required": "Podaj, ile to trwało.",
+        "invalid": "Użyj minut albo formatu h:mm:ss.",
+        "tooShort": "Co najmniej sekunda.",
+        "tooLong": "Najwyżej 24 godziny."
+      },
+      "distance": {
+        "invalid": "Użyj liczby z najwyżej dwoma miejscami po przecinku.",
+        "tooShort": "Więcej niż zero albo zostaw puste.",
+        "tooFar": "Najwyżej 1000 km."
+      },
+      "minutes": {
+        "required": "Podaj minuty.",
+        "invalid": "Użyj pełnych minut.",
+        "tooShort": "Co najmniej minuta.",
+        "tooLong": "Najwyżej 1440 minut."
+      },
+      "count": {
+        "invalid": "Od 1 do 1000."
+      },
+      "pages": {
+        "required": "Podaj przeczytane strony albo bieżącą stronę.",
+        "invalid": "Użyj pełnych stron.",
+        "pagesTooFew": "Przeczytaj coś za stroną {{page}}, żeby to zapisać.",
+        "pastLastPage": "Ta książka ma {{pages}} stron."
+      },
+      "book": {
+        "noBook": "Dodaj książkę, którą czytasz."
+      },
+      "when": {
+        "inFuture": "Ta chwila jeszcze nie nadeszła."
+      }
+    },
+    "side": {
+      "readingTitle": "Trochę więcej, każdego dnia.",
+      "cardioTitle": "Kilometry się sumują.",
+      "durationTitle": "Zrób miejsce na pauzę.",
+      "counterTitle": "Krok po kroku się sumuje.",
+      "week": "{{progress}} w tym tygodniu",
+      "day": "{{progress}} dziś",
+      "bookProgress": "{{current}} / {{total}} stron · {{percent}}%",
+      "estimate": "W tym tempie skończysz {{date}}.",
+      "noEstimate": "Zapisz kilka sesji, żeby zobaczyć, kiedy skończysz.",
+      "finished": "Skończona {{date}}.",
+      "quickTitle": "Stworzone do szybkich zapisów.",
+      "quickBody": "Ostatnie wartości są już wpisane. Sprawdź liczby i zapisz — bez dodatkowych kroków.",
+      "private": "Zapisane w Twojej prywatnej historii"
+    },
+    "chooser": {
+      "title": "Zapisz sesję",
+      "empty": "Nie ma jeszcze aktywnego trackera do zapisu.",
+      "create": "Utwórz tracker",
+      "workout": "Rozpocznij trening",
+      "resume": "Wróć do treningu",
+      "quick": "{{type}} · szybki zapis"
+    },
+    "actions": {
+      "reading": "Zapisz czytanie",
+      "other": "Inne",
+      "any": "Zapisz sesję"
+    }
+  },
+  "books": {
+    "pickTitle": "Wybierz książkę",
+    "add": "Dodaj książkę",
+    "addTitle": "Dodaj książkę",
+    "editTitle": "Edytuj książkę",
+    "edit": "Edytuj: {{title}}",
+    "title": "Tytuł",
+    "author": "Autor · opcjonalnie",
+    "totalPages": "Liczba stron",
+    "startPage": "Strona początkowa",
+    "save": "Zapisz książkę",
+    "cancel": "Anuluj",
+    "finished": "Przeczytana",
+    "pages": "Strona {{current}} z {{total}}",
+    "none": "Nie ma jeszcze książek. Dodaj tę, którą czytasz.",
+    "failed": "Nie udało się zapisać książki. Spróbuj ponownie.",
+    "problems": {
+      "title": "Podaj tytuł książki.",
+      "titleLong": "Najwyżej 200 znaków.",
+      "authorLong": "Najwyżej 120 znaków.",
+      "total": "Od 1 do 10 000 stron.",
+      "totalBelowCurrent": "Jesteś już na stronie {{page}}.",
+      "start": "Od 0 do ostatniej strony."
+    }
   }
 }

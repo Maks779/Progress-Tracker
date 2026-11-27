@@ -1,10 +1,10 @@
 import { router } from 'expo-router';
 
-/** A page of the Home stack that other places open: the workout from the sidebar or Trackers. */
-export type HomePage = '/workout';
+/** A page of the Home stack that other places open: the workout, or a tracker's quick log. */
+export type HomePage = '/workout' | `/quick-log/${string}`;
 
 function inHome(pathname: string): boolean {
-  return pathname === '/' || pathname === '/workout' || pathname.startsWith('/workout/');
+  return pathname === '/' || pathname === '/workout' || pathname.startsWith('/workout/') || pathname.startsWith('/quick-log/');
 }
 
 /**

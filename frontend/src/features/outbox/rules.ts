@@ -1,11 +1,11 @@
 import { ApiError } from '@/shared/api/fetcher';
-import type { ExerciseWrite, SessionWrite } from '@/shared/api/generated/model';
+import type { BookWrite, ExerciseWrite, SessionWrite } from '@/shared/api/generated/model';
 
 /**
  * Why the server refused a change for good: its tracker or the session itself was deleted on
- * another device, an exercise it uses is gone, or anything else it would not accept.
+ * another device, an exercise or a book it uses is gone, or anything else it would not accept.
  */
-export type FailureCode = 'tracker_gone' | 'session_gone' | 'exercise_gone' | 'refused';
+export type FailureCode = 'tracker_gone' | 'session_gone' | 'exercise_gone' | 'book_gone' | 'refused';
 
 type Base = {
   id: string;
@@ -19,7 +19,8 @@ type Base = {
 
 export type SessionItem = Base & { kind: 'session'; body: SessionWrite };
 export type ExerciseItem = Base & { kind: 'exercise'; body: ExerciseWrite };
-export type OutboxItem = SessionItem | ExerciseItem;
+export type BookItem = Base & { kind: 'book'; body: BookWrite };
+export type OutboxItem = SessionItem | ExerciseItem | BookItem;
 export type OutboxKind = OutboxItem['kind'];
 
 export const FIRST_RETRY_MS = 5_000;
@@ -57,13 +58,16 @@ export function failureOf(kind: OutboxKind, error: unknown): FailureCode | null 
     return null;
   }
   if (status === 404) {
-    return kind === 'session' ? 'session_gone' : 'exercise_gone';
+    return { session: 'session_gone', exercise: 'exercise_gone', book: 'book_gone' }[kind] as FailureCode;
   }
   if (fieldErrors.some((field) => field.field === 'tracker_id' && field.code === 'not_found')) {
     return 'tracker_gone';
   }
   if (fieldErrors.some((field) => field.field.endsWith('exercise_id') && field.code === 'not_found')) {
     return 'exercise_gone';
+  }
+  if (fieldErrors.some((field) => field.field === 'reading.book_id' && field.code === 'not_found')) {
+    return 'book_gone';
   }
   return 'refused';
 }

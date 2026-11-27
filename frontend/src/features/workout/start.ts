@@ -8,7 +8,12 @@ import { CACHE_GC_TIME } from '@/shared/api/cache';
 import { isOffline } from '@/shared/api/connection';
 import { getListExercisesQueryKey, listExercises } from '@/shared/api/generated/endpoints/exercises/exercises';
 import { useReadMe } from '@/shared/api/generated/endpoints/me/me';
-import { getGetSessionQueryKey, getSession } from '@/shared/api/generated/endpoints/sessions/sessions';
+import {
+  getGetSessionQueryKey,
+  getListSessionsQueryKey,
+  getSession,
+  listSessions,
+} from '@/shared/api/generated/endpoints/sessions/sessions';
 import { useHome } from '@/shared/api/generated/endpoints/stats/stats';
 import { useListTrackers } from '@/shared/api/generated/endpoints/trackers/trackers';
 import type { UpNext } from '@/shared/api/generated/model';
@@ -39,6 +44,18 @@ async function freshOrSaved<T>(client: QueryClient, queryKey: QueryKey, queryFn:
       return saved;
     }
     throw error;
+  }
+}
+
+/** The last workout of a strength tracker other than the main one, for Start to repeat. */
+async function lastWorkoutOf(client: QueryClient, trackerId: string): Promise<UpNext | null> {
+  try {
+    const params = { tracker_id: trackerId, limit: 1 };
+    const answer = await freshOrSaved(client, getListSessionsQueryKey(params), () => listSessions(params));
+    const last = answer.status === 200 ? answer.data.items[0] : undefined;
+    return last ? { session_id: last.id, name: last.name, exercise_count: 0, estimated_duration_s: last.duration_s ?? 0 } : null;
+  } catch {
+    return null;
   }
 }
 
@@ -131,7 +148,8 @@ export type WorkoutEntry = {
   /** A workout is under way on this device: the button says "Resume workout". */
   active: boolean;
   starting: boolean;
-  open: () => Promise<void>;
+  /** Starts (or resumes) the workout; `trackerId` picks a strength tracker other than the main one. */
+  open: (trackerId?: string) => Promise<void>;
 };
 
 /**
@@ -166,18 +184,19 @@ export function useWorkoutEntry(showHomeTab: () => void): WorkoutEntry {
     }
   }, [client, upNextId]);
 
-  const open = async () => {
+  const open = async (trackerId?: string) => {
     if (!useWorkout.getState().draft) {
-      if (!main || !account || !homeKnown) {
+      const tracker = trackerId ? items.find((item) => item.id === trackerId && item.type === 'strength') : main;
+      if (!tracker || !account || !homeKnown) {
         return;
       }
       setStarting(true);
       try {
-        const upNext = stats?.main_tracker_id === main.id ? stats.up_next : null;
+        const upNext = stats?.main_tracker_id === tracker.id ? stats.up_next : await lastWorkoutOf(client, tracker.id);
         const prepared = await prepareWorkout(client, {
           userId: account.id,
-          trackerId: main.id,
-          trackerName: main.name,
+          trackerId: tracker.id,
+          trackerName: tracker.name,
           upNext,
         });
         if (!useWorkout.getState().draft) {

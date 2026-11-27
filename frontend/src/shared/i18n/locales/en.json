@@ -16,7 +16,8 @@
     "tracker": "Tracker",
     "workout": "Workout",
     "addExercise": "Add exercise",
-    "summary": "Summary"
+    "summary": "Summary",
+    "quickLog": "Quick log"
   },
   "home": {
     "title": "Let’s keep moving.",
@@ -92,10 +93,6 @@
   "history": {
     "title": "Your effort, recorded.",
     "empty": "Your completed sessions will appear here."
-  },
-  "log": {
-    "title": "Log a session",
-    "empty": "Choose a tracker to log a session."
   },
   "progress": {
     "title": "The bigger picture.",
@@ -876,14 +873,14 @@
     "syncing": "Syncing…",
     "badge": "Offline",
     "badgeLabel": "Offline. You’re seeing what was saved on this device.",
-    "aWorkout": "A workout",
     "anExercise": "An exercise",
     "failedTitle": "“{{name}}” couldn’t be saved",
     "failed": {
       "tracker_gone": "Its tracker was deleted on another device, so the server can’t keep it.",
       "session_gone": "It was deleted on another device.",
       "exercise_gone": "An exercise in it no longer exists.",
-      "refused": "The server didn’t accept it."
+      "refused": "The server didn’t accept it.",
+      "book_gone": "Its book was deleted on another device."
     },
     "retry": "Try again",
     "remove": "Remove",
@@ -897,6 +894,159 @@
     "logOutCancel": "Stay logged in",
     "expiredWorkout": "Your workout is safe on this device.",
     "expiredWaiting_one": "{{count}} change waiting on this device syncs once you’re back in.",
-    "expiredWaiting_other": "{{count}} changes waiting on this device sync once you’re back in."
+    "expiredWaiting_other": "{{count}} changes waiting on this device sync once you’re back in.",
+    "aBook": "A book",
+    "aSession": "A session"
+  },
+  "quickLog": {
+    "title": {
+      "default": "Quick log",
+      "cardio": "Log cardio",
+      "reading": "Log reading",
+      "general": "Log {{name}}"
+    },
+    "caption": "Quick log · {{date}}",
+    "close": "Close",
+    "loading": "Loading the tracker…",
+    "loadErrorTitle": "Couldn’t load the tracker.",
+    "loadError": "Your saved data is safe. Check your connection and try again.",
+    "missing": "This tracker isn’t here any more. It may have been archived or deleted on another device.",
+    "notQuick": "Workouts are logged with Start workout.",
+    "back": "Back to Home",
+    "tracker": "Tracker",
+    "duration": "Duration",
+    "distance": "Distance · {{unit}}",
+    "optional": "Optional",
+    "pace": "Pace {{pace}} / {{unit}}",
+    "minutes": "Duration · minutes",
+    "minutesOptional": "Minutes · optional",
+    "countUnit": "times",
+    "less": "Fewer {{unit}}",
+    "more": "More {{unit}}",
+    "note": "Note · optional",
+    "notePlaceholder": {
+      "cardio": "Easy pace along the river.",
+      "duration": "A quiet start to the day.",
+      "counter": "Refilled after lunch."
+    },
+    "book": "Book",
+    "changeBook": "Change book",
+    "pagesRead": "Pages read",
+    "currentPage": "Current page",
+    "lastEnded": "Last session ended on page {{page}}.",
+    "startsAt": "You start from page {{page}}.",
+    "when": {
+      "label": "When",
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "date": "Date",
+      "time": "Time",
+      "done": "Done"
+    },
+    "save": {
+      "cardio": "Save activity",
+      "reading": "Save reading",
+      "duration": "Save session",
+      "counter": "Save session"
+    },
+    "saved": {
+      "cardio": "Activity saved. Nice work.",
+      "reading": "Reading saved. Nice work.",
+      "duration": "Session saved. Nice work.",
+      "counter": "Session saved. Nice work."
+    },
+    "savedOffline": "Saved on this device. It syncs when you’re back online.",
+    "failed": {
+      "tracker_gone": "This tracker was deleted on another device, so the session can’t be saved.",
+      "book_gone": "This book was deleted on another device. Choose another one.",
+      "refused": "Couldn’t save this session. Check the values and the date, then try again."
+    },
+    "problems": {
+      "duration": {
+        "required": "Enter how long it took.",
+        "invalid": "Use minutes, or h:mm:ss.",
+        "tooShort": "At least one second.",
+        "tooLong": "At most 24 hours."
+      },
+      "distance": {
+        "invalid": "Use a number with up to two decimals.",
+        "tooShort": "More than zero, or leave it empty.",
+        "tooFar": "At most 1,000 km."
+      },
+      "minutes": {
+        "required": "Enter the minutes.",
+        "invalid": "Use whole minutes.",
+        "tooShort": "At least one minute.",
+        "tooLong": "At most 1,440 minutes."
+      },
+      "count": {
+        "invalid": "Between 1 and 1,000."
+      },
+      "pages": {
+        "required": "Enter the pages read or the current page.",
+        "invalid": "Use whole pages.",
+        "pagesTooFew": "Read past page {{page}} to log it.",
+        "pastLastPage": "This book has {{pages}} pages."
+      },
+      "book": {
+        "noBook": "Add the book you’re reading."
+      },
+      "when": {
+        "inFuture": "This time hasn’t come yet."
+      }
+    },
+    "side": {
+      "readingTitle": "A little more, every day.",
+      "cardioTitle": "Your miles are adding up.",
+      "durationTitle": "Make space for a pause.",
+      "counterTitle": "One at a time, it adds up.",
+      "week": "{{progress}} this week",
+      "day": "{{progress}} today",
+      "bookProgress": "{{current}} / {{total}} pages · {{percent}}%",
+      "estimate": "At this pace, you’ll finish {{date}}.",
+      "noEstimate": "Log a few sessions to see when you’ll finish.",
+      "finished": "Finished on {{date}}.",
+      "quickTitle": "Built for quick wins.",
+      "quickBody": "Last-used values are prefilled. Check the numbers and save — no extra steps.",
+      "private": "Saved to your private history"
+    },
+    "chooser": {
+      "title": "Log a session",
+      "empty": "There’s no active tracker to log yet.",
+      "create": "Create a tracker",
+      "workout": "Start workout",
+      "resume": "Resume workout",
+      "quick": "{{type}} · Quick log"
+    },
+    "actions": {
+      "reading": "Log reading",
+      "other": "Other",
+      "any": "Log a session"
+    }
+  },
+  "books": {
+    "pickTitle": "Choose a book",
+    "add": "Add a book",
+    "addTitle": "Add a book",
+    "editTitle": "Edit book",
+    "edit": "Edit {{title}}",
+    "title": "Title",
+    "author": "Author · optional",
+    "totalPages": "Total pages",
+    "startPage": "Start page",
+    "save": "Save book",
+    "cancel": "Cancel",
+    "finished": "Finished",
+    "pages": "Page {{current}} of {{total}}",
+    "none": "No books yet. Add the one you’re reading.",
+    "failed": "Couldn’t save the book. Try again.",
+    "problems": {
+      "title": "Give the book a title.",
+      "titleLong": "At most 200 characters.",
+      "authorLong": "At most 120 characters.",
+      "total": "Between 1 and 10,000 pages.",
+      "totalBelowCurrent": "You’re already on page {{page}}.",
+      "start": "From 0 up to the last page."
+    }
   }
 }

@@ -22,9 +22,14 @@ describe('answers kept on the device', () => {
       '/api/v1/stats/home',
       '/api/v1/exercises',
       '/api/v1/sessions/1d2e',
+      '/api/v1/books',
+      '/api/v1/books/9c1f',
     ]) {
       expect(isKept([path])).toBe(true);
     }
+    expect(isKept(['/api/v1/sessions', { tracker_id: 'run', limit: 1 }])).toBe(true);
+    expect(isKept(['/api/v1/sessions', { tracker_id: 'run', limit: 20 }])).toBe(false);
+    expect(isKept(['/api/v1/sessions', { limit: 1 }])).toBe(false);
     for (const path of ['/api/v1/sessions', '/api/v1/export', '/api/v1/stats/calendar', '/api/v1/exercises/1/last-sets', '/api/v1/health']) {
       expect(isKept([path])).toBe(false);
     }

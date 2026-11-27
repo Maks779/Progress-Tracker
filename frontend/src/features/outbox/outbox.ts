@@ -3,9 +3,10 @@ import { z } from 'zod';
 import { create } from 'zustand';
 
 import { useConnection } from '@/shared/api/connection';
+import { putBook } from '@/shared/api/generated/endpoints/books/books';
 import { putExercise } from '@/shared/api/generated/endpoints/exercises/exercises';
 import { putSession } from '@/shared/api/generated/endpoints/sessions/sessions';
-import type { ExerciseOut, ExerciseWrite, SessionSaved, SessionWrite } from '@/shared/api/generated/model';
+import type { BookOut, BookWrite, ExerciseOut, ExerciseWrite, SessionSaved, SessionWrite } from '@/shared/api/generated/model';
 import { newId } from '@/shared/ids';
 import { oneTabAtATime } from '@/shared/locks';
 import { storage } from '@/shared/storage/storage';
@@ -25,7 +26,7 @@ type State = {
 
 /**
  * Changes made on this device that the server has not got yet (offline level B): finished
- * sessions, a note added later, custom exercises. Each one is kept in storage under its own
+ * sessions and quick logs, a note added later, custom exercises and books. Each one is kept in storage under its own
  * key, so browser tabs never overwrite each other's changes, and sent with `PUT` under its
  * own ID, so a repeat after a lost answer replaces instead of duplicating.
  */
@@ -40,7 +41,7 @@ const base = {
   userId: z.string(),
   queuedAt: z.number(),
   revision: z.string(),
-  failure: z.enum(['tracker_gone', 'session_gone', 'exercise_gone', 'refused']).nullable(),
+  failure: z.enum(['tracker_gone', 'session_gone', 'exercise_gone', 'book_gone', 'refused']).nullable(),
 };
 const itemSchema = z.discriminatedUnion('kind', [
   z.object({
@@ -52,6 +53,11 @@ const itemSchema = z.discriminatedUnion('kind', [
     ...base,
     kind: z.literal('exercise'),
     body: z.looseObject({ name: z.string(), muscle_group: z.string(), equipment: z.string() }),
+  }),
+  z.object({
+    ...base,
+    kind: z.literal('book'),
+    body: z.looseObject({ title: z.string(), total_pages: z.number() }),
   }),
 ]);
 
@@ -122,7 +128,8 @@ function safeJson(text: string): unknown {
 
 type NewItem =
   | { kind: 'session'; id: string; userId: string; body: SessionWrite }
-  | { kind: 'exercise'; id: string; userId: string; body: ExerciseWrite };
+  | { kind: 'exercise'; id: string; userId: string; body: ExerciseWrite }
+  | { kind: 'book'; id: string; userId: string; body: BookWrite };
 
 let lastQueuedAt = 0;
 
@@ -189,7 +196,12 @@ type Sent = 'sent' | 'refused' | 'stopped';
 
 async function send(item: OutboxItem): Promise<Sent> {
   try {
-    const response = item.kind === 'session' ? await putSession(item.id, item.body) : await putExercise(item.id, item.body);
+    const response =
+      item.kind === 'session'
+        ? await putSession(item.id, item.body)
+        : item.kind === 'exercise'
+          ? await putExercise(item.id, item.body)
+          : await putBook(item.id, item.body);
     if (find(itemKey(item))?.revision === item.revision) {
       await removeItem(itemKey(item));
     }
@@ -284,6 +296,11 @@ export function deliverSession(id: string, userId: string, body: SessionWrite): 
 
 export function deliverExercise(id: string, userId: string, body: ExerciseWrite): Promise<Delivery<ExerciseOut>> {
   return deliver({ kind: 'exercise', id, userId, body });
+}
+
+/** A book added or edited on this device, through the outbox like a custom exercise. */
+export function deliverBook(id: string, userId: string, body: BookWrite): Promise<Delivery<BookOut>> {
+  return deliver({ kind: 'book', id, userId, body });
 }
 
 export function sessionKey(id: string): string {

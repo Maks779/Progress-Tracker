@@ -11,7 +11,7 @@ import { Text } from './Text';
  * The web date input: the browser's own `<input type="date">`, which brings the calendar
  * popup, keyboard entry and the screen-reader support of the browser.
  */
-export function DateField({ label, value, minimum, error, onChange }: DateFieldProps) {
+export function DateField({ label, value, minimum, maximum, error, onChange }: DateFieldProps) {
   const { colors, radius, scheme, space, typography } = useTheme();
   const [focused, setFocused] = useState(false);
   const borderColor = error ? colors.state.error : focused ? colors.accent.fill : colors.border.default;
@@ -24,6 +24,7 @@ export function DateField({ label, value, minimum, error, onChange }: DateFieldP
         aria-label={label}
         value={value}
         min={minimum}
+        max={maximum}
         required
         onChange={(event) => event.target.value && onChange(event.target.value)}
         onFocus={() => setFocused(true)}
