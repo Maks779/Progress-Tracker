@@ -15,7 +15,7 @@ export function WorkoutButton({ entry, variant = 'primary' }: { entry: WorkoutEn
       label={t(entry.active ? 'workout.resume' : 'workout.start')}
       variant={variant}
       loading={entry.starting}
-      onPress={entry.open}
+      onPress={() => entry.open()}
     />
   );
 }

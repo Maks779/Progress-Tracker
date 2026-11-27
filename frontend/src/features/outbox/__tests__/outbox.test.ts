@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { useConnection } from '@/shared/api/connection';
 import { ApiError } from '@/shared/api/fetcher';
+import { putBook } from '@/shared/api/generated/endpoints/books/books';
 import { putExercise } from '@/shared/api/generated/endpoints/exercises/exercises';
 import { putSession } from '@/shared/api/generated/endpoints/sessions/sessions';
 import type { SessionWrite } from '@/shared/api/generated/model';
@@ -21,6 +22,7 @@ import {
 
 jest.mock('@/shared/api/generated/endpoints/sessions/sessions', () => ({ putSession: jest.fn() }));
 jest.mock('@/shared/api/generated/endpoints/exercises/exercises', () => ({ putExercise: jest.fn() }));
+jest.mock('@/shared/api/generated/endpoints/books/books', () => ({ putBook: jest.fn() }));
 
 const BODY: SessionWrite = { tracker_id: 'gym', started_at: '2026-11-26T17:00:00Z', local_date: '2026-11-26', duration_s: 1200 };
 const EXERCISE = { name: 'Spider curl', muscle_group: 'arms', equipment: 'dumbbell' } as const;
@@ -37,6 +39,7 @@ beforeEach(async () => {
   useConnection.setState({ online: true, reachable: true });
   jest.mocked(putSession).mockImplementation(async (id) => ok({ session: { id }, new_records: [] }));
   jest.mocked(putExercise).mockImplementation(async (id) => ok({ id }));
+  jest.mocked(putBook).mockImplementation(async (id) => ok({ id }));
 });
 
 describe('changes on the device', () => {
@@ -156,6 +159,20 @@ describe('sending', () => {
     expect(first).toBe(second);
     await first;
     expect(putSession).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('books', () => {
+  it('reach the server before the reading session that uses them', async () => {
+    await enqueue({ kind: 'book', id: 'deep', userId: 'me', body: { title: 'Deep Work', total_pages: 296 } });
+    await enqueue({ kind: 'session', id: 'read', userId: 'me', body: { ...BODY, reading: { book_id: 'deep', end_page: 15 } } });
+    useOutbox.setState({ hydrated: false, items: [] });
+    await hydrateOutbox();
+    expect(ids()).toEqual(['deep', 'read']);
+
+    expect(await flushOutbox('me')).toBe('done');
+    expect(putBook).toHaveBeenCalledWith('deep', { title: 'Deep Work', total_pages: 296 });
+    expect(jest.mocked(putBook).mock.invocationCallOrder[0]).toBeLessThan(jest.mocked(putSession).mock.invocationCallOrder[0]);
   });
 });
 

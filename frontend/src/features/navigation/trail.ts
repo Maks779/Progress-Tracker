@@ -30,6 +30,9 @@ export function trailFor(pathname: string): Crumb[] {
   if (section === 'workout') {
     return workoutTrail(area, parts.length);
   }
+  if (section === 'quick-log') {
+    return parts.length === 2 ? [{ label: 'tabs.home', href: '/' }, { label: 'nav.quickLog' }] : [];
+  }
   if (section !== 'profile') {
     return parts.length <= 1 && section in SECTIONS ? [{ label: SECTIONS[section] }] : [];
   }

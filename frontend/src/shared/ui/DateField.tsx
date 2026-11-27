@@ -16,7 +16,8 @@ import { Text } from './Text';
 export type DateFieldProps = {
   label: string;
   value: string;
-  minimum: string;
+  minimum?: string;
+  maximum?: string;
   doneLabel: string;
   error?: string;
   onChange: (value: string) => void;
@@ -27,7 +28,7 @@ export type DateFieldProps = {
  * iOS shows the inline calendar in a sheet with a Done button. The web build uses the browser's
  * date input instead (DateField.web.tsx).
  */
-export function DateField({ label, value, minimum, doneLabel, error, onChange }: DateFieldProps) {
+export function DateField({ label, value, minimum, maximum, doneLabel, error, onChange }: DateFieldProps) {
   const { i18n } = useTranslation();
   const { colors, radius, scheme, space, typography } = useTheme();
   const [draft, setDraft] = useState<Date | null>(null);
@@ -37,7 +38,8 @@ export function DateField({ label, value, minimum, doneLabel, error, onChange }:
       DateTimePickerAndroid.open({
         value: parseIsoDate(value),
         mode: 'date',
-        minimumDate: parseIsoDate(minimum),
+        minimumDate: minimum ? parseIsoDate(minimum) : undefined,
+        maximumDate: maximum ? parseIsoDate(maximum) : undefined,
         onChange: (event, picked) => {
           if (event.type === 'set' && picked) {
             onChange(toIsoDate(picked));
@@ -92,7 +94,8 @@ export function DateField({ label, value, minimum, doneLabel, error, onChange }:
             value={draft}
             mode="date"
             display="inline"
-            minimumDate={parseIsoDate(minimum)}
+            minimumDate={minimum ? parseIsoDate(minimum) : undefined}
+            maximumDate={maximum ? parseIsoDate(maximum) : undefined}
             themeVariant={scheme}
             accentColor={colors.accent.fill}
             locale={i18n.language}

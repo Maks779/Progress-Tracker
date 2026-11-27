@@ -25,6 +25,7 @@ import { watchConnection } from '@/shared/api/connection';
 import { createQueryClient, followAppFocus } from '@/shared/api/queryClient';
 import { useServerProbe } from '@/shared/api/useServerProbe';
 import { ThemeProvider, useTheme } from '@/shared/theme/ThemeProvider';
+import { ToastHost } from '@/shared/ui/Toast';
 
 SplashScreen.preventAutoHideAsync();
 installAuth();
@@ -132,6 +133,7 @@ export default function RootLayout() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider preference={theme}>
         <Navigator />
+        <ToastHost />
       </ThemeProvider>
     </QueryClientProvider>
   );

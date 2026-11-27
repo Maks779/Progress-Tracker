@@ -54,5 +54,7 @@ describe('a failed send', () => {
     expect(failureOf('session', apiError(422, [{ field: 'strength.exercises[1].exercise_id', code: 'not_found' }]))).toBe('exercise_gone');
     expect(failureOf('session', apiError(422, [{ field: 'started_at', code: 'in_future' }]))).toBe('refused');
     expect(failureOf('exercise', apiError(409))).toBe('refused');
+    expect(failureOf('book', apiError(404))).toBe('book_gone');
+    expect(failureOf('session', apiError(422, [{ field: 'reading.book_id', code: 'not_found' }]))).toBe('book_gone');
   });
 });

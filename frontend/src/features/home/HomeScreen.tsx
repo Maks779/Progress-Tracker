@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { openProfilePage, type ProfileHref } from '@/features/navigation/openProfilePage';
 import { SyncStatus } from '@/features/outbox/components/SyncStatus';
+import { QuickActions } from '@/features/quicklog/components/QuickActions';
 import { UpNextCard } from '@/features/workout/components/UpNextCard';
 import { WorkoutButton } from '@/features/workout/components/WorkoutButton';
 import { useWorkoutEntry } from '@/features/workout/start';
@@ -26,8 +27,8 @@ import { activeDays, firstName, nextGoal, pagesTarget, ringFor, weekDates } from
  * goal and streak and Start workout (Resume workout while one is under way), the recent
  * sessions, the unmet goal closest to done and, on tablets and desktop, the week's totals, its
  * rhythm and the workout up next in a side column. Offline, or with changes still waiting on
- * the device, the sync status leads the page. The quick log buttons and "See all" come with
- * the features they open.
+ * the device, the sync status leads the page. "Log reading" and "Other" under the ring open the
+ * quick logs; "See all" comes with History.
  */
 export function HomeScreen() {
   const { t, i18n } = useTranslation();
@@ -128,6 +129,7 @@ export function HomeScreen() {
               <WorkoutButton entry={entry} variant="secondary" />
             </SetGoalCard>
           )}
+          <QuickActions trackers={trackerItems} showTab={(tab) => navigation.navigate(tab)} />
           <RecentSessions
             items={stats.recent_sessions}
             trackers={new Map(trackerItems.map((tracker) => [tracker.id, tracker]))}
