@@ -21,7 +21,7 @@ import { DiscardSheet, ExerciseMenu, FinishSheet, RenameSheet, SetMenu, WorkoutM
 import { GhostTip, SessionSoFar } from '../components/SideCards';
 import { Elapsed, RestTimer } from '../components/Timers';
 import { exerciseName } from '../exercises';
-import { type DraftExercise, groupOf, MAX_EXERCISES, setNumber, tally, type WorkoutDraft } from '../rules';
+import { cardsOf, type DraftExercise, MAX_EXERCISES, setNumber, tally, type WorkoutDraft } from '../rules';
 import { useActiveDraft, useActiveSummary } from '../start';
 import { workout } from '../store';
 
@@ -29,18 +29,6 @@ type OpenSheet =
   | { kind: 'finish' | 'discard' | 'rename' | 'menu' }
   | { kind: 'exercise'; index: number }
   | { kind: 'set'; index: number; setIndex: number };
-
-/** The cards of the workout: runs of a superset share one card, every other exercise has its own. */
-function cardsOf(exercises: DraftExercise[]): number[][] {
-  const cards: number[][] = [];
-  let index = 0;
-  while (index < exercises.length) {
-    const members = groupOf(exercises, index);
-    cards.push(members);
-    index = members[members.length - 1] + 1;
-  }
-  return cards;
-}
 
 /**
  * The active workout (design: Workout / Active / Rest timer): the name and elapsed time with
@@ -91,6 +79,7 @@ function ActiveWorkout({ draft, onLeave }: { draft: WorkoutDraft; onLeave: () =>
           members={members}
           exercises={draft.exercises}
           nameOf={nameOf}
+          actions={workout}
           onMenu={(index) => setSheet({ kind: 'exercise', index })}
           onSetMenu={(index, setIndex) => setSheet({ kind: 'set', index, setIndex })}
         />
@@ -153,7 +142,14 @@ function ActiveWorkout({ draft, onLeave }: { draft: WorkoutDraft; onLeave: () =>
         <WorkoutMenu onRename={() => setSheet({ kind: 'rename' })} onDiscard={() => setSheet({ kind: 'discard' })} onClose={close} />
       ) : null}
       {sheet?.kind === 'exercise' && exercise ? (
-        <ExerciseMenu draft={draft} index={sheet.index} name={names[sheet.index]} nextName={names[sheet.index + 1]} onClose={close} />
+        <ExerciseMenu
+          draft={draft}
+          index={sheet.index}
+          name={names[sheet.index]}
+          nextName={names[sheet.index + 1]}
+          actions={workout}
+          onClose={close}
+        />
       ) : null}
       {sheet?.kind === 'set' && exercise ? (
         <SetMenu
@@ -161,6 +157,7 @@ function ActiveWorkout({ draft, onLeave }: { draft: WorkoutDraft; onLeave: () =>
           index={sheet.index}
           setIndex={sheet.setIndex}
           title={setTitle(sheet.index, sheet.setIndex)}
+          actions={workout}
           onClose={close}
         />
       ) : null}

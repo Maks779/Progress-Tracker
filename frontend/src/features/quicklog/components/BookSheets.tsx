@@ -39,6 +39,7 @@ function BookRow({ book, selected, disabled, onPress, onEdit }: { book: BookOut;
         role="radio"
         aria-checked={selected}
         aria-disabled={disabled}
+        disabled={disabled}
         aria-label={`${book.title}, ${detail}`}
         onPress={disabled ? undefined : onPress}
         style={({ hovered, focused }: { pressed: boolean; hovered?: boolean; focused?: boolean }): ViewStyle => ({

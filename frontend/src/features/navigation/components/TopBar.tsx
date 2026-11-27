@@ -5,7 +5,10 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, View, type ViewStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { useSessionTitle } from '@/features/history/data';
+import { CACHE_GC_TIME } from '@/shared/api/cache';
 import { useReadMe } from '@/shared/api/generated/endpoints/me/me';
+import { useGetSession } from '@/shared/api/generated/endpoints/sessions/sessions';
 import { useListTrackers } from '@/shared/api/generated/endpoints/trackers/trackers';
 import { CONTENT_MAX_WIDTH, useBreakpoint } from '@/shared/theme/breakpoints';
 import { useTheme } from '@/shared/theme/ThemeProvider';
@@ -55,8 +58,9 @@ function CrumbLink({ href, label }: { href: CrumbHref; label: string }) {
 
 /**
  * Where the page on screen sits ("Profile / Trackers / Gym"): every step but the last leads
- * back to that page. A tracker's page shows its name once the tracker list is loaded (the
- * same list the page itself uses, so no extra request).
+ * back to that page. A tracker's page shows its name once the tracker list is loaded, and a
+ * session's pages its title once the session is (the same answers the page itself uses, so no
+ * extra request).
  */
 function Breadcrumb() {
   const { t } = useTranslation();
@@ -65,6 +69,9 @@ function Breadcrumb() {
   const trackers = useListTrackers({ include_archived: true }, { query: { enabled: Boolean(trackerId) } });
   const items = trackers.data?.status === 200 ? trackers.data.data.items : [];
   const trackerName = items.find((tracker) => tracker.id === trackerId)?.name;
+  const sessionId = trail.find((crumb) => crumb.sessionId)?.sessionId;
+  const session = useGetSession(sessionId ?? '', { query: { enabled: Boolean(sessionId), gcTime: CACHE_GC_TIME } });
+  const sessionTitle = useSessionTitle(session.data?.status === 200 ? session.data.data : undefined);
 
   return (
     <View
@@ -73,9 +80,10 @@ function Breadcrumb() {
       style={{ flexDirection: 'row', alignItems: 'center', gap: 8, minWidth: 0 }}
     >
       {trail.map((crumb, index) => {
-        const label = crumb.trackerId && trackerName ? trackerName : t(crumb.label);
+        const named = crumb.trackerId ? trackerName : crumb.sessionId ? sessionTitle : undefined;
+        const label = named || t(crumb.label);
         return (
-          <Fragment key={crumb.label}>
+          <Fragment key={`${index}-${crumb.label}`}>
             {index > 0 ? (
               <Text variant="small" tone="muted" aria-hidden>
                 /

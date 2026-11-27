@@ -205,6 +205,18 @@ export function groupOf(exercises: DraftExercise[], index: number): number[] {
   return Array.from({ length: end - start + 1 }, (_, offset) => start + offset);
 }
 
+/** The cards of a workout: runs of a superset share one card, every other exercise has its own. */
+export function cardsOf(exercises: DraftExercise[]): number[][] {
+  const cards: number[][] = [];
+  let index = 0;
+  while (index < exercises.length) {
+    const members = groupOf(exercises, index);
+    cards.push(members);
+    index = members[members.length - 1] + 1;
+  }
+  return cards;
+}
+
 /** Sets of a superset in the order they are done: A1, B1, A2, B2, … */
 export function roundOrder(exercises: DraftExercise[], members: number[]): { exercise: number; set: number }[] {
   const rounds = Math.max(0, ...members.map((member) => exercises[member].sets.length));

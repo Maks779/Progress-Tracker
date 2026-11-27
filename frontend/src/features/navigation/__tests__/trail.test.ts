@@ -30,6 +30,19 @@ describe('trailFor', () => {
     expect(trailFor('/profile/trackers/gym')).toEqual([profile, trackers, { label: 'nav.tracker', trackerId: 'gym' }]);
   });
 
+  it('leads from a session and its edit pages back to History, with the session to name', () => {
+    const history = { label: 'tabs.history', href: '/history' };
+    const session = { label: 'nav.session', href: '/history/s1', sessionId: 's1' };
+    expect(trailFor('/history/s1')).toEqual([history, { label: 'nav.session', sessionId: 's1' }]);
+    expect(trailFor('/history/s1/edit')).toEqual([history, session, { label: 'nav.editSession' }]);
+    expect(trailFor('/history/s1/add-exercise')).toEqual([
+      history,
+      session,
+      { label: 'nav.editSession', href: '/history/s1/edit' },
+      { label: 'nav.addExercise' },
+    ]);
+  });
+
   it('leads from a quick log back to Home', () => {
     expect(trailFor('/quick-log/abc')).toEqual([{ label: 'tabs.home', href: '/' }, { label: 'nav.quickLog' }]);
     expect(trailFor('/quick-log/abc/more')).toEqual([]);
@@ -46,7 +59,8 @@ describe('trailFor', () => {
     expect(trailFor('/nowhere')).toEqual([]);
     expect(trailFor('/workout/abc')).toEqual([]);
     expect(trailFor('/workout/summary/abc')).toEqual([]);
-    expect(trailFor('/history/2026')).toEqual([]);
+    expect(trailFor('/history/s1/notes')).toEqual([]);
+    expect(trailFor('/history/s1/edit/more')).toEqual([]);
     expect(trailFor('/profile/books')).toEqual([]);
     expect(trailFor('/profile/goals/abc/edit')).toEqual([]);
   });

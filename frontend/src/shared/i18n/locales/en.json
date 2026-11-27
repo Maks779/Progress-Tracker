@@ -17,7 +17,9 @@
     "workout": "Workout",
     "addExercise": "Add exercise",
     "summary": "Summary",
-    "quickLog": "Quick log"
+    "quickLog": "Quick log",
+    "session": "Session",
+    "editSession": "Edit session"
   },
   "home": {
     "title": "Let’s keep moving.",
@@ -61,7 +63,8 @@
     },
     "recent": {
       "title": "Recent sessions",
-      "empty": "Your sessions will appear here."
+      "empty": "Your sessions will appear here.",
+      "seeAll": "See all"
     },
     "next": {
       "title": "{{amount}} to your next goal",
@@ -92,7 +95,121 @@
   },
   "history": {
     "title": "Your effort, recorded.",
-    "empty": "Your completed sessions will appear here."
+    "caption": "History",
+    "loading": "Loading your progress…",
+    "loadErrorTitle": "Couldn’t load history.",
+    "loadError": "Your saved data is safe. Check your connection and try again.",
+    "retry": "Try again",
+    "empty": {
+      "title": "Your story starts with a session.",
+      "body": "Your completed sessions will appear here.",
+      "action": "Log your first session"
+    },
+    "filter": {
+      "label": "Show sessions of",
+      "all": "All trackers",
+      "more": "More",
+      "open": "Filter by tracker",
+      "title": "Show sessions of",
+      "archived": "Archived"
+    },
+    "calendar": {
+      "previous": "Previous month",
+      "next": "Next month",
+      "nothing": "no sessions",
+      "today": "today",
+      "legend": "Session types"
+    },
+    "types": {
+      "strength": "Strength",
+      "cardio": "Cardio",
+      "reading": "Reading",
+      "general": "General"
+    },
+    "week": {
+      "this": "This week",
+      "last": "Last week",
+      "rangeSameMonth": "{{start}} – {{endDay}}",
+      "range": "{{start}} – {{end}}",
+      "empty": "No sessions this week.",
+      "emptyTracker": "No {{tracker}} sessions this week.",
+      "loading": "Loading the week…",
+      "loadingMore": "Loading…",
+      "errorTitle": "Couldn’t load this week.",
+      "more": "Show more",
+      "count_one": "{{count}} session",
+      "count_other": "{{count}} sessions",
+      "countMore_one": "{{count}}+ sessions",
+      "countMore_other": "{{count}}+ sessions"
+    },
+    "review": {
+      "title": "Month in review",
+      "sessions": "Sessions",
+      "hours": "Active hours"
+    },
+    "detail": {
+      "loading": "Loading the session…",
+      "errorTitle": "Couldn’t load this session.",
+      "missing": "This session isn’t here any more. It may have been deleted on another device.",
+      "back": "Back to History",
+      "duration": "Duration",
+      "volume": "Volume · {{unit}}",
+      "sets": "Sets",
+      "distance": "Distance · {{unit}}",
+      "pace": "Pace · min/{{unit}}",
+      "pagesRead": "Pages read",
+      "minutes": "Minutes",
+      "endPage": "Ended on page",
+      "count": "Count · {{unit}}",
+      "same": "{{count}} × {{reps}} at {{weight}}",
+      "sameBodyweight": "{{count}} × {{reps}} reps",
+      "volumeLine": "{{weight}} volume",
+      "note": "Session note",
+      "edit": "Edit session",
+      "delete": "Delete",
+      "offline": "You’re offline. Editing and deleting need a connection.",
+      "deleteFailed": "Couldn’t delete the session. Try again.",
+      "removed": "Session removed",
+      "undo": "Undo",
+      "restored": "Session restored.",
+      "restoreConflict": "It can’t come back: a later reading session of the same book now ends before it.",
+      "restoreFailed": "Couldn’t bring the session back. Try again.",
+      "weekTitle": "A week of showing up.",
+      "weekBody": "This session counts toward your weekly goal.",
+      "records_one": "{{count}} personal record",
+      "records_other": "{{count}} personal records",
+      "reps_one": "{{count}} rep",
+      "reps_other": "{{count}} reps",
+      "setsCount_one": "{{count}} set",
+      "setsCount_other": "{{count}} sets"
+    },
+    "edit": {
+      "title": "Edit session",
+      "name": "Session name",
+      "duration": "Duration · minutes",
+      "note": "Note",
+      "save": "Save changes",
+      "saved": "Changes saved.",
+      "offline": "You’re offline. Editing needs a connection.",
+      "sideTitle": "Everything follows.",
+      "sideBody": "Volume, records, goals and streaks are recalculated when you save.",
+      "pickerCaption": "Edit session",
+      "pickerSideTitle": "Your changes stay open.",
+      "pickerSideBody": "Add what you forgot to log. It joins the session when you save.",
+      "problems": {
+        "empty": "Keep at least one set.",
+        "sets": "Some sets need their reps or weight.",
+        "duration": "Between 1 and 1,440 minutes."
+      },
+      "errors": {
+        "offline": "You’re offline. Your changes are still here; try again when you’re back online.",
+        "gone": "This session was deleted, so the changes can’t be saved.",
+        "pagesBefore": "Read past page {{page}} to log it.",
+        "pagesLater": "A later session of this book ends on this page or earlier. Change that one first.",
+        "future": "This time hasn’t come yet.",
+        "failed": "Couldn’t save the changes. Try again."
+      }
+    }
   },
   "progress": {
     "title": "The bigger picture.",
@@ -665,7 +782,8 @@
       "trackerGone": "The tracker of this workout was deleted, so it can’t be saved. You can discard it.",
       "failed": "Couldn’t save the workout. It stays on this device; try again.",
       "offlineTitle": "You’re offline.",
-      "offlineBody": "The workout will be saved on this device and synced when you’re back online."
+      "offlineBody": "The workout will be saved on this device and synced when you’re back online.",
+      "editLater": "Volume, records and weekly progress update after you finish. You can edit a saved session in History."
     },
     "stats": {
       "elapsed": "Elapsed",

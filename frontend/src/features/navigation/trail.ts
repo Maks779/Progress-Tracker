@@ -1,7 +1,7 @@
 export type ProfilePage = '/profile' | '/profile/goals' | '/profile/trackers';
 
 /** A page a breadcrumb step can lead back to. */
-export type CrumbHref = ProfilePage | '/' | '/workout';
+export type CrumbHref = ProfilePage | '/' | '/workout' | '/history' | `/history/${string}`;
 
 export type Crumb = {
   /** Translation key of the label. */
@@ -10,6 +10,8 @@ export type Crumb = {
   href?: CrumbHref;
   /** Set on a tracker's page: the label is the tracker's name once it is known. */
   trackerId?: string;
+  /** Set on a session's pages: the label is the session's title once it is known. */
+  sessionId?: string;
 };
 
 const SECTIONS: Record<string, string> = {
@@ -29,6 +31,9 @@ export function trailFor(pathname: string): Crumb[] {
   const [section = '', area, page] = parts;
   if (section === 'workout') {
     return workoutTrail(area, parts.length);
+  }
+  if (section === 'history' && area) {
+    return historyTrail(area, page, parts.length);
   }
   if (section === 'quick-log') {
     return parts.length === 2 ? [{ label: 'tabs.home', href: '/' }, { label: 'nav.quickLog' }] : [];
@@ -57,6 +62,23 @@ export function trailFor(pathname: string): Crumb[] {
   return page === 'new'
     ? [profile, trackers, { label: 'nav.newTracker' }]
     : [profile, trackers, { label: 'nav.tracker', trackerId: page }];
+}
+
+function historyTrail(id: string, page: string | undefined, depth: number): Crumb[] {
+  const history: Crumb = { label: 'tabs.history', href: '/history' };
+  if (depth === 2) {
+    return [history, { label: 'nav.session', sessionId: id }];
+  }
+  const session: Crumb = { label: 'nav.session', href: `/history/${id}`, sessionId: id };
+  if (depth > 3) {
+    return [];
+  }
+  if (page === 'edit') {
+    return [history, session, { label: 'nav.editSession' }];
+  }
+  return page === 'add-exercise'
+    ? [history, session, { label: 'nav.editSession', href: `/history/${id}/edit` }, { label: 'nav.addExercise' }]
+    : [];
 }
 
 function workoutTrail(page: string | undefined, depth: number): Crumb[] {

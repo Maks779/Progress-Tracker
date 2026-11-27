@@ -21,16 +21,19 @@ export const CACHE_GC_TIME = DAY;
 
 /**
  * The answers the app needs to open offline: the account, trackers, goals, Home's numbers,
- * the exercise catalog, books, single sessions (the workout that Start repeats) and each
- * tracker's latest session (what a quick log repeats). Lists that page and exports are left out.
+ * the exercise catalog, books, single sessions (the workout that Start repeats, History's
+ * details), each tracker's latest session (what a quick log repeats), and the months and
+ * weeks History showed. Other lists and exports are left out.
  */
-const KEPT = /^\/api\/v1\/(me|trackers(\/[^/]+)?|goals(\/[^/]+)?|stats\/home|exercises|books(\/[^/]+)?|sessions\/[^/]+)$/;
+const KEPT =
+  /^\/api\/v1\/(me|trackers(\/[^/]+)?|goals(\/[^/]+)?|stats\/(home|calendar)|exercises|books(\/[^/]+)?|sessions\/[^/]+)$/;
 
 export function isKept(queryKey: readonly unknown[]): boolean {
   const [path, params] = queryKey;
   if (path === '/api/v1/sessions') {
-    const query = params as { tracker_id?: string; limit?: number } | undefined;
-    return Boolean(query?.tracker_id) && query?.limit === 1;
+    const query = params as { tracker_id?: string; limit?: number; from_date?: string; to_date?: string } | undefined;
+    const week = Boolean(query?.from_date && query.to_date);
+    return week || (Boolean(query?.tracker_id) && query?.limit === 1);
   }
   return typeof path === 'string' && KEPT.test(path);
 }

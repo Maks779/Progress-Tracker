@@ -284,6 +284,31 @@ export function prefill(
 }
 
 /**
+ * The form of a saved session, to edit it in History: its own values, note, day and time (the
+ * time read in the device's time zone, like the form's).
+ */
+export function formFromSession(
+  kind: QuickKind,
+  session: Pick<SessionOut, 'duration_s' | 'cardio' | 'general' | 'reading' | 'stats' | 'note' | 'started_at'>,
+  unit: DistanceUnit,
+): QuickForm {
+  const started = new Date(session.started_at);
+  const pad = (value: number) => String(value).padStart(2, '0');
+  const minutes = session.duration_s ? String(Math.max(1, Math.round(session.duration_s / 60))) : '';
+  return {
+    durationText: kind === 'cardio' && session.duration_s ? formatDuration(session.duration_s) : '',
+    distanceText: session.cardio?.distance_m ? distanceText(session.cardio.distance_m, unit) : '',
+    minutesText: kind === 'duration' || kind === 'reading' ? minutes : '',
+    count: session.general?.count ?? 1,
+    pagesReadText: session.stats.pages_read ? String(session.stats.pages_read) : '',
+    endPageText: session.reading ? String(session.reading.end_page) : '',
+    note: session.note ?? '',
+    date: `${started.getFullYear()}-${pad(started.getMonth() + 1)}-${pad(started.getDate())}`,
+    time: `${pad(started.getHours())}:${pad(started.getMinutes())}`,
+  };
+}
+
+/**
  * The goal beside the form: the tracker's amount goal (today's before the week's), else its
  * frequency goal. Cumulative goals stay on the Goals page.
  */

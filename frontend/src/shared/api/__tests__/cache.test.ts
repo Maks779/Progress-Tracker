@@ -20,6 +20,7 @@ describe('answers kept on the device', () => {
       '/api/v1/goals',
       '/api/v1/goals/9a1b',
       '/api/v1/stats/home',
+      '/api/v1/stats/calendar',
       '/api/v1/exercises',
       '/api/v1/sessions/1d2e',
       '/api/v1/books',
@@ -30,7 +31,9 @@ describe('answers kept on the device', () => {
     expect(isKept(['/api/v1/sessions', { tracker_id: 'run', limit: 1 }])).toBe(true);
     expect(isKept(['/api/v1/sessions', { tracker_id: 'run', limit: 20 }])).toBe(false);
     expect(isKept(['/api/v1/sessions', { limit: 1 }])).toBe(false);
-    for (const path of ['/api/v1/sessions', '/api/v1/export', '/api/v1/stats/calendar', '/api/v1/exercises/1/last-sets', '/api/v1/health']) {
+    expect(isKept(['/api/v1/sessions', { from_date: '2026-11-23', to_date: '2026-11-29', limit: 50 }, 'pages'])).toBe(true);
+    expect(isKept(['/api/v1/sessions', { from_date: '2026-11-23', limit: 50 }])).toBe(false);
+    for (const path of ['/api/v1/sessions', '/api/v1/export', '/api/v1/stats/progress', '/api/v1/exercises/1/last-sets', '/api/v1/health']) {
       expect(isKept([path])).toBe(false);
     }
     expect(isKept([{ path: '/api/v1/me' }])).toBe(false);

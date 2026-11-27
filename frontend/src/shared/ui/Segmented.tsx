@@ -12,6 +12,8 @@ type Props<T extends string> = {
   options: Option<T>[];
   value: T;
   onChange: (value: T) => void;
+  /** `content`: each option as wide as its label, the room left shared out (History's tracker names). */
+  fit?: 'equal' | 'content';
 };
 
 /**
@@ -19,7 +21,7 @@ type Props<T extends string> = {
  * raised tile, labels at 12 px as in the design so three fit on a phone. Screen readers get a
  * radio group named by `label`.
  */
-export function Segmented<T extends string>({ label, options, value, onChange }: Props<T>) {
+export function Segmented<T extends string>({ label, options, value, onChange, fit = 'equal' }: Props<T>) {
   const { colors, radius, space } = useTheme();
   return (
     <View
@@ -43,7 +45,9 @@ export function Segmented<T extends string>({ label, options, value, onChange }:
             aria-checked={selected}
             onPress={() => onChange(option.value)}
             style={({ hovered, focused }: { pressed: boolean; hovered?: boolean; focused?: boolean }): ViewStyle => ({
-              flex: 1,
+              flexGrow: 1,
+              flexShrink: 1,
+              flexBasis: fit === 'equal' ? 0 : 'auto',
               minHeight: 36,
               alignItems: 'center',
               justifyContent: 'center',

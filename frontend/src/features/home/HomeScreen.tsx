@@ -1,6 +1,7 @@
 import { useNavigation, usePathname } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
+import { openHistoryPage } from '@/features/navigation/openHistoryPage';
 import { openProfilePage, type ProfileHref } from '@/features/navigation/openProfilePage';
 import { SyncStatus } from '@/features/outbox/components/SyncStatus';
 import { QuickActions } from '@/features/quicklog/components/QuickActions';
@@ -134,6 +135,8 @@ export function HomeScreen() {
             items={stats.recent_sessions}
             trackers={new Map(trackerItems.map((tracker) => [tracker.id, tracker]))}
             today={today}
+            onOpen={(id) => openHistoryPage(`/history/${id}`, pathname, () => navigation.navigate('history'))}
+            onSeeAll={() => openHistoryPage('/history', pathname, () => navigation.navigate('history'))}
           />
         </>
       );

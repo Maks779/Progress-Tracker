@@ -1,8 +1,8 @@
-import { act, render, screen } from '@testing-library/react-native';
+import { act, fireEvent, render, screen } from '@testing-library/react-native';
 
 import { ThemeProvider } from '@/shared/theme/ThemeProvider';
 
-import { showToast, TOAST_MS, ToastHost } from '../Toast';
+import { showToast, SNACKBAR_MS, TOAST_MS, ToastHost } from '../Toast';
 
 describe('The toast', () => {
   beforeEach(() => {
@@ -35,5 +35,28 @@ describe('The toast', () => {
       jest.advanceTimersByTime(200);
     });
     expect(screen.queryByText('Session saved. Nice work.')).toBeNull();
+  });
+
+  it('with an action stays longer, and the action closes it', async () => {
+    const undo = jest.fn();
+    await render(
+      <ThemeProvider>
+        <ToastHost />
+      </ThemeProvider>,
+    );
+    await act(async () => showToast('Session removed', { label: 'Undo', onPress: undo }));
+    await act(async () => {
+      jest.advanceTimersByTime(TOAST_MS + 100);
+    });
+    expect(screen.getByText('Session removed')).toBeTruthy();
+    await act(async () => fireEvent.press(screen.getByRole('button', { name: 'Undo' })));
+    expect(undo).toHaveBeenCalledTimes(1);
+    expect(screen.queryByText('Session removed')).toBeNull();
+
+    await act(async () => showToast('Session removed', { label: 'Undo', onPress: undo }));
+    await act(async () => {
+      jest.advanceTimersByTime(SNACKBAR_MS + 100);
+    });
+    expect(screen.queryByText('Session removed')).toBeNull();
   });
 });
