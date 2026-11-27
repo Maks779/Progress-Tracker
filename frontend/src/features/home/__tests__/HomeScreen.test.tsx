@@ -238,7 +238,7 @@ describe('Home', () => {
     await open();
 
     expect(screen.getByText('Couldn’t load home.')).toBeTruthy();
-    await fireEvent.press(screen.getByRole('link', { name: 'Try again' }));
+    await fireEvent.press(screen.getByRole('button', { name: 'Try again' }));
     expect(refetch.home).toHaveBeenCalled();
     expect(refetch.trackers).toHaveBeenCalled();
     expect(refetch.goals).toHaveBeenCalled();

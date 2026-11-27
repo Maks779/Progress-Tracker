@@ -18,7 +18,7 @@ export function DateField({ label, value, minimum, error, onChange }: DateFieldP
 
   return (
     <View style={{ gap: space[8] }}>
-      <Text variant="smallStrong">{label}</Text>
+      <Text variant="smallMedium">{label}</Text>
       <input
         type="date"
         aria-label={label}

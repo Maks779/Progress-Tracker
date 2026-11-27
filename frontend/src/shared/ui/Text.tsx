@@ -7,7 +7,12 @@ type Tone = 'primary' | 'muted' | 'accent' | 'onAccent' | 'error' | 'success';
 
 type Props = TextProps & { variant?: TypographyVariant; tone?: Tone };
 
-export function Text({ variant = 'body', tone = 'primary', style, ...rest }: Props) {
+/**
+ * Text in the type scale and a tone. Android's default line breaking measures a line a little
+ * narrower than it then draws it with Inter, so a last word could vanish ("Start" for "Start
+ * workout"); the simple strategy measures and draws alike.
+ */
+export function Text({ variant = 'body', tone = 'primary', style, textBreakStrategy = 'simple', ...rest }: Props) {
   const { colors, typography } = useTheme();
   const color = {
     primary: colors.text.primary,
@@ -17,5 +22,5 @@ export function Text({ variant = 'body', tone = 'primary', style, ...rest }: Pro
     error: colors.state.error,
     success: colors.state.success,
   }[tone];
-  return <NativeText style={[typography[variant], { color }, style]} {...rest} />;
+  return <NativeText style={[typography[variant], { color }, style]} textBreakStrategy={textBreakStrategy} {...rest} />;
 }

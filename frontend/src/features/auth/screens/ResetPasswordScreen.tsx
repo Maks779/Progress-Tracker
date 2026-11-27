@@ -114,6 +114,7 @@ export function ResetPasswordScreen() {
             message={t('auth.reset.invalidBody')}
           />
           <TextLink label={t('auth.reset.requestNew')} href="/forgot-password" />
+          <TextLink label={t('auth.forgot.back')} href="/log-in" tone="primary" />
         </>
       ) : null}
       {stage === 'done' ? (

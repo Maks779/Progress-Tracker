@@ -5,7 +5,7 @@ import { Pressable, View, type ViewStyle } from 'react-native';
 
 import type { ExerciseOut } from '@/shared/api/generated/model';
 import { parseIsoDate } from '@/shared/format/dates';
-import { useBreakpoint, useSideColumn } from '@/shared/theme/breakpoints';
+import { useSideColumn } from '@/shared/theme/breakpoints';
 import { useTheme } from '@/shared/theme/ThemeProvider';
 import { Badge } from '@/shared/ui/Badge';
 import { Button } from '@/shared/ui/Button';
@@ -61,7 +61,7 @@ function ExerciseRow({ exercise, name, selected, disabled, onPress }: RowProps) 
         flexDirection: 'row',
         alignItems: 'center',
         gap: space[16],
-        minHeight: 64,
+        minHeight: 80,
         paddingHorizontal: space[8],
         borderRadius: radius[12],
         backgroundColor: selected ? colors.accent.subtle : hovered && !disabled ? colors.bg.surfaceRaised : 'transparent',
@@ -88,6 +88,7 @@ function ExerciseRow({ exercise, name, selected, disabled, onPress }: RowProps) 
  * Add exercise (design: Workout / Exercise picker): search by name in the UI language, filter
  * by muscle group, pick one or more, and add them at the end of the workout, each with its
  * rows and ghost values from the last time it was done. What the catalog lacks can be created.
+ * The Add button stays in reach below the list (in the side card when there is one).
  */
 export function AddExerciseScreen() {
   const draft = useActiveDraft();
@@ -97,7 +98,6 @@ export function AddExerciseScreen() {
 function Picker({ draft }: { draft: WorkoutDraft }) {
   const { t, i18n } = useTranslation();
   const { colors, space } = useTheme();
-  const wide = useBreakpoint() !== 'compact';
   const twoColumns = useSideColumn(false) !== null;
   const catalog = useExerciseCatalog();
   const [query, setQuery] = useState('');
@@ -167,7 +167,7 @@ function Picker({ draft }: { draft: WorkoutDraft }) {
   }
 
   const picker = (
-    <Card style={{ padding: wide ? space[24] : space[16], gap: space[16] }}>
+    <Card style={{ padding: space[24], gap: space[16] }}>
       <Text variant="h2" accessibilityRole="header">
         {t('workout.picker.title')}
       </Text>
@@ -191,12 +191,14 @@ function Picker({ draft }: { draft: WorkoutDraft }) {
         ]}
       />
       {list}
-      <Button
-        label={selected.length > 1 ? t('workout.picker.addMany', { count: selected.length }) : t('workout.picker.addOne')}
-        disabled={selected.length === 0}
-        onPress={add}
-      />
     </Card>
+  );
+  const addButton = (
+    <Button
+      label={selected.length > 1 ? t('workout.picker.addMany', { count: selected.length }) : t('workout.picker.addOne')}
+      disabled={selected.length === 0}
+      onPress={add}
+    />
   );
   const side = (
     <Card style={{ padding: space[16], gap: space[8] }}>
@@ -214,6 +216,7 @@ function Picker({ draft }: { draft: WorkoutDraft }) {
           />
         ))}
       </View>
+      {addButton}
     </Card>
   );
 
@@ -223,6 +226,7 @@ function Picker({ draft }: { draft: WorkoutDraft }) {
         title={t('workout.addExercise')}
         caption={<Elapsed startedAt={draft.startedAt} prefix={draft.name} />}
         back={{ label: t('nav.workout'), onPress: back }}
+        footer={twoColumns ? undefined : addButton}
       >
         <Columns main={picker} side={twoColumns ? side : undefined} />
       </Screen>

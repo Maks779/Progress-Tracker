@@ -27,7 +27,7 @@ function OfflineCard({ sessions, changes }: { sessions: number; changes: number 
   const { t } = useTranslation();
   const { colors, space } = useTheme();
   return (
-    <Card style={{ gap: space[8] }}>
+    <Card style={{ gap: 12 }}>
       <WifiOff color={colors.state.warning} size={24} strokeWidth={1.75} />
       <Text variant="h3" style={{ marginTop: space[8] }}>
         {t('sync.offlineTitle')}
@@ -36,7 +36,7 @@ function OfflineCard({ sessions, changes }: { sessions: number; changes: number 
         {sessions > 0 ? t('sync.offlineBody', { count: sessions }) : t('sync.offlineBodyNone')}
       </Text>
       {changes > 0 ? (
-        <View style={{ alignItems: 'flex-start', marginTop: space[4] }}>
+        <View style={{ alignItems: 'flex-start', marginTop: 2 }}>
           <WaitingBadge count={changes} />
         </View>
       ) : null}

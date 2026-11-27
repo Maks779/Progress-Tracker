@@ -39,7 +39,7 @@ export function LinksCard({ links }: { links: Link[] }) {
         >
           <Icon color={colors.text.primary} size={24} strokeWidth={1.5} />
           <View style={{ flex: 1 }}>
-            <Text variant="body">{title}</Text>
+            <Text variant="smallMedium">{title}</Text>
             {hint ? (
               <Text variant="caption" tone="muted">
                 {hint}

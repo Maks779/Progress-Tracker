@@ -54,7 +54,7 @@ export function GoalCard({ goal, tracker, today, showPinned, onPress }: CardProp
       aria-label={`${title}, ${t(`goals.status.${goal.progress.status}`)}, ${progress}`}
       onPress={onPress}
       style={({ hovered, focused }: { pressed: boolean; hovered?: boolean; focused?: boolean }): ViewStyle => ({
-        gap: space[16],
+        gap: 12,
         padding: space[16],
         borderRadius: radius[16],
         borderWidth: 1,
@@ -107,7 +107,7 @@ export function StreakCard({ goal, trackerName }: StreakProps) {
     }
   }
   return (
-    <Card style={{ gap: space[16], padding: space[24] }}>
+    <Card style={{ gap: space[16], padding: space[16] }}>
       <Flame color={colors.accent.text} size={24} strokeWidth={1.75} />
       <Text variant="h3">{title}</Text>
       <Text variant="small" tone="muted">

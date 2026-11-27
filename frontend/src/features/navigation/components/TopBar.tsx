@@ -134,8 +134,8 @@ function AccountChip({ onPress }: { onPress: () => void }) {
 /**
  * The bar above every page on tablets and desktop, as in the design: on desktop the
  * breadcrumb (the sidebar carries the logo), on tablets the logo; the account chip on the
- * right opens Profile, with the offline badge before it. Its content lines up with the page
- * column below.
+ * right opens Profile, with the offline badge before it (not on Home, whose sync card says
+ * more). Its content lines up with the page column below.
  */
 export function TopBar({ navigation }: Pick<BottomTabHeaderProps, 'navigation'>) {
   const { colors } = useTheme();
@@ -167,7 +167,7 @@ export function TopBar({ navigation }: Pick<BottomTabHeaderProps, 'navigation'>)
       >
         <View style={{ flex: 1, minWidth: 0 }}>{expanded ? <Breadcrumb /> : <Logo />}</View>
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <OfflineBadge style={{ marginRight: 12 }} />
+          {pathname === '/' ? null : <OfflineBadge style={{ marginRight: 12 }} />}
           <AccountChip onPress={openProfile} />
         </View>
       </View>

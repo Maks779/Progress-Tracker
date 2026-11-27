@@ -83,7 +83,7 @@ export function DeleteAccountSheet({ visible, onClose }: Props) {
 
   return (
     <Sheet visible={visible} title={t('profile.delete.title')} onClose={close}>
-      <Text variant="body" tone="muted">
+      <Text variant="small" tone="muted">
         {t('profile.delete.body')}
       </Text>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: space[8] }}>

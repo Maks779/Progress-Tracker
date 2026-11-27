@@ -17,6 +17,8 @@ type Props = {
   title: string;
   subtitle?: string;
   caption: string;
+  /** Welcome and onboarding show their tagline in capitals, as in the design; the auth screens do not. */
+  upperCaption?: boolean;
   large?: boolean;
   children: ReactNode;
 };
@@ -27,8 +29,8 @@ type Props = {
  * The focused field stays above the keyboard: Android apps are edge-to-edge, so the window no
  * longer shrinks and the view adds padding instead; on iOS the scroll view moves the field.
  */
-export function AuthLayout({ eyebrow, title, subtitle, caption, large = false, children }: Props) {
-  const { colors, space } = useTheme();
+export function AuthLayout({ eyebrow, title, subtitle, caption, upperCaption = false, large = false, children }: Props) {
+  const { colors, scheme, space } = useTheme();
   const wide = useBreakpoint() === 'expanded';
 
   return (
@@ -42,11 +44,15 @@ export function AuthLayout({ eyebrow, title, subtitle, caption, large = false, c
           <ScrollView
             automaticallyAdjustKeyboardInsets
             keyboardShouldPersistTaps="handled"
-            contentContainerStyle={{ flexGrow: 1, padding: wide ? space[48] : space[24] }}
+            contentContainerStyle={{
+              flexGrow: 1,
+              paddingHorizontal: wide ? space[48] : space[24],
+              paddingVertical: wide ? space[32] : space[24],
+            }}
           >
             <View style={styles.bar}>
               <Logo />
-              <Text variant="caption" tone="muted" style={{ textTransform: 'uppercase' }}>
+              <Text variant="caption" tone="muted" style={upperCaption ? { textTransform: 'uppercase' } : undefined}>
                 {caption}
               </Text>
             </View>
@@ -54,7 +60,11 @@ export function AuthLayout({ eyebrow, title, subtitle, caption, large = false, c
               {wide ? <HeroPanel /> : null}
               <View style={[wide ? styles.formWide : styles.formSingle, { gap: space[24] }]}>
                 <Animated.View entering={entrance(wide ? 2 : 0)} style={{ gap: space[16] }}>
-                  <Text variant="captionStrong" tone="accent" style={{ textTransform: 'uppercase' }}>
+                  <Text
+                    variant="captionStrong"
+                    tone={scheme === 'light' ? 'primary' : 'accent'}
+                    style={{ textTransform: 'uppercase', marginBottom: space[8] }}
+                  >
                     {eyebrow}
                   </Text>
                   <Text variant={large ? 'display' : 'h1'} accessibilityRole="header">
@@ -91,7 +101,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: 64,
-    paddingHorizontal: 32,
   },
   formSingle: { width: '100%' },
   formWide: { width: 400 },

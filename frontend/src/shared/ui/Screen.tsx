@@ -24,6 +24,8 @@ type Props = {
   back?: Back;
   action?: ReactNode;
   offlineBadge?: boolean;
+  /** Stays below the scrolling content, always in reach (the picker's Add button). */
+  footer?: ReactNode;
   children?: ReactNode;
 };
 
@@ -67,7 +69,7 @@ function BackLink({ label, onPress }: Back) {
  * leads to the parent pages, so only a step back stays. Offline, a badge sits above the title,
  * or in the top bar when there is one.
  */
-export function Screen({ title, caption, back, action, offlineBadge = true, children }: Props) {
+export function Screen({ title, caption, back, action, offlineBadge = true, footer, children }: Props) {
   const { colors, space } = useTheme();
   const breakpoint = useBreakpoint();
   const underTopBar = useContext(HeaderShownContext);
@@ -93,7 +95,11 @@ export function Screen({ title, caption, back, action, offlineBadge = true, chil
                 {title}
               </Text>
               {caption ? (
-                <Text variant="caption" tone="muted" style={{ textTransform: 'uppercase', marginTop: 4 }}>
+                <Text
+                  variant={breakpoint === 'compact' ? 'caption' : 'small'}
+                  tone="muted"
+                  style={{ textTransform: 'uppercase', marginTop: 4 }}
+                >
                   {caption}
                 </Text>
               ) : null}
@@ -103,6 +109,22 @@ export function Screen({ title, caption, back, action, offlineBadge = true, chil
         </View>
         <View style={[styles.column, { gap: space[16] }]}>{children}</View>
       </ScrollView>
+      {footer ? (
+        <View
+          style={[
+            styles.content,
+            {
+              paddingHorizontal: breakpoint === 'compact' ? space[24] : space[40],
+              paddingVertical: space[16],
+              borderTopWidth: 1,
+              borderTopColor: colors.border.default,
+              backgroundColor: colors.bg.base,
+            },
+          ]}
+        >
+          <View style={styles.column}>{footer}</View>
+        </View>
+      ) : null}
     </SafeAreaView>
   );
 }

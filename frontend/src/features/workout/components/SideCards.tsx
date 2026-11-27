@@ -47,11 +47,11 @@ export function GhostTip() {
   const { space } = useTheme();
   return (
     <Card style={{ padding: space[16], gap: space[8] }}>
-      <Text variant="bodyStrong">{t('workout.tip.title')}</Text>
+      <Text variant="smallStrong">{t('workout.tip.title')}</Text>
       <Text variant="small" tone="muted">
         {t('workout.tip.body')}
       </Text>
-      <Text variant="caption" tone="muted">
+      <Text variant="caption" tone="muted" style={{ marginTop: space[8] }}>
         {t('workout.tip.rest')}
       </Text>
     </Card>

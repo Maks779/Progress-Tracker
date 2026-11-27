@@ -14,6 +14,7 @@ import { refreshAccountData } from '@/shared/api/refresh';
 import { endOfYear, toIsoDate } from '@/shared/format/dates';
 import { useExclusive } from '@/shared/hooks/useExclusive';
 import { useGoBack } from '@/shared/hooks/useGoBack';
+import { useBreakpoint } from '@/shared/theme/breakpoints';
 import { useTheme } from '@/shared/theme/ThemeProvider';
 import { Button } from '@/shared/ui/Button';
 import { Card } from '@/shared/ui/Card';
@@ -35,6 +36,7 @@ import { TextLink } from '@/shared/ui/TextLink';
 import { StreakCard } from '../components';
 import { useGoalText } from '../format';
 import {
+  freeGoal,
   FREQUENCY,
   fromCanonical,
   type GoalKind,
@@ -151,6 +153,7 @@ type FormProps = {
 function GoalForm({ trackers, goals, initialTrackerId, goal }: FormProps) {
   const { t } = useTranslation();
   const { space } = useTheme();
+  const compact = useBreakpoint() === 'compact';
   const router = useRouter();
   const queryClient = useQueryClient();
   const leave = useLeaveForm();
@@ -173,9 +176,8 @@ function GoalForm({ trackers, goals, initialTrackerId, goal }: FormProps) {
         pin: false,
       };
     }
-    const kind = kindsFor(tracker)[0];
-    const metric = metricsFor(tracker, kind)[0];
-    return { kind, period: 'week', metric, steps: FREQUENCY.initial, amount: String(initialTarget(kind, 'week', metric)), name: '', endDate: endOfYear(new Date()), pin: false };
+    const { kind, period, metric } = freeGoal(tracker, tracker.id, goals);
+    return { kind, period, metric, steps: FREQUENCY.initial, amount: String(initialTarget(kind, period, metric)), name: '', endDate: endOfYear(new Date()), pin: false };
   });
   const [tried, setTried] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -196,8 +198,18 @@ function GoalForm({ trackers, goals, initialTrackerId, goal }: FormProps) {
     const kind = kinds.includes(draft.kind) ? draft.kind : kinds[0];
     const metrics = metricsFor(next, kind);
     const metric = metrics.includes(draft.metric) ? draft.metric : metrics[0];
+    const kept = { kind, period: draft.period, metric };
+    const exists =
+      kind !== 'cumulative' &&
+      goals.some(
+        (other) =>
+          other.tracker_id === id &&
+          other.kind === kind &&
+          other.period === (kind === 'frequency' ? 'week' : draft.period) &&
+          other.metric === metric,
+      );
     setTrackerId(id);
-    setDraft({ ...retarget({ kind, period: draft.period, metric }), pin: false });
+    setDraft({ ...retarget(exists ? freeGoal(next, id, goals) : kept), pin: false });
   }
 
   function chooseKind(kind: GoalKind) {
@@ -301,6 +313,18 @@ function GoalForm({ trackers, goals, initialTrackerId, goal }: FormProps) {
   const unit = text.targetUnit(draft.kind, draft.period, draft.metric, tracker);
   const hint = t(`goals.form.${editing ? 'changeHint' : 'hints'}.${period ?? 'cumulative'}`);
 
+  const targetField = (
+    <TextField
+      label={t('goals.form.target', { unit })}
+      value={draft.amount}
+      onChangeText={(amount) => setDraft({ ...draft, amount })}
+      error={tried ? targetError : undefined}
+      keyboardType={draft.metric === 'distance' ? 'decimal-pad' : 'number-pad'}
+      inputMode={draft.metric === 'distance' ? 'decimal' : 'numeric'}
+      maxLength={12}
+    />
+  );
+
   const fields = (
     <Card style={{ gap: space[24], padding: space[24] }}>
       <Text variant="h2" accessibilityRole="header">
@@ -334,23 +358,33 @@ function GoalForm({ trackers, goals, initialTrackerId, goal }: FormProps) {
             </Text>
           </View>
           {draft.kind === 'amount' ? (
-            <Segmented
-              label={t('goals.form.period')}
-              value={draft.period}
-              onChange={(next) => setDraft(retarget({ kind: draft.kind, period: next, metric: draft.metric }))}
-              options={(['day', 'week'] as const).map((value) => ({ value, label: t(`goals.periods.${value}`) }))}
-            />
+            <View style={{ gap: space[8] }}>
+              <Text variant="smallMedium" aria-hidden>
+                {t('goals.form.period')}
+              </Text>
+              <Segmented
+                label={t('goals.form.period')}
+                value={draft.period}
+                onChange={(next) => setDraft(retarget({ kind: draft.kind, period: next, metric: draft.metric }))}
+                options={(['day', 'week'] as const).map((value) => ({ value, label: t(`goals.periods.${value}`) }))}
+              />
+            </View>
           ) : null}
           {metrics.length > 1 ? (
-            <Segmented
-              label={t('goals.form.metric')}
-              value={draft.metric}
-              onChange={(next) => setDraft(retarget({ kind: draft.kind, period: draft.period, metric: next }))}
-              options={metrics.map((value) => ({
-                value,
-                label: value === 'count' ? (tracker.counter_unit ?? t('goals.metrics.count')) : t(`goals.metrics.${value}`),
-              }))}
-            />
+            <View style={{ gap: space[8] }}>
+              <Text variant="smallMedium" aria-hidden>
+                {t('goals.form.metric')}
+              </Text>
+              <Segmented
+                label={t('goals.form.metric')}
+                value={draft.metric}
+                onChange={(next) => setDraft(retarget({ kind: draft.kind, period: draft.period, metric: next }))}
+                options={metrics.map((value) => ({
+                  value,
+                  label: value === 'count' ? (tracker.counter_unit ?? t('goals.metrics.count')) : t(`goals.metrics.${value}`),
+                }))}
+              />
+            </View>
           ) : null}
         </>
       )}
@@ -374,27 +408,23 @@ function GoalForm({ trackers, goals, initialTrackerId, goal }: FormProps) {
           increaseLabel={t('goals.form.increase')}
           onChange={(direction) => setDraft({ ...draft, steps: draft.steps + direction })}
         />
+      ) : draft.kind === 'cumulative' ? (
+        <View style={{ flexDirection: compact ? 'column' : 'row', gap: compact ? space[24] : space[16] }}>
+          <View style={compact ? undefined : { flex: 1 }}>{targetField}</View>
+          <View style={compact ? undefined : { flex: 1 }}>
+            <DateField
+              label={t('goals.form.endDate')}
+              value={draft.endDate}
+              minimum={editing && goal.start_date < today ? goal.start_date : today}
+              doneLabel={t('goals.form.dateDone')}
+              error={tried ? endDateError : undefined}
+              onChange={(endDate) => setDraft({ ...draft, endDate })}
+            />
+          </View>
+        </View>
       ) : (
-        <TextField
-          label={t('goals.form.target', { unit })}
-          value={draft.amount}
-          onChangeText={(amount) => setDraft({ ...draft, amount })}
-          error={tried ? targetError : undefined}
-          keyboardType={draft.metric === 'distance' ? 'decimal-pad' : 'number-pad'}
-          inputMode={draft.metric === 'distance' ? 'decimal' : 'numeric'}
-          maxLength={12}
-        />
+        targetField
       )}
-      {draft.kind === 'cumulative' ? (
-        <DateField
-          label={t('goals.form.endDate')}
-          value={draft.endDate}
-          minimum={editing && goal.start_date < today ? goal.start_date : today}
-          doneLabel={t('goals.form.dateDone')}
-          error={tried ? endDateError : undefined}
-          onChange={(endDate) => setDraft({ ...draft, endDate })}
-        />
-      ) : null}
       <Text variant="small" tone="muted">
         {hint}
       </Text>
@@ -462,7 +492,10 @@ function useGoalPage(includeArchived: boolean) {
   return { back, trackerItems, goalItems, states };
 }
 
-/** "Create a goal", optionally for the tracker in `?tracker=`. */
+/**
+ * "Create a goal", for the tracker in `?tracker=`, else for the main tracker or the first one
+ * that still lacks a weekly or daily goal, starting on a goal it does not have yet.
+ */
 export function NewGoalScreen() {
   const { t } = useTranslation();
   const { tracker: wanted } = useLocalSearchParams<{ tracker?: string }>();
@@ -472,7 +505,12 @@ export function NewGoalScreen() {
 
   let body = states;
   if (!states && trackerItems && goalItems) {
-    const initial = [wanted, mainId, trackerItems[0]?.id].find((id) => trackerItems.some((item) => item.id === id));
+    const preferred = [mainId, ...trackerItems.map((item) => item.id)];
+    const free = preferred.find((id) => {
+      const item = trackerItems.find((candidate) => candidate.id === id);
+      return item !== undefined && freeGoal(item, item.id, goalItems).kind !== 'cumulative';
+    });
+    const initial = [wanted, free, mainId, trackerItems[0]?.id].find((id) => trackerItems.some((item) => item.id === id));
     body = initial ? (
       <GoalForm trackers={trackerItems} goals={goalItems} initialTrackerId={initial} />
     ) : (

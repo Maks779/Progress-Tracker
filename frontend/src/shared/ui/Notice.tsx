@@ -2,22 +2,25 @@ import { View } from 'react-native';
 
 import { useTheme } from '@/shared/theme/ThemeProvider';
 
-import { Check, CircleAlert, Info } from './icons';
+import { Check, CircleAlert, Info, type LucideIcon } from './icons';
 import { Text } from './Text';
 
 type Tone = 'success' | 'error' | 'info';
 
-type Props = { tone: Tone; title: string; message?: string };
+/** `icon` replaces the tone's icon, drawn in the text color (the lock of an expired session). */
+type Props = { tone: Tone; title: string; message?: string; icon?: LucideIcon };
 
 /** A short status card ("Reset link sent", a failed request). Screen readers announce it. */
-export function Notice({ tone, title, message }: Props) {
+export function Notice({ tone, title, message, icon }: Props) {
   const { colors, radius, space } = useTheme();
-  const Icon = { success: Check, error: CircleAlert, info: Info }[tone];
-  const iconColor = {
-    success: colors.state.success,
-    error: colors.state.error,
-    info: colors.accent.text,
-  }[tone];
+  const Icon = icon ?? { success: Check, error: CircleAlert, info: Info }[tone];
+  const iconColor = icon
+    ? colors.text.primary
+    : {
+        success: colors.state.success,
+        error: colors.state.error,
+        info: colors.accent.text,
+      }[tone];
 
   return (
     <View
@@ -32,14 +35,16 @@ export function Notice({ tone, title, message }: Props) {
         gap: space[8],
       }}
     >
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: space[8] }}>
-        <Icon color={iconColor} size={16} strokeWidth={2} />
+      <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: space[8] }}>
+        <View style={{ flexShrink: 0, paddingTop: 2 }}>
+          <Icon color={iconColor} size={16} strokeWidth={2} />
+        </View>
         <Text variant="smallStrong" style={{ flexShrink: 1 }}>
           {title}
         </Text>
       </View>
       {message ? (
-        <Text variant="caption" tone="muted">
+        <Text variant="small" tone="muted">
           {message}
         </Text>
       ) : null}

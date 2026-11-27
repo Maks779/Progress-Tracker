@@ -42,6 +42,31 @@ export function metricsFor(tracker: TrackerShape, kind: GoalKind): Metric[] {
   }[tracker.type] as Metric[];
 }
 
+export type GoalShape = { kind: GoalKind; period: GoalPeriod; metric: Metric };
+
+/**
+ * The first goal this tracker does not have yet, in the form's order: frequency, then amounts
+ * per week and per day, then cumulative (a tracker may have several cumulative goals). A new
+ * goal form starts there, so it never opens on a goal that already exists.
+ */
+export function freeGoal(tracker: TrackerShape, trackerId: string, goals: Pick<GoalOut, 'tracker_id' | 'kind' | 'period' | 'metric'>[]): GoalShape {
+  const taken = (kind: GoalKind, period: GoalPeriod, metric: Metric) =>
+    goals.some((goal) => goal.tracker_id === trackerId && goal.kind === kind && goal.period === period && goal.metric === metric);
+  for (const kind of kindsFor(tracker)) {
+    if (kind === 'cumulative') {
+      break;
+    }
+    const periods: GoalPeriod[] = kind === 'frequency' ? ['week'] : ['week', 'day'];
+    for (const period of periods) {
+      const metric = metricsFor(tracker, kind).find((candidate) => !taken(kind, period, candidate));
+      if (metric) {
+        return { kind, period, metric };
+      }
+    }
+  }
+  return { kind: 'cumulative', period: 'week', metric: metricsFor(tracker, 'cumulative')[0] };
+}
+
 /** A sensible first target, in the units the person types (km or mi, minutes). */
 export function initialTarget(kind: GoalKind, period: GoalPeriod, metric: Metric): number {
   if (kind === 'frequency') {

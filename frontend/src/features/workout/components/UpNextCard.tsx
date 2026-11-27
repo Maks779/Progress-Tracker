@@ -90,7 +90,7 @@ export function UpNextCard({ upNext, entry }: { upNext: UpNext; entry: WorkoutEn
   }
   return (
     <Card style={{ padding: space[16], gap: space[16] }}>
-      <View style={{ gap: space[8] }}>
+      <View style={{ gap: 12 }}>
         <Text variant="caption" tone="muted" style={{ textTransform: 'uppercase' }}>
           {t('workout.upNext.title')}
         </Text>

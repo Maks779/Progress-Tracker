@@ -54,7 +54,7 @@ export function TrackerRow({ icon, color, name, detail, muted = false, onPress }
     >
       <TrackerGlyph icon={icon} color={color} muted={muted} />
       <View style={{ flex: 1 }}>
-        <Text variant="bodyStrong" tone={muted ? 'muted' : 'primary'}>
+        <Text variant="smallMedium" tone={muted ? 'muted' : 'primary'}>
           {name}
         </Text>
         <Text variant="caption" tone="muted">
@@ -72,7 +72,7 @@ type FeatureProps = { eyebrow: string; icon?: string; color?: string; name?: str
 export function FeatureCard({ eyebrow, icon, color, name, body, children }: FeatureProps) {
   const { space } = useTheme();
   return (
-    <Card style={{ gap: space[16], padding: space[24] }}>
+    <Card style={{ gap: space[16], padding: space[16] }}>
       <Text variant="caption" tone="muted" style={{ textTransform: 'uppercase' }}>
         {eyebrow}
       </Text>

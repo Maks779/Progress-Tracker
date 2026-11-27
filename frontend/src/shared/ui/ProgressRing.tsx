@@ -15,6 +15,8 @@ import Svg, { Circle, Defs, RadialGradient, Stop } from 'react-native-svg';
 
 import { useTheme } from '@/shared/theme/ThemeProvider';
 
+import { EASE_OUT } from './motion';
+
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
 type Props = {
@@ -99,7 +101,7 @@ export function ProgressRing({
       delay,
       withTiming(share, {
         duration,
-        easing: Easing.out(Easing.cubic),
+        easing: EASE_OUT,
         reduceMotion: ReduceMotion.System,
       }),
       ReduceMotion.System,

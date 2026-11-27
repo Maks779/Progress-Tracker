@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { Pressable, View, type ViewStyle } from 'react-native';
 
+import { useBreakpoint } from '@/shared/theme/breakpoints';
 import { useTheme } from '@/shared/theme/ThemeProvider';
 import { showFocusRing } from '@/shared/ui/focusRing';
 import { Circle, CircleCheck } from '@/shared/ui/icons';
@@ -51,7 +52,7 @@ export function TypeCard({ type, selected, onSelect }: TypeProps) {
     >
       <Icon color={selected ? colors.accent.text : colors.text.muted} size={24} strokeWidth={1.75} />
       <View style={{ flex: 1, paddingVertical: space[8] }}>
-        <Text variant="bodyStrong">{title}</Text>
+        <Text variant="smallMedium">{title}</Text>
         <Text variant="caption" tone="muted">
           {body}
         </Text>
@@ -69,7 +70,7 @@ export function ColorPicker({ value, onChange }: ColorProps) {
   const { colors, space } = useTheme();
   return (
     <View style={{ gap: space[16] }}>
-      <Text variant="smallStrong">{t('trackers.fields.color')}</Text>
+      <Text variant="smallMedium">{t('trackers.fields.color')}</Text>
       <View role="radiogroup" aria-label={t('trackers.fields.color')} style={{ flexDirection: 'row', gap: space[16] }}>
         {TRACKER_COLORS.map((color) => {
           const selected = color === value;
@@ -106,14 +107,19 @@ export function ColorPicker({ value, onChange }: ColorProps) {
 
 type IconProps = { value: TrackerIcon; color: TrackerColor; onChange: (icon: TrackerIcon) => void };
 
-/** All 16 tracker icons in a grid of 48 px tiles; the chosen one is tinted in the tracker color. */
+/** All 16 tracker icons in a grid of 48 px tiles, 4 a row on phones and 8 wider up; the chosen one is tinted in the tracker color. */
 export function IconPicker({ value, color, onChange }: IconProps) {
   const { t } = useTranslation();
   const { colors, radius, space } = useTheme();
+  const compact = useBreakpoint() === 'compact';
   return (
     <View style={{ gap: space[16] }}>
-      <Text variant="smallStrong">{t('trackers.fields.icon')}</Text>
-      <View role="radiogroup" aria-label={t('trackers.fields.icon')} style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
+      <Text variant="smallMedium">{t('trackers.fields.icon')}</Text>
+      <View
+        role="radiogroup"
+        aria-label={t('trackers.fields.icon')}
+        style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space[16], maxWidth: (compact ? 4 : 8) * 64 - space[16] }}
+      >
         {ICON_KEYS.map((key) => {
           const selected = key === value;
           const Icon = TRACKER_ICONS[key];
@@ -131,15 +137,15 @@ export function IconPicker({ value, color, onChange }: IconProps) {
                 justifyContent: 'center',
                 borderRadius: radius[12],
                 borderWidth: 1,
-                borderColor: selected ? colorFor(colors, color) : colors.border.default,
-                backgroundColor: selected ? colors.accent.subtle : hovered ? colors.bg.base : colors.bg.surfaceRaised,
+                borderColor: selected ? colorFor(colors, color) : hovered ? colors.accent.fill : colors.border.default,
+                backgroundColor: selected ? `${colorFor(colors, color)}26` : colors.bg.surfaceRaised,
                 cursor: 'pointer',
                 outlineStyle: 'solid',
                 outlineWidth: showFocusRing(focused) ? 2 : 0,
                 outlineColor: colors.accent.fill,
               })}
             >
-              <Icon color={selected ? colorFor(colors, color) : colors.text.primary} size={22} strokeWidth={1.75} />
+              <Icon color={selected ? colorFor(colors, color) : colors.text.primary} size={24} strokeWidth={1.75} />
             </Pressable>
           );
         })}

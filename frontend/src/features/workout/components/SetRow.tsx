@@ -18,7 +18,7 @@ import {
   type SetProblem,
 } from '../rules';
 
-export const COLUMN = { set: 32, weight: 64, reps: 48, done: 44, gap: 8 };
+export const COLUMN = { set: 24, weight: 64, reps: 48, done: 44, gap: 8 };
 
 type FieldProps = {
   label: string;
@@ -76,7 +76,7 @@ function NumberField({ label, value, ghost, format, clean, parse, onChange, widt
         borderColor,
         backgroundColor: colors.bg.surfaceRaised,
         color: colors.text.primary,
-        fontFamily: typography.bodyStrong.fontFamily,
+        fontFamily: typography.body.fontFamily,
         fontSize: typography.body.fontSize,
         fontVariant: ['tabular-nums'],
         textAlign: 'center',
@@ -124,7 +124,6 @@ export function SetRow({ set, label, name, previous, highlighted, problems, onWe
         alignItems: 'center',
         gap: COLUMN.gap,
         minHeight: 44,
-        paddingLeft: 8,
         borderRadius: radius[8],
         borderWidth: 1,
         borderColor: highlighted ? colors.accent.fill : 'transparent',
@@ -139,6 +138,7 @@ export function SetRow({ set, label, name, previous, highlighted, problems, onWe
         style={({ hovered, focused }: { pressed: boolean; hovered?: boolean; focused?: boolean }): ViewStyle => ({
           width: COLUMN.set,
           height: 44,
+          paddingLeft: 8,
           justifyContent: 'center',
           borderRadius: radius[8],
           backgroundColor: hovered ? colors.bg.surfaceRaised : 'transparent',

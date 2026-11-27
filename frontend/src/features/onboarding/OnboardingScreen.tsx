@@ -108,6 +108,7 @@ export function OnboardingScreen() {
         title={t('onboarding.choose.title')}
         subtitle={t('onboarding.choose.subtitle')}
         caption={t('auth.welcome.caption')}
+        upperCaption
       >
         <View role="group" aria-label={t('onboarding.choose.title')} style={{ gap: space[8] }}>
           {KINDS.map((kind) => (
@@ -129,6 +130,7 @@ export function OnboardingScreen() {
         title={t('onboarding.goal.title')}
         subtitle={t('onboarding.goal.subtitle')}
         caption={t('auth.welcome.caption')}
+        upperCaption
       >
         {choices.map(({ kind, name, target }) => (
           <GoalCard
@@ -157,6 +159,7 @@ export function OnboardingScreen() {
       title={t('onboarding.ready.title')}
       subtitle={t('onboarding.ready.subtitle')}
       caption={t('auth.welcome.caption')}
+      upperCaption
     >
       <View style={{ alignItems: 'center', paddingVertical: space[8] }}>
         <ProgressRing size={160} progress={1} duration={1100} delay={200} glow accessibilityLabel={t('onboarding.ready.ring')}>

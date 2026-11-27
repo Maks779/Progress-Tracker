@@ -91,7 +91,7 @@ export function GoalCard({ kind, name, value, onChange }: GoalProps) {
   const title = name === kindTitle ? kindTitle : `${kindTitle} · ${name}`;
   return (
     <Card style={{ gap: space[16], padding: space[24] }}>
-      <Text variant="smallStrong">{title}</Text>
+      <Text variant="smallMedium">{title}</Text>
       <Stepper
         value={value}
         unit={label(kind, value)}
@@ -101,11 +101,11 @@ export function GoalCard({ kind, name, value, onChange }: GoalProps) {
         increaseLabel={`${t('onboarding.goal.increase')}: ${title}`}
         onChange={onChange}
       />
-      <View style={{ height: 6, borderRadius: radius.full, backgroundColor: colors.bg.surfaceRaised }}>
+      <View style={{ height: 8, borderRadius: radius.full, backgroundColor: colors.bg.surfaceRaised }}>
         <View
           style={{
             width: `${Math.round((value / rule.max) * 100)}%`,
-            height: 6,
+            height: 8,
             borderRadius: radius.full,
             backgroundColor: colors.accent.fill,
           }}
@@ -138,9 +138,9 @@ export function Lineup({ items }: LineupProps) {
   const { colors, radius, space } = useTheme();
   const label = useTargetLabel();
   return (
-    <Card style={{ gap: space[16], padding: space[24] }}>
+    <Card style={{ gap: space[16], padding: space[16] }}>
       <Text variant="h3">{t('onboarding.ready.lineup')}</Text>
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space[8] }}>
+      <View style={{ alignItems: 'flex-start', gap: space[8] }}>
         {items.map(({ kind, name, target }) => {
           const Icon = KIND_ICONS[kind];
           return (
@@ -150,14 +150,14 @@ export function Lineup({ items }: LineupProps) {
                 flexDirection: 'row',
                 alignItems: 'center',
                 gap: space[8],
-                paddingVertical: 6,
+                paddingVertical: 4,
                 paddingHorizontal: space[8],
                 borderRadius: radius[8],
                 backgroundColor: colors.bg.surfaceRaised,
               }}
             >
-              <Icon color={colors.accent.text} size={16} strokeWidth={2} />
-              <Text variant="small">{`${name} · ${target} ${label(kind, target)}`}</Text>
+              <Icon color={colors.accent.text} size={14} strokeWidth={2} />
+              <Text variant="caption">{`${name} · ${target} ${label(kind, target)}`}</Text>
             </View>
           );
         })}
