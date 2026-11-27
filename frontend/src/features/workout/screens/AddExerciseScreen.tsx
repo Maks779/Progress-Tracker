@@ -1,8 +1,10 @@
+import { useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { type ReactNode, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, View, type ViewStyle } from 'react-native';
 
+import { prefetchBests } from '@/features/progress/data';
 import type { ExerciseOut } from '@/shared/api/generated/model';
 import { parseIsoDate } from '@/shared/format/dates';
 import { useSideColumn } from '@/shared/theme/breakpoints';
@@ -88,6 +90,7 @@ function ExerciseRow({ exercise, name, selected, disabled, onPress }: RowProps) 
 /** Add exercise for the active workout; back to the workout afterwards. */
 export function AddExerciseScreen() {
   const { t } = useTranslation();
+  const client = useQueryClient();
   const draft = useActiveDraft();
   if (!draft) {
     return <NoWorkout />;
@@ -102,6 +105,7 @@ export function AddExerciseScreen() {
       onAdd={(items) => {
         if (useWorkout.getState().draft) {
           workout.addExercises(items);
+          prefetchBests(client, items.map((item) => item.exerciseId));
         }
         back();
       }}

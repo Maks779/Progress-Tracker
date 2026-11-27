@@ -1,7 +1,7 @@
 export type ProfilePage = '/profile' | '/profile/goals' | '/profile/trackers';
 
 /** A page a breadcrumb step can lead back to. */
-export type CrumbHref = ProfilePage | '/' | '/workout' | '/history' | `/history/${string}`;
+export type CrumbHref = ProfilePage | '/' | '/workout' | '/history' | `/history/${string}` | '/progress';
 
 export type Crumb = {
   /** Translation key of the label. */
@@ -34,6 +34,9 @@ export function trailFor(pathname: string): Crumb[] {
   }
   if (section === 'history' && area) {
     return historyTrail(area, page, parts.length);
+  }
+  if (section === 'progress' && area) {
+    return area === 'records' && parts.length === 2 ? [{ label: 'tabs.progress', href: '/progress' }, { label: 'nav.records' }] : [];
   }
   if (section === 'quick-log') {
     return parts.length === 2 ? [{ label: 'tabs.home', href: '/' }, { label: 'nav.quickLog' }] : [];

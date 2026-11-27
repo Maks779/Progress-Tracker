@@ -19,7 +19,8 @@
     "summary": "Podsumowanie",
     "quickLog": "Szybki zapis",
     "session": "Sesja",
-    "editSession": "Edycja sesji"
+    "editSession": "Edycja sesji",
+    "records": "Rekordy"
   },
   "home": {
     "title": "Ruszajmy dalej.",
@@ -235,7 +236,100 @@
   },
   "progress": {
     "title": "Szerszy obraz.",
-    "empty": "Zapisz dwie sesje, aby zobaczyć pierwszy trend."
+    "caption": "Postęp, nie perfekcja",
+    "loading": "Wczytywanie postępów…",
+    "loadErrorTitle": "Nie udało się wczytać postępów.",
+    "loadError": "Twoje zapisane dane są bezpieczne. Sprawdź połączenie i spróbuj ponownie.",
+    "retry": "Spróbuj ponownie",
+    "empty": {
+      "title": "Punkt wyjścia to początek.",
+      "body": "Zapisz dwie sesje, aby zobaczyć pierwszy trend.",
+      "workout": "Rozpocznij trening",
+      "log": "Zapisz sesję"
+    },
+    "tabs": {
+      "label": "Widok postępów",
+      "overview": "Przegląd",
+      "records": "Rekordy"
+    },
+    "period": {
+      "label": "Okres",
+      "4w": "4 tyg.",
+      "3m": "3 mies.",
+      "1y": "1 rok",
+      "all": "Wszystko"
+    },
+    "filter": "Filtruj według trackera",
+    "line": {
+      "pick": "{{name}}, wybierz inne ćwiczenie",
+      "pickTitle": "Pokaż linię dla",
+      "none": "Brak serii „{{name}}” z ciężarem w tym okresie.",
+      "one": "Na razie jedna sesja. Linia zacznie się od następnej.",
+      "label": "{{name}}: od {{first}} ({{firstDate}}) do {{last}} ({{lastDate}})",
+      "change": {
+        "4w": "{{amount}} w 4 tygodnie",
+        "3m": "{{amount}} w 3 miesiące",
+        "1y": "{{amount}} w rok",
+        "all": "{{amount}} od początku"
+      }
+    },
+    "volume": "Objętość · {{unit}}",
+    "pages": {
+      "week": "Strony / tydzień",
+      "month": "Strony / miesiąc"
+    },
+    "noVolume": "Brak treningów w tym okresie.",
+    "noPages": "Brak przeczytanych stron w tym okresie.",
+    "consistency": {
+      "title": "Regularność, w tygodniach.",
+      "less": "Mniej",
+      "more": "Więcej",
+      "rest": "Dni odpoczynku nigdy nie przerywają serii.",
+      "days_one": "{{count}} aktywny dzień",
+      "days_few": "{{count}} aktywne dni",
+      "days_many": "{{count}} aktywnych dni",
+      "days_other": "{{count}} aktywnego dnia",
+      "streak_one": "Tydzień z osiągniętym celem.",
+      "streak_few": "{{count}} tygodnie z rzędu z osiągniętym celem.",
+      "streak_many": "{{count}} tygodni z rzędu z osiągniętym celem.",
+      "streak_other": "{{count}} tygodnia z rzędu z osiągniętym celem."
+    },
+    "last": {
+      "4w": "ostatnie 4 tygodnie",
+      "3m": "ostatnie 3 miesiące",
+      "1y": "ostatnie 12 miesięcy",
+      "all": "cały czas"
+    },
+    "totals": {
+      "volume": "Objętość treningowa · {{period}}",
+      "change": "{{change}} względem poprzedniego okresu",
+      "pages": "Przeczytane strony · {{period}}",
+      "books_one": "strony · {{count}} ukończona książka",
+      "books_few": "strony · {{count}} ukończone książki",
+      "books_many": "strony · {{count}} ukończonych książek",
+      "books_other": "strony · {{count}} ukończonej książki",
+      "books_zero": "strony"
+    },
+    "viewRecords": "Zobacz rekordy osobiste",
+    "records": {
+      "title": "Twoje rekordy.",
+      "loading": "Wczytywanie rekordów…",
+      "errorTitle": "Nie udało się wczytać rekordów.",
+      "empty": "Na razie brak rekordów. Pojawią się z drugim treningiem danego ćwiczenia.",
+      "kind": {
+        "max_weight": "Maks. ciężar",
+        "max_reps": "Maks. powtórzeń",
+        "estimated_1rm": "Szac. 1RM"
+      },
+      "bodyweight": "masa ciała",
+      "epley": "szacunek Epleya",
+      "noteTitle": "Zdobyte seria po serii.",
+      "noteBody": "Rekordy pochodzą z ukończonych serii siłowych. Szacowany 1RM to wskazówka, nie zalecenie treningowe.",
+      "newThisWeek_one": "{{count}} nowy rekord w tym tygodniu",
+      "newThisWeek_few": "{{count}} nowe rekordy w tym tygodniu",
+      "newThisWeek_many": "{{count}} nowych rekordów w tym tygodniu",
+      "newThisWeek_other": "{{count}} nowego rekordu w tym tygodniu"
+    }
   },
   "profile": {
     "title": "Twoja przestrzeń, twoje zasady.",
@@ -973,7 +1067,11 @@
       "noteFailed": "Nie udało się zapisać notatki. Spróbuj ponownie.",
       "waitingTitle": "Zapisano na tym urządzeniu.",
       "waitingBody": "Zsynchronizuje się, gdy wrócisz do sieci. Wtedy zaktualizują się rekordy i cel tygodniowy.",
-      "noteWaiting": "Notatka zapisana na tym urządzeniu"
+      "noteWaiting": "Notatka zapisana na tym urządzeniu",
+      "recordsOnDevice": "Policzone na tym urządzeniu. Potwierdzone po wysłaniu treningu."
+    },
+    "record": {
+      "live": "Nowy rekord osobisty: {{record}}"
     }
   },
   "exercises": {

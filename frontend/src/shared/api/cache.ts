@@ -22,11 +22,12 @@ export const CACHE_GC_TIME = DAY;
 /**
  * The answers the app needs to open offline: the account, trackers, goals, Home's numbers,
  * the exercise catalog, books, single sessions (the workout that Start repeats, History's
- * details), each tracker's latest session (what a quick log repeats), and the months and
- * weeks History showed. Other lists and exports are left out.
+ * details), each tracker's latest session (what a quick log repeats), the months and weeks
+ * History showed, Progress's overview and lines, and each exercise's bests (records in an
+ * offline workout). Other lists and exports are left out.
  */
 const KEPT =
-  /^\/api\/v1\/(me|trackers(\/[^/]+)?|goals(\/[^/]+)?|stats\/(home|calendar)|exercises|books(\/[^/]+)?|sessions\/[^/]+)$/;
+  /^\/api\/v1\/(me|trackers(\/[^/]+)?|goals(\/[^/]+)?|stats\/(home|calendar|progress)|exercises(\/[^/]+\/(records|progress))?|books(\/[^/]+)?|sessions\/[^/]+)$/;
 
 export function isKept(queryKey: readonly unknown[]): boolean {
   const [path, params] = queryKey;

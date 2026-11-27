@@ -19,7 +19,8 @@
     "summary": "Summary",
     "quickLog": "Quick log",
     "session": "Session",
-    "editSession": "Edit session"
+    "editSession": "Edit session",
+    "records": "Records"
   },
   "home": {
     "title": "Let’s keep moving.",
@@ -213,7 +214,92 @@
   },
   "progress": {
     "title": "The bigger picture.",
-    "empty": "Log two sessions to see your first trend."
+    "caption": "Progress, not perfection",
+    "loading": "Loading your progress…",
+    "loadErrorTitle": "Couldn’t load progress.",
+    "loadError": "Your saved data is safe. Check your connection and try again.",
+    "retry": "Try again",
+    "empty": {
+      "title": "A baseline is a beginning.",
+      "body": "Log two sessions to see your first trend.",
+      "workout": "Start a workout",
+      "log": "Log a session"
+    },
+    "tabs": {
+      "label": "Progress view",
+      "overview": "Overview",
+      "records": "Records"
+    },
+    "period": {
+      "label": "Period",
+      "4w": "4W",
+      "3m": "3M",
+      "1y": "1Y",
+      "all": "All"
+    },
+    "filter": "Filter by tracker",
+    "line": {
+      "pick": "{{name}}, choose another exercise",
+      "pickTitle": "Show the line of",
+      "none": "No sets of {{name}} with a weight in this period.",
+      "one": "One session so far. The line starts with the next one.",
+      "label": "{{name}}: from {{first}} on {{firstDate}} to {{last}} on {{lastDate}}",
+      "change": {
+        "4w": "{{amount}} in 4 weeks",
+        "3m": "{{amount}} in 3 months",
+        "1y": "{{amount}} in a year",
+        "all": "{{amount}} since you started"
+      }
+    },
+    "volume": "Volume · {{unit}}",
+    "pages": {
+      "week": "Pages / week",
+      "month": "Pages / month"
+    },
+    "noVolume": "No workouts in this period.",
+    "noPages": "No pages read in this period.",
+    "consistency": {
+      "title": "Consistency, in weeks.",
+      "less": "Less",
+      "more": "More",
+      "rest": "Rest days never break your streak.",
+      "days_one": "{{count}} active day",
+      "days_other": "{{count}} active days",
+      "streak_one": "One week of meeting your goal.",
+      "streak_other": "{{count}} consecutive weeks of meeting your goal."
+    },
+    "last": {
+      "4w": "last 4 weeks",
+      "3m": "last 3 months",
+      "1y": "last 12 months",
+      "all": "all time"
+    },
+    "totals": {
+      "volume": "Training volume · {{period}}",
+      "change": "{{change}} vs previous period",
+      "pages": "Pages read · {{period}}",
+      "books_one": "pages · {{count}} book finished",
+      "books_other": "pages · {{count}} books finished",
+      "books_zero": "pages"
+    },
+    "viewRecords": "View personal records",
+    "records": {
+      "title": "Your personal bests.",
+      "loading": "Loading your records…",
+      "errorTitle": "Couldn’t load records.",
+      "empty": "No records yet. They come with the second workout of an exercise.",
+      "kind": {
+        "max_weight": "Max weight",
+        "max_reps": "Max reps",
+        "estimated_1rm": "Est. 1RM"
+      },
+      "bodyweight": "bodyweight",
+      "epley": "Epley estimate",
+      "noteTitle": "Earned, one set at a time.",
+      "noteBody": "Records come from completed strength sets. Estimated 1RM is a guide, not a lifting prescription.",
+      "newThisWeek_one": "{{count}} new record this week",
+      "newThisWeek_other": "{{count}} new records this week"
+    }
   },
   "profile": {
     "title": "Your space, your rules.",
@@ -901,7 +987,11 @@
       "noteFailed": "Couldn’t save the note. Try again.",
       "waitingTitle": "Saved on this device.",
       "waitingBody": "It syncs when you’re back online. Your records and weekly goal update then.",
-      "noteWaiting": "Note saved on this device"
+      "noteWaiting": "Note saved on this device",
+      "recordsOnDevice": "Counted on this device. Confirmed once the workout is sent."
+    },
+    "record": {
+      "live": "New personal record: {{record}}"
     }
   },
   "exercises": {

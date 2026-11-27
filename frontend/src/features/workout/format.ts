@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 
 import { useHomeText } from '@/features/home/format';
 
+import type { RecordOut } from '@/shared/api/generated/model';
+
 import type { PreviousSet } from './rules';
 import { clock, weightIn } from './rules';
 
@@ -29,6 +31,19 @@ export function useWorkoutText() {
       : `${fieldWeight(set.weightKg)} × ${set.reps}`;
   }
 
+  /** A record as a badge, live in the workout and on Summary: "Max weight · 62.5 kg", "Max reps · 10 at 60 kg". */
+  function recordBadge(record: Pick<RecordOut, 'record_type' | 'value' | 'weight_kg' | 'reps'>): string {
+    if (record.record_type === 'max_weight') {
+      return t('workout.summary.maxWeight', { weight: home.weight(record.value) });
+    }
+    if (record.record_type === 'max_reps') {
+      return record.weight_kg === null
+        ? t('workout.summary.maxRepsBodyweight', { count: record.reps })
+        : t('workout.summary.maxReps', { count: record.reps, weight: home.weight(record.weight_kg) });
+    }
+    return t('workout.summary.estimated', { weight: home.weight(record.value) });
+  }
+
   /** "01:24": the rest timer, always with two-digit minutes. */
   function restClock(seconds: number): string {
     const text = clock(seconds);
@@ -41,6 +56,7 @@ export function useWorkoutText() {
     unitLabel: t(`profile.units.${unit}`),
     fieldWeight,
     previous,
+    recordBadge,
     clock,
     restClock,
   };

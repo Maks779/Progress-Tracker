@@ -1,10 +1,12 @@
+import { useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 import Animated from 'react-native-reanimated';
 
 import { deliverSession, removeItem, sessionKey, useOutbox } from '@/features/outbox/outbox';
+import { deviceRecords } from '@/features/progress/data';
 import { useListSessions } from '@/shared/api/generated/endpoints/sessions/sessions';
 import type { GoalOut, RecordOut } from '@/shared/api/generated/model';
 import { useBreakpoint, useSideColumn } from '@/shared/theme/breakpoints';
@@ -90,24 +92,19 @@ function SummaryStats({ figures, trackerName }: { figures: SummaryFigures; track
   );
 }
 
-/** The records this workout set, grouped by exercise, each badge appearing in turn. */
-function RecordsCard({ records }: { records: RecordOut[] }) {
+type ShownRecord = Pick<RecordOut, 'exercise_id' | 'record_type' | 'value' | 'weight_kg' | 'reps'>;
+
+/**
+ * The records this workout set, grouped by exercise, each badge appearing in turn. While the
+ * workout waits to be sent they are counted on the device against the bests saved there
+ * (spec §3.4), and say so; the server's answer replaces them.
+ */
+function RecordsCard({ records, onDevice }: { records: ShownRecord[]; onDevice: boolean }) {
   const { t } = useTranslation();
   const { colors, space } = useTheme();
   const text = useWorkoutText();
   const catalog = useExerciseCatalog();
   const exercises = [...new Set(records.map((record) => record.exercise_id))];
-  const label = (record: RecordOut) => {
-    if (record.record_type === 'max_weight') {
-      return t('workout.summary.maxWeight', { weight: text.weight(record.value) });
-    }
-    if (record.record_type === 'max_reps') {
-      return record.weight_kg === null
-        ? t('workout.summary.maxRepsBodyweight', { count: record.reps })
-        : t('workout.summary.maxReps', { count: record.reps, weight: text.weight(record.weight_kg) });
-    }
-    return t('workout.summary.estimated', { weight: text.weight(record.value) });
-  };
   let step = 0;
   return (
     <Card style={{ padding: space[16], gap: space[16] }}>
@@ -120,7 +117,7 @@ function RecordsCard({ records }: { records: RecordOut[] }) {
             .filter((record) => record.exercise_id === id)
             .map((record) => (
               <Animated.View key={record.record_type} entering={recordReveal(step++)}>
-                <Badge icon={Trophy} color={colors.accent.text} label={label(record)} />
+                <Badge icon={Trophy} color={colors.accent.text} label={text.recordBadge(record)} />
               </Animated.View>
             ))}
           <Text variant="caption" tone="muted">
@@ -128,6 +125,11 @@ function RecordsCard({ records }: { records: RecordOut[] }) {
           </Text>
         </View>
       ))}
+      {onDevice ? (
+        <Text variant="caption" tone="muted">
+          {t('workout.summary.recordsOnDevice')}
+        </Text>
+      ) : null}
     </Card>
   );
 }
@@ -173,7 +175,9 @@ function Summary({ summary, onLeave }: { summary: WorkoutSummary; onLeave: () =>
   const { colors, space } = useTheme();
   const side = useSideColumn(false) !== null;
   const figures = summaryFigures(summary.sessionId, summary.body, summary.saved?.session ?? null);
-  const records = summary.saved?.new_records ?? [];
+  const client = useQueryClient();
+  const counted = useMemo(() => (summary.saved ? [] : deviceRecords(client, summary.body)), [client, summary.saved, summary.body]);
+  const records: ShownRecord[] = summary.saved ? summary.saved.new_records : counted;
   const goals = summary.saved?.goals ?? [];
   const waiting = useOutbox((state) => state.items.some((item) => item.kind === 'session' && item.id === summary.sessionId));
   const [note, setNote] = useState(figures.note ?? '');
@@ -231,7 +235,7 @@ function Summary({ summary, onLeave }: { summary: WorkoutSummary; onLeave: () =>
       {summary.saved ? null : (
         <Notice tone="info" title={t('workout.summary.waitingTitle')} message={t('workout.summary.waitingBody')} />
       )}
-      {records.length > 0 ? <RecordsCard records={records} /> : null}
+      {records.length > 0 ? <RecordsCard records={records} onDevice={!summary.saved} /> : null}
       {side ? null : (
         <>
           {goal ? <GoalCard goal={goal} /> : null}

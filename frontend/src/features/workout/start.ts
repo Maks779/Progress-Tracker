@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 
 import { useAccountId } from '@/features/auth/account';
 import { openHomePage } from '@/features/navigation/openHomePage';
+import { prefetchBests } from '@/features/progress/data';
 import { CACHE_GC_TIME } from '@/shared/api/cache';
 import { isOffline } from '@/shared/api/connection';
 import { getListExercisesQueryKey, listExercises } from '@/shared/api/generated/endpoints/exercises/exercises';
@@ -179,7 +180,14 @@ export function useWorkoutEntry(showHomeTab: () => void): WorkoutEntry {
   useEffect(() => {
     if (upNextId) {
       const ahead = { staleTime: FRESH_MS, gcTime: CACHE_GC_TIME };
-      void client.prefetchQuery({ queryKey: getGetSessionQueryKey(upNextId), queryFn: () => getSession(upNextId), ...ahead });
+      void client
+        .prefetchQuery({ queryKey: getGetSessionQueryKey(upNextId), queryFn: () => getSession(upNextId), ...ahead })
+        .then(() => {
+          const answer = client.getQueryData<Awaited<ReturnType<typeof getSession>>>(getGetSessionQueryKey(upNextId));
+          if (answer?.status === 200) {
+            prefetchBests(client, (answer.data.strength?.exercises ?? []).map((entry) => entry.exercise_id));
+          }
+        });
       void client.prefetchQuery({ queryKey: getListExercisesQueryKey(), queryFn: () => listExercises(), ...ahead });
     }
   }, [client, upNextId]);
@@ -201,6 +209,7 @@ export function useWorkoutEntry(showHomeTab: () => void): WorkoutEntry {
         });
         if (!useWorkout.getState().draft) {
           workout.begin(prepared);
+          prefetchBests(client, prepared.exercises.map((exercise) => exercise.exerciseId));
         }
       } finally {
         setStarting(false);

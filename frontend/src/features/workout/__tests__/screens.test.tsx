@@ -10,7 +10,7 @@ import { sessionKey, useOutbox } from '@/features/outbox/outbox';
 import { usePreferences } from '@/features/settings/preferences';
 import { useConnection } from '@/shared/api/connection';
 import { ApiError } from '@/shared/api/fetcher';
-import { lastSets, putExercise, useListExercises } from '@/shared/api/generated/endpoints/exercises/exercises';
+import { lastSets, putExercise, useExerciseRecords, useListExercises } from '@/shared/api/generated/endpoints/exercises/exercises';
 import { putSession, useListSessions } from '@/shared/api/generated/endpoints/sessions/sessions';
 import { useListTrackers } from '@/shared/api/generated/endpoints/trackers/trackers';
 import type { ExerciseOut, GoalOut, RecordOut, SessionSaved, SessionWrite } from '@/shared/api/generated/model';
@@ -45,6 +45,9 @@ jest.mock('@/shared/api/generated/endpoints/exercises/exercises', () => ({
   putExercise: jest.fn(),
   listExercises: jest.fn(),
   getListExercisesQueryKey: () => ['/api/v1/exercises'],
+  useExerciseRecords: jest.fn(() => ({ data: undefined })),
+  exerciseRecords: jest.fn(),
+  getExerciseRecordsQueryKey: (id: string) => [`/api/v1/exercises/${id}/records`],
 }));
 jest.mock('@/shared/api/generated/endpoints/trackers/trackers', () => ({ useListTrackers: jest.fn() }));
 jest.mock('@/shared/api/generated/endpoints/me/me', () => ({ useReadMe: () => ({ data: { status: 200, data: { id: 'me' } } }) }));
@@ -120,6 +123,7 @@ beforeEach(async () => {
   useOutbox.setState({ hydrated: true, items: [], syncing: false, retryAt: null });
   usePreferences.setState((current) => ({ values: { ...current.values, weight_unit: 'kg' } }));
   useWorkout.setState({ hydrated: true, draft: draft(), summary: null });
+  jest.mocked(useExerciseRecords).mockImplementation(() => ({ data: undefined }) as never);
   jest.mocked(useListTrackers).mockReturnValue({
     data: { status: 200, data: { items: [{ id: 'gym', name: 'Gym', type: 'strength', archived: false }] } },
   } as unknown as ReturnType<typeof useListTrackers>);
@@ -162,6 +166,39 @@ describe('Workout', () => {
     expect(screen.getByText('Rest · of 120 seconds')).toBeTruthy();
     await press(screen.getByRole('button', { name: 'Skip rest' }));
     expect(screen.queryByText(/Rest · of/)).toBeNull();
+  });
+
+  it('shows a record as soon as a checked set beats the exercise’s bests, never on a tie or a first time', async () => {
+    const best = (record_type: RecordOut['record_type'], value: number) =>
+      ({ exercise_id: 'bench', record_type, value, weight_kg: 60, reps: 8, session_id: 'old', local_date: '2026-11-20' }) as RecordOut;
+    jest.mocked(useExerciseRecords).mockImplementation(
+      (id) =>
+        ({
+          data: {
+            status: 200,
+            data:
+              id === 'bench'
+                ? { exercise_id: 'bench', max_weight: best('max_weight', 60), max_reps: best('max_reps', 8), estimated_1rm: best('estimated_1rm', 76) }
+                : { exercise_id: id, max_weight: null, max_reps: null, estimated_1rm: null },
+          },
+        }) as never,
+    );
+    await show(<WorkoutScreen />);
+
+    await press(screen.getByRole('checkbox', { name: 'Bench press, Set 1, done' }));
+    expect(screen.queryByText(/Max weight/)).toBeNull();
+    await press(screen.getByRole('checkbox', { name: 'Barbell row, Set 1, done' }));
+    expect(screen.queryByText(/Max weight/)).toBeNull();
+
+    await act(() => fireEvent.changeText(screen.getByLabelText('Bench press, Set 2, weight in kg'), '62.5'));
+    await press(screen.getByRole('checkbox', { name: 'Bench press, Set 2, done' }));
+    expect(screen.getByText('Max weight · 62.5 kg')).toBeTruthy();
+    expect(screen.getByText('Max reps · 8 at 62.5 kg')).toBeTruthy();
+    expect(screen.getByText('Estimated 1RM · 79.2 kg')).toBeTruthy();
+    expect(screen.getByLabelText('New personal record: Max weight · 62.5 kg')).toBeTruthy();
+
+    await press(screen.getByRole('checkbox', { name: 'Bench press, Set 2, done' }));
+    expect(screen.queryByText(/Max weight/)).toBeNull();
   });
 
   it('takes typed weight and reps, in pounds too', async () => {
@@ -556,6 +593,25 @@ describe('Summary', () => {
     expect(router.dismissTo).not.toHaveBeenCalled();
     expect(state().summary).not.toBeNull();
     expect(useOutbox.getState().items).toEqual([]);
+  });
+
+  it('counts the records on the device while the workout waits, until the server’s answer', async () => {
+    client.setQueryData(['/api/v1/exercises/bench/records'], {
+      status: 200,
+      data: { exercise_id: 'bench', max_weight: record('max_weight', 60, 60, 8), max_reps: record('max_reps', 8, 60, 8), estimated_1rm: record('estimated_1rm', 76, 60, 8) },
+    });
+    useWorkout.setState({ summary: summary(null) });
+    await show(<SummaryScreen />);
+
+    expect(screen.getByText('Stronger than yesterday.')).toBeTruthy();
+    expect(screen.getByText('3 new personal records')).toBeTruthy();
+    expect(screen.getByText('Max reps · 10 at 60 kg')).toBeTruthy();
+    expect(screen.getByText('Estimated 1RM · 80 kg')).toBeTruthy();
+    expect(screen.getByText('Counted on this device. Confirmed once the workout is sent.')).toBeTruthy();
+
+    await act(() => workout.sessionSaved(saved({ new_records: [record('max_weight', 62.5, 62.5, 8)] })));
+    expect(screen.getByText('A new personal record')).toBeTruthy();
+    expect(screen.queryByText(/Counted on this device/)).toBeNull();
   });
 
   it('shows the device’s numbers while the workout waits, and the records once it is sent', async () => {
