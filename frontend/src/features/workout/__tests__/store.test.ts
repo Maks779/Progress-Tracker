@@ -1,15 +1,21 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { QueryClient } from '@tanstack/react-query';
 
+import { enqueue, sessionKey, useOutbox } from '@/features/outbox/outbox';
+import { useConnection } from '@/shared/api/connection';
 import { getSession } from '@/shared/api/generated/endpoints/sessions/sessions';
 import { lastSets, listExercises } from '@/shared/api/generated/endpoints/exercises/exercises';
-import type { SessionSaved } from '@/shared/api/generated/model';
+import type { SessionSaved, SessionWrite } from '@/shared/api/generated/model';
 
 import { MAX_EXERCISES, MAX_SETS, type WorkoutDraft } from '../rules';
 import { prepareWorkout } from '../start';
 import { hydrateWorkout, useWorkout, workout } from '../store';
 
-jest.mock('@/shared/api/generated/endpoints/sessions/sessions', () => ({ getSession: jest.fn() }));
+jest.mock('@/shared/api/generated/endpoints/sessions/sessions', () => ({
+  getSession: jest.fn(),
+  putSession: jest.fn(),
+  getGetSessionQueryKey: (id: string) => [`/api/v1/sessions/${id}`],
+}));
 jest.mock('@/shared/api/generated/endpoints/exercises/exercises', () => ({
   lastSets: jest.fn(),
   listExercises: jest.fn(),
@@ -33,12 +39,16 @@ function draft(): WorkoutDraft {
   };
 }
 
+const BODY: SessionWrite = { tracker_id: 'gym', started_at: '2026-11-26T17:00:00.000Z', local_date: '2026-11-26', duration_s: 1200 };
+
 const settle = () => new Promise((resolve) => setTimeout(resolve, 0));
 
 beforeEach(async () => {
   jest.clearAllMocks();
   await AsyncStorage.clear();
   useWorkout.setState({ hydrated: false, draft: null, summary: null });
+  useOutbox.setState({ hydrated: true, items: [], syncing: false, retryAt: null });
+  useConnection.setState({ online: true, reachable: true });
 });
 
 describe('the workout on the device', () => {
@@ -81,17 +91,46 @@ describe('the workout on the device', () => {
     await hydrateWorkout();
     workout.begin(draft());
     const saved = { session: { id: 'session' }, new_records: [], goals: [] } as unknown as SessionSaved;
-    workout.finished({ userId: 'me', trackerName: 'Gym', saved });
+    workout.finished({ userId: 'me', trackerName: 'Gym', sessionId: 'session', body: BODY, saved });
     await settle();
     expect(useWorkout.getState()).toMatchObject({ draft: null, summary: { trackerName: 'Gym' } });
 
     useWorkout.setState({ hydrated: false, draft: null, summary: null });
     await hydrateWorkout();
-    expect(useWorkout.getState().summary?.saved.session.id).toBe('session');
+    expect(useWorkout.getState().summary?.saved?.session.id).toBe('session');
 
     workout.clear();
     await settle();
     expect(JSON.parse((await AsyncStorage.getItem('ember.workout')) ?? '{}')).toEqual({ draft: null, summary: null });
+  });
+});
+
+describe('a workout that waits for the server', () => {
+  const answer = (records: number) =>
+    ({ session: { id: 'session', note: null }, new_records: Array.from({ length: records }, () => ({})), goals: [] }) as unknown as SessionSaved;
+
+  it('takes the server’s answer when the outbox sends it, and keeps the first answer’s records', async () => {
+    await hydrateWorkout();
+    workout.finished({ userId: 'me', trackerName: 'Gym', sessionId: 'session', body: BODY, saved: null });
+    workout.sessionSaved({ ...answer(2), session: { id: 'other' } } as unknown as SessionSaved);
+    expect(useWorkout.getState().summary?.saved).toBeNull();
+
+    workout.sessionSaved(answer(2));
+    expect(useWorkout.getState().summary?.saved?.new_records).toHaveLength(2);
+    workout.summaryBody({ ...BODY, note: 'Felt strong.' });
+    workout.sessionSaved(answer(0));
+    expect(useWorkout.getState().summary).toMatchObject({ body: { note: 'Felt strong.' }, saved: { new_records: [{}, {}] } });
+  });
+
+  it('is dropped from the outbox too when the workout is discarded', async () => {
+    await hydrateWorkout();
+    workout.begin(draft());
+    await enqueue({ kind: 'session', id: 'session', userId: 'me', body: BODY });
+    workout.discard();
+    await settle();
+    expect(useWorkout.getState().draft).toBeNull();
+    expect(useOutbox.getState().items).toEqual([]);
+    expect(await AsyncStorage.getItem(sessionKey('session'))).toBeNull();
   });
 });
 
@@ -156,6 +195,33 @@ describe('starting a workout', () => {
     const prepared = await prepareWorkout(client, start);
     expect(prepared.exercises).toEqual([]);
     expect(prepared.prefillFailed).toBe(true);
+  });
+
+  it('uses the copies saved on the device when offline, with ghosts from that workout', async () => {
+    client.setQueryData([`/api/v1/sessions/last`], session);
+    client.setQueryData(['/api/v1/exercises'], catalog);
+    useConnection.setState({ online: false });
+    const prepared = await prepareWorkout(client, start);
+    expect(getSession).not.toHaveBeenCalled();
+    expect(lastSets).not.toHaveBeenCalled();
+    expect(prepared.prefillFailed).toBeUndefined();
+    expect(prepared.exercises.map((item) => [item.exerciseId, item.sets.length])).toEqual([
+      ['bench', 3],
+      ['pull', 2],
+      ['curl', 2],
+    ]);
+    expect(prepared.exercises[0].sets[0].ghost).toEqual({ weightKg: 60, reps: 8 });
+  });
+
+  it('falls back to the saved copy when the server does not answer', async () => {
+    client.setQueryData([`/api/v1/sessions/last`], session);
+    jest.mocked(getSession).mockRejectedValue(new Error('offline'));
+    jest.mocked(listExercises).mockRejectedValue(new Error('offline'));
+    client.setQueryData(['/api/v1/exercises'], catalog);
+    await client.invalidateQueries();
+    const prepared = await prepareWorkout(client, start);
+    expect(getSession).toHaveBeenCalledTimes(1);
+    expect(prepared.exercises).toHaveLength(3);
   });
 
   it('starts empty under the tracker’s name before the first workout', async () => {

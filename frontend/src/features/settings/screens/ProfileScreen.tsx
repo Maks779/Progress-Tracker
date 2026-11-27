@@ -4,8 +4,9 @@ import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { signOut } from '@/features/auth/session';
-import { workout } from '@/features/workout/store';
 import { ExportSheet } from '@/features/export/ExportSheet';
+import { forgetAccount, useOutbox } from '@/features/outbox/outbox';
+import { workout } from '@/features/workout/store';
 import { useReadMe } from '@/shared/api/generated/endpoints/me/me';
 import { SIDE_COLUMN_WIDTH, useBreakpoint, useTwoColumns } from '@/shared/theme/breakpoints';
 import { useTheme } from '@/shared/theme/ThemeProvider';
@@ -19,6 +20,7 @@ import { ChangePasswordSheet } from '../components/ChangePasswordSheet';
 import { DeleteAccountSheet } from '../components/DeleteAccountSheet';
 import { EditNameSheet } from '../components/EditNameSheet';
 import { LinksCard } from '../components/LinksCard';
+import { LogOutSheet } from '../components/LogOutSheet';
 import { ProfileCard } from '../components/ProfileCard';
 import { SettingsCard } from '../components/SettingsCard';
 
@@ -59,12 +61,24 @@ export function ProfileScreen() {
   const [editingName, setEditingName] = useState(false);
   const [changingPassword, setChangingPassword] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [confirmingLogOut, setConfirmingLogOut] = useState(false);
   const account = me.data?.status === 200 ? me.data.data : undefined;
+  const unsynced = useOutbox((state) => state.items.filter((item) => item.userId === account?.id).length);
 
-  const logOut = async () => {
+  const leave = async () => {
     setSigningOut(true);
     workout.clear();
+    if (account) {
+      await forgetAccount(account.id);
+    }
     await signOut();
+  };
+  const logOut = async () => {
+    if (unsynced > 0) {
+      setConfirmingLogOut(true);
+      return;
+    }
+    await leave();
   };
 
   const main = (
@@ -146,6 +160,9 @@ export function ProfileScreen() {
       {changingPassword ? <ChangePasswordSheet onClose={() => setChangingPassword(false)} /> : null}
       {exporting ? <ExportSheet onClose={() => setExporting(false)} /> : null}
       <DeleteAccountSheet visible={deleting} onClose={() => setDeleting(false)} />
+      {confirmingLogOut ? (
+        <LogOutSheet count={unsynced} onLogOut={leave} onClose={() => setConfirmingLogOut(false)} />
+      ) : null}
     </Screen>
   );
 }

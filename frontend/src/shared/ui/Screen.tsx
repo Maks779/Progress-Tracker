@@ -8,13 +8,24 @@ import { useTheme } from '@/shared/theme/ThemeProvider';
 
 import { showFocusRing } from './focusRing';
 import { ChevronLeft } from './icons';
+import { OfflineBadge } from './OfflineBadge';
 import { Text } from './Text';
 
 /** `step` marks a step back inside the page (a form in steps), which desktop keeps. */
 type Back = { label: string; onPress: () => void; step?: boolean };
 
-/** `caption` may be live text, such as the workout's elapsed time. */
-type Props = { title: string; caption?: ReactNode; back?: Back; action?: ReactNode; children?: ReactNode };
+/**
+ * `caption` may be live text, such as the workout's elapsed time. `offlineBadge: false` leaves
+ * the badge out where the page says more about being offline itself (Home).
+ */
+type Props = {
+  title: string;
+  caption?: ReactNode;
+  back?: Back;
+  action?: ReactNode;
+  offlineBadge?: boolean;
+  children?: ReactNode;
+};
 
 function BackLink({ label, onPress }: Back) {
   const { colors, radius } = useTheme();
@@ -53,9 +64,10 @@ function BackLink({ label, onPress }: Back) {
  * back to the parent page, the screen title (with an optional caption under it and an
  * optional action beside it) and scrollable content, centred on wide screens. Tablets and
  * desktop get the roomier padding of their designs. On desktop the breadcrumb in the top bar
- * leads to the parent pages, so only a step back stays.
+ * leads to the parent pages, so only a step back stays. Offline, a badge sits above the title,
+ * or in the top bar when there is one.
  */
-export function Screen({ title, caption, back, action, children }: Props) {
+export function Screen({ title, caption, back, action, offlineBadge = true, children }: Props) {
   const { colors, space } = useTheme();
   const breakpoint = useBreakpoint();
   const underTopBar = useContext(HeaderShownContext);
@@ -74,6 +86,7 @@ export function Screen({ title, caption, back, action, children }: Props) {
       >
         <View style={styles.column}>
           {showBack ? <BackLink label={back.label} onPress={back.onPress} /> : null}
+          {offlineBadge && !underTopBar ? <OfflineBadge style={{ marginBottom: space[8] }} /> : null}
           <View style={styles.titleRow}>
             <View style={styles.titleText}>
               <Text variant="h1" accessibilityRole="header">

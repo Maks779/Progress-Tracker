@@ -15,15 +15,21 @@ import { ActivityIndicator, View } from 'react-native';
 import { installAuth, restoreSession } from '@/features/auth/session';
 import { useAuthStore } from '@/features/auth/store';
 import { useOnboardingGate } from '@/features/onboarding/useOnboardingGate';
+import { hydrateOutbox, useOutbox } from '@/features/outbox/outbox';
+import { useOutboxSync } from '@/features/outbox/useOutboxSync';
 import { hydratePreferences, usePreferences } from '@/features/settings/preferences';
 import { usePreferencesSync } from '@/features/settings/usePreferencesSync';
 import { hydrateWorkout, useWorkout } from '@/features/workout/store';
+import { forgetCache, restoreCache } from '@/shared/api/cache';
+import { watchConnection } from '@/shared/api/connection';
 import { createQueryClient, followAppFocus } from '@/shared/api/queryClient';
+import { useServerProbe } from '@/shared/api/useServerProbe';
 import { ThemeProvider, useTheme } from '@/shared/theme/ThemeProvider';
 
 SplashScreen.preventAutoHideAsync();
 installAuth();
 followAppFocus();
+watchConnection();
 
 /**
  * Signed-out people see the auth screens; a signed-in account without trackers goes through
@@ -37,6 +43,8 @@ function Navigator() {
   const expired = useAuthStore((state) => state.expired);
   const onboarding = useOnboardingGate();
   usePreferencesSync();
+  useOutboxSync();
+  useServerProbe(signedIn);
 
   if (signedIn && onboarding === 'unknown') {
     return (
@@ -85,20 +93,31 @@ export default function RootLayout() {
   const status = useAuthStore((state) => state.status);
   const hydrated = usePreferences((state) => state.hydrated);
   const workoutLoaded = useWorkout((state) => state.hydrated);
+  const outboxLoaded = useOutbox((state) => state.hydrated);
+  const [cacheLoaded, setCacheLoaded] = useState(false);
   const theme = usePreferences((state) => state.values.theme);
-  const ready = (fontsLoaded || fontError !== null) && status !== 'restoring' && hydrated && workoutLoaded;
+  const ready =
+    (fontsLoaded || fontError !== null) &&
+    status !== 'restoring' &&
+    hydrated &&
+    workoutLoaded &&
+    outboxLoaded &&
+    cacheLoaded;
 
   useEffect(() => {
     hydratePreferences();
     hydrateWorkout();
+    hydrateOutbox();
     restoreSession();
-  }, []);
+    restoreCache(queryClient).then(() => setCacheLoaded(true));
+  }, [queryClient]);
 
   useEffect(() => {
-    if (status === 'signedOut') {
+    if (cacheLoaded && status === 'signedOut') {
       queryClient.clear();
+      void forgetCache();
     }
-  }, [status, queryClient]);
+  }, [cacheLoaded, status, queryClient]);
 
   useEffect(() => {
     if (ready) {

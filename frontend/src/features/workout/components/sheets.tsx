@@ -1,10 +1,9 @@
-import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
-import { ApiError } from '@/shared/api/fetcher';
-import { putSession } from '@/shared/api/generated/endpoints/sessions/sessions';
+import { deliverSession, removeItem, sessionKey } from '@/features/outbox/outbox';
+import { useOffline } from '@/shared/api/connection';
 import { useNow } from '@/shared/hooks/useNow';
 import { useTheme } from '@/shared/theme/ThemeProvider';
 import { Button } from '@/shared/ui/Button';
@@ -36,13 +35,15 @@ type FinishProps = { draft: WorkoutDraft; trackerName: string; exerciseNames: st
 
 /**
  * "Finish this workout?": what will be saved and what will not count, then the save. Only
- * checked sets are sent; the draft stays on the device until the server has the session.
+ * checked sets are sent, through the outbox: without a connection the session waits on the
+ * device and Summary opens anyway. When the server refuses it (its tracker was deleted
+ * meanwhile), the workout stays open.
  */
 export function FinishSheet({ draft, trackerName, exerciseNames, onClose }: FinishProps) {
   const { t } = useTranslation();
   const { colors, radius, space } = useTheme();
   const text = useWorkoutText();
-  const queryClient = useQueryClient();
+  const offline = useOffline();
   const [error, setError] = useState<string | null>(null);
   const now = useNow();
   const counts = tally(draft.exercises);
@@ -55,19 +56,19 @@ export function FinishSheet({ draft, trackerName, exerciseNames, onClose }: Fini
       return;
     }
     setError(null);
-    try {
-      const response = await putSession(draft.id, body);
-      if (response.status !== 200 && response.status !== 201) {
-        throw new Error(`Unexpected response ${response.status}`);
-      }
-      workout.finished({ userId: draft.userId, trackerName, saved: response.data });
-      void queryClient.invalidateQueries();
-    } catch (cause) {
-      const missing =
-        cause instanceof ApiError && cause.fieldErrors.some((field) => field.field === 'tracker_id' && field.code === 'not_found');
-      const offline = cause instanceof ApiError && cause.status === 0;
-      setError(t(missing ? 'workout.finish.trackerGone' : offline ? 'workout.finish.offline' : 'workout.finish.failed'));
+    const result = await deliverSession(draft.id, draft.userId, body);
+    if (result.status === 'refused') {
+      await removeItem(sessionKey(draft.id));
+      setError(t(result.code === 'tracker_gone' ? 'workout.finish.trackerGone' : 'workout.finish.failed'));
+      return;
     }
+    workout.finished({
+      userId: draft.userId,
+      trackerName,
+      sessionId: draft.id,
+      body,
+      saved: result.status === 'saved' ? result.data : null,
+    });
   };
 
   let body: string;
@@ -95,6 +96,7 @@ export function FinishSheet({ draft, trackerName, exerciseNames, onClose }: Fini
       <Text variant="small" tone="muted">
         {body}
       </Text>
+      {offline && counts.done > 0 ? <Notice tone="info" title={t('workout.finish.offlineTitle')} message={t('workout.finish.offlineBody')} /> : null}
       {error ? <Notice tone="error" title={error} /> : null}
       {counts.done > 0 ? <Button label={t('workout.finish.confirm')} onPress={finish} /> : null}
       <Button label={t('workout.keepTraining')} variant="secondary" onPress={onClose} />

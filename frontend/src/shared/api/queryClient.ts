@@ -3,17 +3,23 @@ import { AppState, Platform } from 'react-native';
 
 import { ApiError } from './fetcher';
 
-/** Server data cache. Client errors (4xx) are not retried; network and 5xx errors once. */
+/**
+ * Server data cache. Client errors (4xx) are not retried; network and 5xx errors once.
+ * Requests are tried even when the device reports no network (`networkMode: 'always'`): they
+ * fail at once, so screens show their saved data or their error state instead of waiting.
+ */
 export function createQueryClient(): QueryClient {
   return new QueryClient({
     defaultOptions: {
       queries: {
         staleTime: 30_000,
+        networkMode: 'always',
         retry: (failures, error) => {
           const clientError = error instanceof ApiError && error.status < 500 && error.status > 0;
           return !clientError && failures < 1;
         },
       },
+      mutations: { networkMode: 'always' },
     },
   });
 }

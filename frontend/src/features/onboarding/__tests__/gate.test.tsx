@@ -10,10 +10,11 @@ jest.mock('@/shared/api/generated/endpoints/trackers/trackers', () => ({ useList
 
 const trackers = useListTrackers as jest.Mock;
 
-function answer(state: { items?: unknown[]; isError?: boolean }) {
+function answer(state: { items?: unknown[]; isError?: boolean; fresh?: boolean }) {
   trackers.mockReturnValue({
     data: state.items ? { status: 200, data: { items: state.items } } : undefined,
     isError: state.isError ?? false,
+    isFetchedAfterMount: state.fresh ?? Boolean(state.items),
   });
 }
 
@@ -29,7 +30,7 @@ describe('useOnboardingGate', () => {
 
     const { result } = await renderHook(() => useOnboardingGate());
 
-    expect(trackers).toHaveBeenCalledWith({ include_archived: true }, { query: { enabled: true } });
+    expect(trackers).toHaveBeenCalledWith({ include_archived: true }, { query: { enabled: true, staleTime: 0 } });
     expect(result.current).toBe('needed');
   });
 
@@ -38,6 +39,25 @@ describe('useOnboardingGate', () => {
 
     const { result } = await renderHook(() => useOnboardingGate());
 
+    expect(result.current).toBe('done');
+  });
+
+  it('trusts a saved list with trackers at once', async () => {
+    answer({ items: [{ id: 'gym' }], fresh: false });
+
+    const { result } = await renderHook(() => useOnboardingGate());
+
+    expect(result.current).toBe('done');
+  });
+
+  it('waits for a fresh answer when the saved list is empty', async () => {
+    answer({ items: [], fresh: false });
+
+    const { result, rerender } = await renderHook(() => useOnboardingGate());
+    expect(result.current).toBe('unknown');
+
+    answer({ items: [{ id: 'gym' }] });
+    await rerender({});
     expect(result.current).toBe('done');
   });
 
@@ -56,7 +76,7 @@ describe('useOnboardingGate', () => {
 
     await renderHook(() => useOnboardingGate());
 
-    expect(trackers).toHaveBeenCalledWith({ include_archived: true }, { query: { enabled: false } });
+    expect(trackers).toHaveBeenCalledWith({ include_archived: true }, { query: { enabled: false, staleTime: 0 } });
     expect(useOnboarding.getState().status).toBe('unknown');
   });
 });

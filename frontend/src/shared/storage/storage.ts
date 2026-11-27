@@ -21,6 +21,13 @@ export const storage = {
       return;
     }
   },
+  async keys(prefix: string): Promise<string[]> {
+    try {
+      return (await AsyncStorage.getAllKeys()).filter((key) => key.startsWith(prefix));
+    } catch {
+      return [];
+    }
+  },
   async remove(key: string): Promise<void> {
     try {
       await AsyncStorage.removeItem(key);

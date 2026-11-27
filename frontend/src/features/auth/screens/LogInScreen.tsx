@@ -4,6 +4,8 @@ import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { type TextInputInstance, View } from 'react-native';
 
+import { useOutbox } from '@/features/outbox/outbox';
+import { useWorkout } from '@/features/workout/store';
 import { useExclusive } from '@/shared/hooks/useExclusive';
 import { useTheme } from '@/shared/theme/ThemeProvider';
 import { Button } from '@/shared/ui/Button';
@@ -22,6 +24,15 @@ export function LogInScreen() {
   const { t } = useTranslation();
   const { space } = useTheme();
   const expired = useAuthStore((state) => state.expired);
+  const waiting = useOutbox((state) => state.items.length);
+  const hasWorkout = useWorkout((state) => state.draft !== null);
+  const expiredBody = [
+    t('auth.logIn.expiredBody'),
+    hasWorkout ? t('sync.expiredWorkout') : null,
+    waiting > 0 ? t('sync.expiredWaiting', { count: waiting }) : null,
+  ]
+    .filter(Boolean)
+    .join(' ');
   const passwordRef = useRef<TextInputInstance>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -52,7 +63,7 @@ export function LogInScreen() {
       caption={t('auth.secure')}
     >
       {expired ? (
-        <Notice tone="info" title={t('auth.logIn.expiredTitle')} message={t('auth.logIn.expiredBody')} />
+        <Notice tone="info" title={t('auth.logIn.expiredTitle')} message={expiredBody} />
       ) : null}
       <View style={{ gap: space[16] }}>
         <Controller

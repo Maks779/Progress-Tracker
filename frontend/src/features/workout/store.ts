@@ -2,7 +2,8 @@ import { Platform } from 'react-native';
 import { z } from 'zod';
 import { create } from 'zustand';
 
-import type { SessionSaved } from '@/shared/api/generated/model';
+import { onSaved, removeItem, sessionKey } from '@/features/outbox/outbox';
+import type { SessionSaved, SessionWrite } from '@/shared/api/generated/model';
 import { newId } from '@/shared/ids';
 import { storage } from '@/shared/storage/storage';
 
@@ -26,8 +27,18 @@ import {
 
 const STORAGE_KEY = 'ember.workout';
 
-/** What Summary shows after Finish; kept until Done, so it survives a restart too. */
-export type WorkoutSummary = { userId: string; trackerName: string; saved: SessionSaved };
+/**
+ * What Summary shows after Finish; kept until Done, so it survives a restart too. `body` is
+ * the session as sent (or waiting in the outbox); `saved` is the server's answer, null until
+ * the session reaches the server.
+ */
+export type WorkoutSummary = {
+  userId: string;
+  trackerName: string;
+  sessionId: string;
+  body: SessionWrite;
+  saved: SessionSaved | null;
+};
 
 type State = { hydrated: boolean; draft: WorkoutDraft | null; summary: WorkoutSummary | null };
 
@@ -73,10 +84,14 @@ const draftSchema = z.object({
 const summarySchema = z.object({
   userId: z.string(),
   trackerName: z.string(),
-  saved: z.looseObject({
-    session: z.looseObject({ id: z.string() }),
-    new_records: z.array(z.looseObject({})),
-  }),
+  sessionId: z.string(),
+  body: z.looseObject({ tracker_id: z.string(), started_at: z.string(), local_date: z.string() }),
+  saved: z
+    .looseObject({
+      session: z.looseObject({ id: z.string() }),
+      new_records: z.array(z.looseObject({})),
+    })
+    .nullable(),
 });
 
 let loading = false;
@@ -203,16 +218,34 @@ export const workout = {
   skipRest(): void {
     change((draft) => ({ ...draft, rest: null }));
   },
+  /** Nothing of it was saved: a Finish that is still waiting to be sent goes too. */
   discard(): void {
+    const { draft } = useWorkout.getState();
     useWorkout.setState({ draft: null });
+    if (draft) {
+      void removeItem(sessionKey(draft.id));
+    }
   },
   finished(summary: WorkoutSummary): void {
     useWorkout.setState({ draft: null, summary });
   },
-  updateSummary(saved: SessionSaved): void {
+  /** The session as sent again with a note. */
+  summaryBody(body: SessionWrite): void {
     const { summary } = useWorkout.getState();
     if (summary) {
-      useWorkout.setState({ summary: { ...summary, saved: { ...saved, new_records: summary.saved.new_records } } });
+      useWorkout.setState({ summary: { ...summary, body } });
+    }
+  },
+  /**
+   * The server's answer for the session on Summary, also when the outbox sends it later. The
+   * records stay those of the first answer: sending the session again for a note does not set
+   * them again.
+   */
+  sessionSaved(saved: SessionSaved): void {
+    const { summary } = useWorkout.getState();
+    if (summary && summary.sessionId === saved.session.id) {
+      const records = summary.saved ? summary.saved.new_records : saved.new_records;
+      useWorkout.setState({ summary: { ...summary, saved: { ...saved, new_records: records } } });
     }
   },
   closeSummary(): void {
@@ -223,3 +256,9 @@ export const workout = {
     useWorkout.setState({ draft: null, summary: null });
   },
 };
+
+onSaved((item, data) => {
+  if (item.kind === 'session') {
+    workout.sessionSaved(data as SessionSaved);
+  }
+});

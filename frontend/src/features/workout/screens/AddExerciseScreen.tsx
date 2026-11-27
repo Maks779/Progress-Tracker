@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, View, type ViewStyle } from 'react-native';
 
-import { lastSets } from '@/shared/api/generated/endpoints/exercises/exercises';
 import type { ExerciseOut } from '@/shared/api/generated/model';
 import { parseIsoDate } from '@/shared/format/dates';
 import { useBreakpoint, useSideColumn } from '@/shared/theme/breakpoints';
@@ -28,11 +27,12 @@ import {
   filterExercises,
   infoOf,
   isWeighted,
+  lastSetsOf,
   MUSCLE_GROUPS,
   type MuscleGroup,
   useExerciseCatalog,
 } from '../exercises';
-import { MAX_EXERCISES, previousFrom, type WorkoutDraft } from '../rules';
+import { MAX_EXERCISES, type WorkoutDraft } from '../rules';
 import { useActiveDraft } from '../start';
 import { type NewExercise, useWorkout, workout } from '../store';
 
@@ -114,14 +114,7 @@ function Picker({ draft }: { draft: WorkoutDraft }) {
     const items: NewExercise[] = await Promise.all(
       selected.map(async (id) => {
         const exercise = catalog.byId.get(id);
-        let previous: NewExercise['previous'] = [];
-        try {
-          const response = await lastSets(id);
-          previous = response.status === 200 ? previousFrom(response.data.sets) : [];
-        } catch {
-          previous = [];
-        }
-        return { exerciseId: id, info: infoOf(exercise), weighted: isWeighted(exercise), previous };
+        return { exerciseId: id, info: infoOf(exercise), weighted: isWeighted(exercise), previous: await lastSetsOf(id) };
       }),
     );
     if (useWorkout.getState().draft) {
@@ -235,6 +228,7 @@ function Picker({ draft }: { draft: WorkoutDraft }) {
       </Screen>
       {creating !== null ? (
         <CustomExerciseSheet
+          userId={draft.userId}
           name={creating}
           muscle={muscle === 'all' ? 'chest' : muscle}
           onClose={() => setCreating(null)}

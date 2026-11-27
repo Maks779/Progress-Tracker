@@ -2,8 +2,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { ApiError } from '@/shared/api/fetcher';
-import { getListExercisesQueryKey, putExercise } from '@/shared/api/generated/endpoints/exercises/exercises';
+import { deliverExercise, itemKey, removeItem } from '@/features/outbox/outbox';
+import { getListExercisesQueryKey } from '@/shared/api/generated/endpoints/exercises/exercises';
 import type { ExerciseOut } from '@/shared/api/generated/model';
 import { newId } from '@/shared/ids';
 import { Button } from '@/shared/ui/Button';
@@ -12,15 +12,22 @@ import { Notice } from '@/shared/ui/Notice';
 import { Sheet } from '@/shared/ui/Sheet';
 import { TextField } from '@/shared/ui/TextField';
 
-import { EQUIPMENT, type Equipment, MUSCLE_GROUPS, type MuscleGroup } from '../exercises';
+import { EQUIPMENT, type Equipment, MUSCLE_GROUPS, type MuscleGroup, waitingExercise } from '../exercises';
 
-type Props = { name: string; muscle: MuscleGroup; onCreated: (exercise: ExerciseOut) => void; onClose: () => void };
+type Props = {
+  userId: string;
+  name: string;
+  muscle: MuscleGroup;
+  onCreated: (exercise: ExerciseOut) => void;
+  onClose: () => void;
+};
 
 /**
  * "Create an exercise" for what the catalog lacks: a name, the muscle group and the equipment
- * (bodyweight ones may be logged without a weight). It is saved under an ID from the device.
+ * (bodyweight ones may be logged without a weight). It is saved under an ID from the device,
+ * through the outbox: offline it is usable at once and reaches the server before the workout.
  */
-export function CustomExerciseSheet({ name: initialName, muscle: initialMuscle, onCreated, onClose }: Props) {
+export function CustomExerciseSheet({ userId, name: initialName, muscle: initialMuscle, onCreated, onClose }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [name, setName] = useState(initialName);
@@ -36,16 +43,18 @@ export function CustomExerciseSheet({ name: initialName, muscle: initialMuscle, 
       return;
     }
     setError(null);
-    try {
-      const response = await putExercise(newId(), { name: trimmed, muscle_group: muscle, equipment });
-      if (response.status !== 200 && response.status !== 201) {
-        throw new Error(`Unexpected response ${response.status}`);
-      }
-      await queryClient.invalidateQueries({ queryKey: getListExercisesQueryKey() });
-      onCreated(response.data);
-    } catch (cause) {
-      setError(t(cause instanceof ApiError && cause.status === 0 ? 'workout.custom.offline' : 'workout.custom.failed'));
+    const id = newId();
+    const body = { name: trimmed, muscle_group: muscle, equipment };
+    const result = await deliverExercise(id, userId, body);
+    if (result.status === 'refused') {
+      await removeItem(itemKey({ kind: 'exercise', id }));
+      setError(t('workout.custom.failed'));
+      return;
     }
+    if (result.status === 'saved') {
+      await queryClient.invalidateQueries({ queryKey: getListExercisesQueryKey() });
+    }
+    onCreated(result.status === 'saved' ? result.data : waitingExercise(id, body));
   };
 
   return (

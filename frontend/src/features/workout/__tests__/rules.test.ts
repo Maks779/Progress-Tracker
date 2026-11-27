@@ -1,4 +1,4 @@
-import type { SessionOut } from '@/shared/api/generated/model';
+import type { SessionOut, SessionWrite } from '@/shared/api/generated/model';
 
 import {
   clock,
@@ -21,6 +21,7 @@ import {
   roundOrder,
   setNumber,
   setProblems,
+  summaryFigures,
   tally,
   toggleSet,
   toSession,
@@ -271,9 +272,8 @@ describe('finishing', () => {
     expect(toSession(draft([exercise('a', [set({ reps: 8 })])]), NOW)).toBeUndefined();
   });
 
-  it('sends a saved session back whole with its new note', () => {
-    const session = {
-      id: 'saved',
+  it('sends the session back whole with its new note', () => {
+    const body: SessionWrite = {
       tracker_id: 'gym',
       started_at: '2026-11-26T17:00:00Z',
       local_date: '2026-11-26',
@@ -283,18 +283,50 @@ describe('finishing', () => {
       strength: {
         exercises: [{ id: 'a', exercise_id: 'bench', position: 0, superset_group: null, sets: [{ position: 0, weight_kg: 60, reps: 8, kind: 'working' }] }],
       },
-    } as unknown as SessionOut;
-    expect(withNote(session, '  Felt strong.  ')).toEqual({
+    };
+    expect(withNote(body, '  Felt strong.  ')).toEqual({ ...body, note: 'Felt strong.' });
+    expect(withNote(body, '   ').note).toBeNull();
+  });
+
+  it('shows the device’s own numbers until the server’s arrive', () => {
+    const body: SessionWrite = {
       tracker_id: 'gym',
       started_at: '2026-11-26T17:00:00Z',
       local_date: '2026-11-26',
       duration_s: 2892,
       name: 'Upper body A',
       note: 'Felt strong.',
-      strength: session.strength,
+      strength: {
+        exercises: [
+          {
+            id: 'a',
+            exercise_id: 'bench',
+            position: 0,
+            sets: [
+              { position: 0, weight_kg: 40, reps: 10, kind: 'warmup' },
+              { position: 1, weight_kg: 62.5, reps: 8, kind: 'working' },
+              { position: 2, weight_kg: '60', reps: 10 },
+            ],
+          },
+          { id: 'b', exercise_id: 'pull', position: 1, sets: [{ position: 0, weight_kg: null, reps: 12, kind: 'working' }] },
+        ],
+      },
+    };
+    expect(summaryFigures('s', body, null)).toEqual({
+      sessionId: 's',
+      trackerId: 'gym',
+      localDate: '2026-11-26',
+      startedAt: '2026-11-26T17:00:00Z',
+      name: 'Upper body A',
+      durationS: 2892,
+      volumeKg: 1100,
+      workingSets: 3,
+      note: 'Felt strong.',
     });
-    expect(withNote(session, '   ').note).toBeNull();
+    const saved = { name: 'Upper body A', duration_s: 2892, stats: { volume_kg: 1100.5, working_sets: 3 } } as unknown as SessionOut;
+    expect(summaryFigures('s', body, saved)).toMatchObject({ volumeKg: 1100.5, workingSets: 3 });
   });
+
 });
 
 describe('numbers in fields', () => {
