@@ -9,9 +9,9 @@ import { IconButton } from '@/shared/ui/IconButton';
 import { Ellipsis, Plus } from '@/shared/ui/icons';
 import { Text } from '@/shared/ui/Text';
 
+import type { DraftActions } from '../editor';
 import { useWorkoutText } from '../format';
 import { type DraftExercise, MAX_SETS, nextInSuperset, setNumber, setProblems } from '../rules';
-import { workout } from '../store';
 import { COLUMN, SetRow } from './SetRow';
 
 /** "+ Add set" under the rows: a dark full-width button, as in the design. */
@@ -50,6 +50,9 @@ type BlockProps = {
   exercise: DraftExercise;
   exercises: DraftExercise[];
   name: string;
+  actions: DraftActions;
+  editing: boolean;
+  showProblems: boolean;
   onMenu: () => void;
   onSetMenu: (setIndex: number) => void;
 };
@@ -57,14 +60,17 @@ type BlockProps = {
 /**
  * Exercise block from the design: the name with its "⋯" menu, the column headings and a row per
  * set, then "Add set". A set that cannot be checked yet marks its empty fields and says why.
+ * In a saved session being edited every set counts: there is no Previous or Done column, and
+ * `showProblems` marks every set that cannot be saved.
  */
-function ExerciseBlock({ index, exercise, exercises, name, onMenu, onSetMenu }: BlockProps) {
+function ExerciseBlock({ index, exercise, exercises, name, actions, editing, showProblems, onMenu, onSetMenu }: BlockProps) {
   const { t } = useTranslation();
   const { space } = useTheme();
   const text = useWorkoutText();
   const [attempted, setAttempted] = useState<string[]>([]);
-  const highlight = nextInSuperset(exercises, index);
-  const failing = exercise.sets.filter((set) => attempted.includes(set.id) && setProblems(set, exercise.weighted).length > 0);
+  const highlight = editing ? null : nextInSuperset(exercises, index);
+  const marked = (id: string) => showProblems || attempted.includes(id);
+  const failing = exercise.sets.filter((set) => marked(set.id) && setProblems(set, exercise.weighted).length > 0);
 
   const toggle = (setIndex: number) => {
     const set = exercise.sets[setIndex];
@@ -74,8 +80,21 @@ function ExerciseBlock({ index, exercise, exercises, name, onMenu, onSetMenu }: 
       return;
     }
     setAttempted((ids) => ids.filter((id) => id !== set.id));
-    workout.toggleSet(index, setIndex);
+    actions.toggleSet(index, setIndex);
   };
+  const columns: { label: string; width?: number; flex?: number }[] = editing
+    ? [
+        { label: t('workout.columns.set'), width: COLUMN.set },
+        { label: text.unitLabel, flex: 1 },
+        { label: t('workout.columns.reps'), flex: 1 },
+      ]
+    : [
+        { label: t('workout.columns.set'), width: COLUMN.set },
+        { label: t('workout.columns.previous'), flex: 1 },
+        { label: text.unitLabel, width: COLUMN.weight },
+        { label: t('workout.columns.reps'), width: COLUMN.reps },
+        { label: t('workout.columns.done'), width: COLUMN.done },
+      ];
 
   return (
     <View style={{ gap: space[8] }}>
@@ -88,19 +107,17 @@ function ExerciseBlock({ index, exercise, exercises, name, onMenu, onSetMenu }: 
         </View>
       </View>
       <View style={{ flexDirection: 'row', gap: COLUMN.gap }} importantForAccessibility="no-hide-descendants" aria-hidden>
-        {[
-          { label: t('workout.columns.set'), width: COLUMN.set },
-          { label: t('workout.columns.previous'), flex: 1 },
-          { label: text.unitLabel, width: COLUMN.weight },
-          { label: t('workout.columns.reps'), width: COLUMN.reps },
-          { label: t('workout.columns.done'), width: COLUMN.done },
-        ].map((column) => (
+        {columns.map((column) => (
           <Text
             key={column.label}
             variant="caption"
             tone="muted"
             numberOfLines={1}
-            style={{ width: column.width, flex: column.flex, textAlign: column.width === COLUMN.set || column.flex ? 'left' : 'center' }}
+            style={{
+              width: column.width,
+              flex: column.flex,
+              textAlign: column.width === COLUMN.set || (column.flex && !editing) ? 'left' : 'center',
+            }}
           >
             {column.label}
           </Text>
@@ -118,9 +135,10 @@ function ExerciseBlock({ index, exercise, exercises, name, onMenu, onSetMenu }: 
             name={`${name}, ${setName}`}
             previous={exercise.previous[setIndex]}
             highlighted={set.id === highlight}
-            problems={attempted.includes(set.id) ? setProblems(set, exercise.weighted) : []}
-            onWeight={(kg) => workout.setWeight(index, setIndex, kg)}
-            onReps={(reps) => workout.setReps(index, setIndex, reps)}
+            editing={editing}
+            problems={marked(set.id) ? setProblems(set, exercise.weighted) : []}
+            onWeight={(kg) => actions.setWeight(index, setIndex, kg)}
+            onReps={(reps) => actions.setReps(index, setIndex, reps)}
             onToggle={() => toggle(setIndex)}
             onMenu={() => onSetMenu(setIndex)}
           />
@@ -131,7 +149,7 @@ function ExerciseBlock({ index, exercise, exercises, name, onMenu, onSetMenu }: 
           {t(exercise.weighted ? 'workout.set.needsWeight' : 'workout.set.needsReps')}
         </Text>
       ) : null}
-      {exercise.sets.length < MAX_SETS ? <AddRowButton label={t('workout.exercise.addSet')} onPress={() => workout.addSet(index)} /> : null}
+      {exercise.sets.length < MAX_SETS ? <AddRowButton label={t('workout.exercise.addSet')} onPress={() => actions.addSet(index)} /> : null}
     </View>
   );
 }
@@ -141,6 +159,10 @@ type Props = {
   members: number[];
   exercises: DraftExercise[];
   nameOf: (exercise: DraftExercise) => string;
+  actions: DraftActions;
+  /** A saved session being edited rather than the active workout. */
+  editing?: boolean;
+  showProblems?: boolean;
   onMenu: (index: number) => void;
   onSetMenu: (index: number, setIndex: number) => void;
 };
@@ -149,7 +171,7 @@ type Props = {
  * A card with one exercise, or with every exercise of a superset (agreed with the owner,
  * 2026-11-26): "Superset" above them and an accent bar on the left, one block per exercise.
  */
-export function ExerciseCard({ members, exercises, nameOf, onMenu, onSetMenu }: Props) {
+export function ExerciseCard({ members, exercises, nameOf, actions, editing = false, showProblems = false, onMenu, onSetMenu }: Props) {
   const { t } = useTranslation();
   const { colors, radius, space } = useTheme();
   const wide = useBreakpoint() !== 'compact';
@@ -186,6 +208,9 @@ export function ExerciseCard({ members, exercises, nameOf, onMenu, onSetMenu }: 
             exercise={exercises[member]}
             exercises={exercises}
             name={names[position]}
+            actions={actions}
+            editing={editing}
+            showProblems={showProblems}
             onMenu={() => onMenu(member)}
             onSetMenu={(setIndex) => onSetMenu(member, setIndex)}
           />

@@ -3,7 +3,8 @@ import { View } from 'react-native';
 
 import { useGoalText } from '@/features/goals/format';
 import type { Metric } from '@/features/goals/rules';
-import { colorFor, TRACKER_ICONS, TYPE_DEFAULTS, type TrackerIcon } from '@/features/trackers/catalog';
+import { SessionRow } from '@/features/history/components/SessionRow';
+import { colorFor } from '@/features/trackers/catalog';
 import type { SessionListItem, TrackerSummary } from '@/shared/api/generated/model';
 import { parseIsoDate } from '@/shared/format/dates';
 import { useTheme } from '@/shared/theme/ThemeProvider';
@@ -12,22 +13,33 @@ import { Card } from '@/shared/ui/Card';
 import { Check, Sparkles, Target } from '@/shared/ui/icons';
 import { ProgressBar } from '@/shared/ui/ProgressBar';
 import { Text } from '@/shared/ui/Text';
+import { TextLink } from '@/shared/ui/TextLink';
 
-import { useHomeText } from '../format';
 import type { NextGoal } from '../rules';
 
-type RecentProps = { items: SessionListItem[]; trackers: Map<string, TrackerSummary>; today: string };
+type RecentProps = {
+  items: SessionListItem[];
+  trackers: Map<string, TrackerSummary>;
+  today: string;
+  onOpen: (id: string) => void;
+  onSeeAll: () => void;
+};
 
-/** The latest sessions: tracker icon, name, day and duration, and the session's main figure. */
-export function RecentSessions({ items, trackers, today }: RecentProps) {
+/**
+ * The latest sessions: tracker icon, name, day and duration, and the session's main figure.
+ * Each opens in History; See all opens History itself.
+ */
+export function RecentSessions({ items, trackers, today, onOpen, onSeeAll }: RecentProps) {
   const { t } = useTranslation();
-  const { colors, radius, space } = useTheme();
-  const text = useHomeText();
+  const { space } = useTheme();
   return (
     <View style={{ gap: space[16] }}>
-      <Text variant="h3" accessibilityRole="header">
-        {t('home.recent.title')}
-      </Text>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: space[8] }}>
+        <Text variant="h3" accessibilityRole="header" style={{ flex: 1 }}>
+          {t('home.recent.title')}
+        </Text>
+        {items.length > 0 ? <TextLink label={t('home.recent.seeAll')} onPress={onSeeAll} tone="primary" /> : null}
+      </View>
       {items.length === 0 ? (
         <Card style={{ padding: space[24] }}>
           <Text variant="small" tone="muted">
@@ -35,45 +47,11 @@ export function RecentSessions({ items, trackers, today }: RecentProps) {
           </Text>
         </Card>
       ) : (
-        items.map((item) => {
-          const tracker = trackers.get(item.tracker_id);
-          const look = tracker ?? TYPE_DEFAULTS[item.tracker_type];
-          const Icon = TRACKER_ICONS[look.icon as TrackerIcon] ?? TRACKER_ICONS.sparkles;
-          const line = text.sessionLine(item, today);
-          const figure = text.headline(item);
-          return (
-            <View
-              key={item.id}
-              accessible
-              accessibilityLabel={`${item.name}, ${line}, ${figure}`}
-              style={{ flexDirection: 'row', alignItems: 'center', gap: space[16], paddingVertical: space[8] }}
-            >
-              <View
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: radius[12],
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  backgroundColor: colors.bg.surfaceRaised,
-                }}
-              >
-                <Icon color={colorFor(colors, look.color)} size={20} strokeWidth={1.75} />
-              </View>
-              <View style={{ flex: 1, gap: 6 }}>
-                <Text variant="smallMedium" numberOfLines={1}>
-                  {item.name}
-                </Text>
-                <Text variant="caption" tone="muted" numberOfLines={1}>
-                  {line}
-                </Text>
-              </View>
-              <Text variant="smallMedium" style={{ fontVariant: ['tabular-nums'] }}>
-                {figure}
-              </Text>
-            </View>
-          );
-        })
+        <View>
+          {items.map((item) => (
+            <SessionRow key={item.id} item={item} tracker={trackers.get(item.tracker_id)} today={today} onOpen={onOpen} />
+          ))}
+        </View>
       )}
     </View>
   );

@@ -1,6 +1,6 @@
 import { HeaderShownContext } from 'expo-router/react-navigation';
 import { type ReactNode, useContext } from 'react';
-import { Pressable, ScrollView, StyleSheet, View, type ViewStyle } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, View, type ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { CONTENT_MAX_WIDTH, useBreakpoint } from '@/shared/theme/breakpoints';
@@ -67,7 +67,9 @@ function BackLink({ label, onPress }: Back) {
  * optional action beside it) and scrollable content, centred on wide screens. Tablets and
  * desktop get the roomier padding of their designs. On desktop the breadcrumb in the top bar
  * leads to the parent pages, so only a step back stays. Offline, a badge sits above the title,
- * or in the top bar when there is one.
+ * or in the top bar when there is one. The keyboard never covers the field being typed in:
+ * iOS insets the scroll view; Android, which draws edge to edge and no longer resizes the
+ * window, shrinks the page above the keyboard, and the field scrolls into view.
  */
 export function Screen({ title, caption, back, action, offlineBadge = true, footer, children }: Props) {
   const { colors, space } = useTheme();
@@ -80,51 +82,53 @@ export function Screen({ title, caption, back, action, offlineBadge = true, foot
   const showBack = back && (breakpoint !== 'expanded' || back.step);
   return (
     <SafeAreaView edges={underTopBar ? [] : ['top']} style={[styles.root, { backgroundColor: colors.bg.base }]}>
-      <ScrollView
-        contentContainerStyle={[styles.content, padding, { gap: space[24] }]}
-        keyboardShouldPersistTaps="handled"
-        keyboardDismissMode="on-drag"
-        automaticallyAdjustKeyboardInsets
-      >
-        <View style={styles.column}>
-          {showBack ? <BackLink label={back.label} onPress={back.onPress} /> : null}
-          {offlineBadge && !underTopBar ? <OfflineBadge style={{ marginBottom: space[8] }} /> : null}
-          <View style={styles.titleRow}>
-            <View style={styles.titleText}>
-              <Text variant="h1" accessibilityRole="header">
-                {title}
-              </Text>
-              {caption ? (
-                <Text
-                  variant={breakpoint === 'compact' ? 'caption' : 'small'}
-                  tone="muted"
-                  style={{ textTransform: 'uppercase', marginTop: 4 }}
-                >
-                  {caption}
-                </Text>
-              ) : null}
-            </View>
-            {action}
-          </View>
-        </View>
-        <View style={[styles.column, { gap: space[16] }]}>{children}</View>
-      </ScrollView>
-      {footer ? (
-        <View
-          style={[
-            styles.content,
-            {
-              paddingHorizontal: breakpoint === 'compact' ? space[24] : space[40],
-              paddingVertical: space[16],
-              borderTopWidth: 1,
-              borderTopColor: colors.border.default,
-              backgroundColor: colors.bg.base,
-            },
-          ]}
+      <KeyboardAvoidingView style={styles.root} behavior="padding" enabled={Platform.OS === 'android'}>
+        <ScrollView
+          contentContainerStyle={[styles.content, padding, { gap: space[24] }]}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+          automaticallyAdjustKeyboardInsets
         >
-          <View style={styles.column}>{footer}</View>
-        </View>
-      ) : null}
+          <View style={styles.column}>
+            {showBack ? <BackLink label={back.label} onPress={back.onPress} /> : null}
+            {offlineBadge && !underTopBar ? <OfflineBadge style={{ marginBottom: space[8] }} /> : null}
+            <View style={styles.titleRow}>
+              <View style={styles.titleText}>
+                <Text variant="h1" accessibilityRole="header">
+                  {title}
+                </Text>
+                {caption ? (
+                  <Text
+                    variant={breakpoint === 'compact' ? 'caption' : 'small'}
+                    tone="muted"
+                    style={{ textTransform: 'uppercase', marginTop: 4 }}
+                  >
+                    {caption}
+                  </Text>
+                ) : null}
+              </View>
+              {action}
+            </View>
+          </View>
+          <View style={[styles.column, { gap: space[16] }]}>{children}</View>
+        </ScrollView>
+        {footer ? (
+          <View
+            style={[
+              styles.content,
+              {
+                paddingHorizontal: breakpoint === 'compact' ? space[24] : space[40],
+                paddingVertical: space[16],
+                borderTopWidth: 1,
+                borderTopColor: colors.border.default,
+                backgroundColor: colors.bg.base,
+              },
+            ]}
+          >
+            <View style={styles.column}>{footer}</View>
+          </View>
+        ) : null}
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }

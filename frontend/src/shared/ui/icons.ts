@@ -41,6 +41,7 @@ export { default as Pencil } from 'lucide-react-native/icons/pencil';
 export { default as Plus } from 'lucide-react-native/icons/plus';
 export { default as Search } from 'lucide-react-native/icons/search';
 export { default as ShieldCheck } from 'lucide-react-native/icons/shield-check';
+export { default as SlidersHorizontal } from 'lucide-react-native/icons/sliders-horizontal';
 export { default as Sparkles } from 'lucide-react-native/icons/sparkles';
 export { default as Square } from 'lucide-react-native/icons/square';
 export { default as SquareCheck } from 'lucide-react-native/icons/square-check';

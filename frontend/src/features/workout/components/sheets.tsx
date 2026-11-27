@@ -14,6 +14,7 @@ import { Sheet } from '@/shared/ui/Sheet';
 import { Text } from '@/shared/ui/Text';
 import { TextField } from '@/shared/ui/TextField';
 
+import type { DraftActions } from '../editor';
 import { useWorkoutText } from '../format';
 import { durationSeconds, tally, toSession, type WorkoutDraft } from '../rules';
 import { workout } from '../store';
@@ -96,6 +97,11 @@ export function FinishSheet({ draft, trackerName, exerciseNames, onClose }: Fini
       <Text variant="small" tone="muted">
         {body}
       </Text>
+      {counts.done > 0 ? (
+        <Text variant="small" tone="muted">
+          {t('workout.finish.editLater')}
+        </Text>
+      ) : null}
       {offline && counts.done > 0 ? <Notice tone="info" title={t('workout.finish.offlineTitle')} message={t('workout.finish.offlineBody')} /> : null}
       {error ? <Notice tone="error" title={error} /> : null}
       {counts.done > 0 ? <Button label={t('workout.finish.confirm')} onPress={finish} /> : null}
@@ -177,6 +183,7 @@ type ExerciseMenuProps = {
   index: number;
   name: string;
   nextName: string | undefined;
+  actions: DraftActions;
   onClose: () => void;
 };
 
@@ -184,7 +191,7 @@ type ExerciseMenuProps = {
  * An exercise's "⋯": superset with the next exercise or leave the superset, and remove. An
  * exercise with checked sets asks first, because those sets would go with it.
  */
-export function ExerciseMenu({ draft, index, name, nextName, onClose }: ExerciseMenuProps) {
+export function ExerciseMenu({ draft, index, name, nextName, actions, onClose }: ExerciseMenuProps) {
   const { t } = useTranslation();
   const [confirming, setConfirming] = useState(false);
   const exercise = draft.exercises[index];
@@ -194,7 +201,7 @@ export function ExerciseMenu({ draft, index, name, nextName, onClose }: Exercise
     return null;
   }
   const remove = () => {
-    workout.removeExercise(index);
+    actions.removeExercise(index);
     onClose();
   };
   if (confirming) {
@@ -215,7 +222,7 @@ export function ExerciseMenu({ draft, index, name, nextName, onClose }: Exercise
       hint: nextName,
       icon: Link2,
       onPress: () => {
-        workout.groupWithNext(index);
+        actions.groupWithNext(index);
         onClose();
       },
     });
@@ -225,7 +232,7 @@ export function ExerciseMenu({ draft, index, name, nextName, onClose }: Exercise
       label: t('workout.superset.leave'),
       icon: Unlink2,
       onPress: () => {
-        workout.leaveGroup(index);
+        actions.leaveGroup(index);
         onClose();
       },
     });
@@ -239,10 +246,17 @@ export function ExerciseMenu({ draft, index, name, nextName, onClose }: Exercise
   return <MenuSheet title={name} items={items} onClose={onClose} />;
 }
 
-type SetMenuProps = { draft: WorkoutDraft; index: number; setIndex: number; title: string; onClose: () => void };
+type SetMenuProps = {
+  draft: WorkoutDraft;
+  index: number;
+  setIndex: number;
+  title: string;
+  actions: DraftActions;
+  onClose: () => void;
+};
 
 /** A set's menu, behind its number: warm-up or working set, and remove. */
-export function SetMenu({ draft, index, setIndex, title, onClose }: SetMenuProps) {
+export function SetMenu({ draft, index, setIndex, title, actions, onClose }: SetMenuProps) {
   const { t } = useTranslation();
   const set = draft.exercises[index]?.sets[setIndex];
   if (!set) {
@@ -259,7 +273,7 @@ export function SetMenu({ draft, index, setIndex, title, onClose }: SetMenuProps
           hint: warmup ? undefined : t('workout.set.warmupHint'),
           icon: warmup ? Dumbbell : Flame,
           onPress: () => {
-            workout.setKind(index, setIndex, warmup ? 'working' : 'warmup');
+            actions.setKind(index, setIndex, warmup ? 'working' : 'warmup');
             onClose();
           },
         },
@@ -268,7 +282,7 @@ export function SetMenu({ draft, index, setIndex, title, onClose }: SetMenuProps
           icon: Trash2,
           destructive: true,
           onPress: () => {
-            workout.removeSet(index, setIndex);
+            actions.removeSet(index, setIndex);
             onClose();
           },
         },

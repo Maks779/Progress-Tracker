@@ -28,7 +28,7 @@ type FieldProps = {
   clean: (text: string) => string;
   parse: (text: string) => number | null | undefined;
   onChange: (value: number | null) => void;
-  width: number;
+  width: number | undefined;
   locked: boolean;
   invalid: boolean;
   keyboard: 'decimal-pad' | 'number-pad';
@@ -70,6 +70,7 @@ function NumberField({ label, value, ghost, format, clean, parse, onChange, widt
       }}
       style={{
         width,
+        flex: width === undefined ? 1 : undefined,
         height: 44,
         borderRadius: radius[8],
         borderWidth: 1,
@@ -96,6 +97,8 @@ type Props = {
   name: string;
   previous: PreviousSet | undefined;
   highlighted: boolean;
+  /** A saved session being edited: no Previous or Done column, every field can change. */
+  editing?: boolean;
   problems: SetProblem[];
   onWeight: (kg: number | null) => void;
   onReps: (reps: number | null) => void;
@@ -108,7 +111,7 @@ type Props = {
  * reps, and the 44 px done box. A done row is tinted and its fields are locked until it is
  * unchecked, so a tired thumb cannot change a finished set by accident.
  */
-export function SetRow({ set, label, name, previous, highlighted, problems, onWeight, onReps, onToggle, onMenu }: Props) {
+export function SetRow({ set, label, name, previous, highlighted, editing = false, problems, onWeight, onReps, onToggle, onMenu }: Props) {
   const { t } = useTranslation();
   const { colors, radius } = useTheme();
   const text = useWorkoutText();
@@ -116,6 +119,7 @@ export function SetRow({ set, label, name, previous, highlighted, problems, onWe
   const weightGhost = set.ghost?.weightKg ?? null;
   const repsGhost = set.ghost?.reps ?? null;
   const parseReps = (input: string) => (input === '' ? null : Number(input));
+  const locked = set.done && !editing;
 
   return (
     <View
@@ -152,67 +156,71 @@ export function SetRow({ set, label, name, previous, highlighted, problems, onWe
           {label}
         </Text>
       </Pressable>
-      <Text variant="caption" tone="muted" numberOfLines={1} style={{ flex: 1, fontVariant: ['tabular-nums'] }}>
-        {text.previous(previous)}
-      </Text>
+      {editing ? null : (
+        <Text variant="caption" tone="muted" numberOfLines={1} style={{ flex: 1, fontVariant: ['tabular-nums'] }}>
+          {text.previous(previous)}
+        </Text>
+      )}
       <NumberField
         label={t('workout.set.weight', { set: name, unit: text.unitLabel })}
-        value={set.done ? values.weightKg : set.weightKg}
+        value={locked ? values.weightKg : set.weightKg}
         ghost={weightGhost}
         format={text.fieldWeight}
         clean={cleanWeightText}
         parse={(input) => parseWeight(input, text.unit)}
         onChange={onWeight}
-        width={COLUMN.weight}
-        locked={set.done}
+        width={editing ? undefined : COLUMN.weight}
+        locked={locked}
         invalid={problems.includes('weightRequired') || problems.includes('weightRange')}
         keyboard="decimal-pad"
       />
       <NumberField
         label={t('workout.set.reps', { set: name })}
-        value={set.done ? values.reps : set.reps}
+        value={locked ? values.reps : set.reps}
         ghost={repsGhost}
         format={String}
         clean={cleanRepsText}
         parse={parseReps}
         onChange={onReps}
-        width={COLUMN.reps}
-        locked={set.done}
+        width={editing ? undefined : COLUMN.reps}
+        locked={locked}
         invalid={problems.includes('repsRequired') || problems.includes('repsRange')}
         keyboard="number-pad"
       />
-      <Pressable
-        role="checkbox"
-        aria-checked={set.done}
-        aria-label={t('workout.set.done', { set: name })}
-        onPress={onToggle}
-        style={({ hovered, focused }: { pressed: boolean; hovered?: boolean; focused?: boolean }): ViewStyle => ({
-          width: COLUMN.done,
-          height: 44,
-          alignItems: 'center',
-          justifyContent: 'center',
-          borderRadius: radius[8],
-          backgroundColor: hovered && !set.done ? colors.bg.surfaceRaised : 'transparent',
-          cursor: 'pointer',
-          outlineStyle: 'solid',
-          outlineWidth: showFocusRing(focused) ? 2 : 0,
-          outlineColor: colors.accent.fill,
-        })}
-      >
-        <View
-          style={{
-            width: 24,
-            height: 24,
-            borderRadius: 4,
-            borderWidth: 1.5,
-            borderColor: set.done ? colors.accent.fill : colors.text.muted,
+      {editing ? null : (
+        <Pressable
+          role="checkbox"
+          aria-checked={set.done}
+          aria-label={t('workout.set.done', { set: name })}
+          onPress={onToggle}
+          style={({ hovered, focused }: { pressed: boolean; hovered?: boolean; focused?: boolean }): ViewStyle => ({
+            width: COLUMN.done,
+            height: 44,
             alignItems: 'center',
             justifyContent: 'center',
-          }}
+            borderRadius: radius[8],
+            backgroundColor: hovered && !set.done ? colors.bg.surfaceRaised : 'transparent',
+            cursor: 'pointer',
+            outlineStyle: 'solid',
+            outlineWidth: showFocusRing(focused) ? 2 : 0,
+            outlineColor: colors.accent.fill,
+          })}
         >
-          {set.done ? <Check color={colors.accent.text} size={16} strokeWidth={2.5} /> : null}
-        </View>
-      </Pressable>
+          <View
+            style={{
+              width: 24,
+              height: 24,
+              borderRadius: 4,
+              borderWidth: 1.5,
+              borderColor: set.done ? colors.accent.fill : colors.text.muted,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            {set.done ? <Check color={colors.accent.text} size={16} strokeWidth={2.5} /> : null}
+          </View>
+        </Pressable>
+      )}
     </View>
   );
 }

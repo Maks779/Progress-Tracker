@@ -179,6 +179,18 @@ describe('Home', () => {
     expect(mockEntry.open).toHaveBeenCalled();
   });
 
+  it('opens a recent session, and all of them, in History', async () => {
+    await open();
+    await fireEvent.press(screen.getByRole('link', { name: 'Atomic Habits, Today · 20 min, 24 pages' }));
+    expect(mockNavigate).toHaveBeenCalledWith('history');
+    expect(router.dismissTo).toHaveBeenCalledWith('/history');
+    expect(router.push).toHaveBeenCalledWith('/history/read', { withAnchor: true });
+    jest.mocked(router.push).mockClear();
+    await fireEvent.press(screen.getByRole('link', { name: 'See all' }));
+    expect(router.push).not.toHaveBeenCalled();
+    expect(router.dismissTo).toHaveBeenLastCalledWith('/history');
+  });
+
   it('offers to resume the workout under way', async () => {
     mockEntry.active = true;
     await open();

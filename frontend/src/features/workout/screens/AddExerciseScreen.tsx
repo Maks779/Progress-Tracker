@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { type ReactNode, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, View, type ViewStyle } from 'react-native';
 
@@ -55,6 +55,7 @@ function ExerciseRow({ exercise, name, selected, disabled, onPress }: RowProps) 
       role="checkbox"
       aria-checked={selected}
       aria-disabled={disabled}
+      disabled={disabled}
       aria-label={`${name}, ${parts.join(', ')}`}
       onPress={disabled ? undefined : onPress}
       style={({ hovered, focused }: { pressed: boolean; hovered?: boolean; focused?: boolean }): ViewStyle => ({
@@ -84,18 +85,47 @@ function ExerciseRow({ exercise, name, selected, disabled, onPress }: RowProps) 
   );
 }
 
-/**
- * Add exercise (design: Workout / Exercise picker): search by name in the UI language, filter
- * by muscle group, pick one or more, and add them at the end of the workout, each with its
- * rows and ghost values from the last time it was done. What the catalog lacks can be created.
- * The Add button stays in reach below the list (in the side card when there is one).
- */
+/** Add exercise for the active workout; back to the workout afterwards. */
 export function AddExerciseScreen() {
+  const { t } = useTranslation();
   const draft = useActiveDraft();
-  return draft ? <Picker draft={draft} /> : <NoWorkout />;
+  if (!draft) {
+    return <NoWorkout />;
+  }
+  const back = () => router.dismissTo('/workout');
+  return (
+    <ExercisePicker
+      draft={draft}
+      caption={<Elapsed startedAt={draft.startedAt} prefix={draft.name} />}
+      back={{ label: t('nav.workout'), onPress: back }}
+      side={{ title: t('workout.picker.sideTitle'), body: t('workout.picker.sideBody') }}
+      onAdd={(items) => {
+        if (useWorkout.getState().draft) {
+          workout.addExercises(items);
+        }
+        back();
+      }}
+    />
+  );
 }
 
-function Picker({ draft }: { draft: WorkoutDraft }) {
+type PickerProps = {
+  draft: WorkoutDraft;
+  caption: ReactNode;
+  back: { label: string; onPress: () => void };
+  /** The side card's words on desktop: what happens to the page underneath. */
+  side: { title: string; body: string };
+  onAdd: (items: NewExercise[]) => void;
+};
+
+/**
+ * Add exercise (design: Workout / Exercise picker): search by name in the UI language, filter
+ * by muscle group, pick one or more, and add them at the end of the draft (the active workout,
+ * or a saved session being edited), each with its rows and ghost values from the last time it
+ * was done. What the catalog lacks can be created. The Add button stays in reach below the
+ * list (in the side card when there is one).
+ */
+export function ExercisePicker({ draft, caption, back, side: sideText, onAdd }: PickerProps) {
   const { t, i18n } = useTranslation();
   const { colors, space } = useTheme();
   const twoColumns = useSideColumn(false) !== null;
@@ -108,7 +138,6 @@ function Picker({ draft }: { draft: WorkoutDraft }) {
   const nameOf = (exercise: ExerciseOut) => exerciseName(exercise, t);
   const toggle = (id: string) =>
     setSelected((ids) => (ids.includes(id) ? ids.filter((item) => item !== id) : ids.length < room ? [...ids, id] : ids));
-  const back = () => router.dismissTo('/workout');
 
   const add = async () => {
     const items: NewExercise[] = await Promise.all(
@@ -117,10 +146,7 @@ function Picker({ draft }: { draft: WorkoutDraft }) {
         return { exerciseId: id, info: infoOf(exercise), weighted: isWeighted(exercise), previous: await lastSetsOf(id) };
       }),
     );
-    if (useWorkout.getState().draft) {
-      workout.addExercises(items);
-    }
-    back();
+    onAdd(items);
   };
 
   let list;
@@ -202,9 +228,9 @@ function Picker({ draft }: { draft: WorkoutDraft }) {
   );
   const side = (
     <Card style={{ padding: space[16], gap: space[8] }}>
-      <Text variant="h3">{t('workout.picker.sideTitle')}</Text>
+      <Text variant="h3">{sideText.title}</Text>
       <Text variant="small" tone="muted">
-        {room > 0 ? t('workout.picker.sideBody') : t('workout.picker.full', { count: MAX_EXERCISES })}
+        {room > 0 ? sideText.body : t('workout.picker.full', { count: MAX_EXERCISES })}
       </Text>
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space[8] }}>
         {selected.map((id) => (
@@ -224,8 +250,8 @@ function Picker({ draft }: { draft: WorkoutDraft }) {
     <>
       <Screen
         title={t('workout.addExercise')}
-        caption={<Elapsed startedAt={draft.startedAt} prefix={draft.name} />}
-        back={{ label: t('nav.workout'), onPress: back }}
+        caption={caption}
+        back={back}
         footer={twoColumns ? undefined : addButton}
       >
         <Columns main={picker} side={twoColumns ? side : undefined} />

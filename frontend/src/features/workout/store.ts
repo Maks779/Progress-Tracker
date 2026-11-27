@@ -4,26 +4,12 @@ import { create } from 'zustand';
 
 import { onSaved, removeItem, sessionKey } from '@/features/outbox/outbox';
 import type { SessionSaved, SessionWrite } from '@/shared/api/generated/model';
-import { newId } from '@/shared/ids';
 import { storage } from '@/shared/storage/storage';
 
-import {
-  type DraftExercise,
-  type ExerciseInfo,
-  extendRest,
-  groupWithNext,
-  leaveGroup,
-  MAX_EXERCISES,
-  MAX_SETS,
-  newExercise,
-  newSet,
-  normalizeGroups,
-  type PreviousSet,
-  replaceSet,
-  type SetKind,
-  toggleSet,
-  type WorkoutDraft,
-} from './rules';
+import { draftActions } from './editor';
+import { extendRest, type WorkoutDraft } from './rules';
+
+export { buildExercise, type NewExercise } from './editor';
 
 const STORAGE_KEY = 'ember.workout';
 
@@ -141,76 +127,14 @@ function change(update: (draft: WorkoutDraft) => WorkoutDraft): void {
   }
 }
 
-function changeExercise(index: number, update: (exercise: DraftExercise) => DraftExercise): void {
-  change((draft) => ({
-    ...draft,
-    exercises: draft.exercises.map((exercise, position) => (position === index ? update(exercise) : exercise)),
-  }));
-}
-
-export type NewExercise = {
-  exerciseId: string;
-  info: ExerciseInfo;
-  weighted: boolean;
-  previous: PreviousSet[];
-  group?: number | null;
-};
-
-/** A fresh exercise with new IDs for the entry and each set row. */
-export function buildExercise({ exerciseId, info, weighted, previous, group = null }: NewExercise): DraftExercise {
-  return newExercise(
-    { entry: newId(), sets: Array.from({ length: Math.max(1, previous.length) }, newId) },
-    exerciseId,
-    info,
-    weighted,
-    previous,
-    group,
-  );
-}
-
 /** Every change to the active workout; each one is saved to the device at once. */
 export const workout = {
+  ...draftActions(change),
   begin(draft: WorkoutDraft): void {
     useWorkout.setState({ draft, summary: null });
   },
   rename(name: string): void {
     change((draft) => ({ ...draft, name }));
-  },
-  addExercises(items: NewExercise[]): void {
-    change((draft) => ({
-      ...draft,
-      exercises: [...draft.exercises, ...items.map(buildExercise)].slice(0, MAX_EXERCISES),
-      prefillFailed: false,
-    }));
-  },
-  removeExercise(index: number): void {
-    change((draft) => ({ ...draft, exercises: normalizeGroups(draft.exercises.filter((_, position) => position !== index)) }));
-  },
-  groupWithNext(index: number): void {
-    change((draft) => ({ ...draft, exercises: groupWithNext(draft.exercises, index) }));
-  },
-  leaveGroup(index: number): void {
-    change((draft) => ({ ...draft, exercises: leaveGroup(draft.exercises, index) }));
-  },
-  addSet(index: number): void {
-    changeExercise(index, (exercise) =>
-      exercise.sets.length >= MAX_SETS ? exercise : { ...exercise, sets: [...exercise.sets, newSet(newId(), exercise)] },
-    );
-  },
-  removeSet(index: number, setIndex: number): void {
-    changeExercise(index, (exercise) => ({ ...exercise, sets: exercise.sets.filter((_, position) => position !== setIndex) }));
-  },
-  setKind(index: number, setIndex: number, kind: SetKind): void {
-    change((draft) => replaceSet(draft, index, setIndex, { ...draft.exercises[index].sets[setIndex], kind }));
-  },
-  setWeight(index: number, setIndex: number, weightKg: number | null): void {
-    change((draft) => replaceSet(draft, index, setIndex, { ...draft.exercises[index].sets[setIndex], weightKg }));
-  },
-  setReps(index: number, setIndex: number, reps: number | null): void {
-    change((draft) => replaceSet(draft, index, setIndex, { ...draft.exercises[index].sets[setIndex], reps }));
-  },
-  toggleSet(index: number, setIndex: number, now = Date.now()): void {
-    change((draft) => toggleSet(draft, index, setIndex, now));
   },
   extendRest(now = Date.now()): void {
     change((draft) => (draft.rest ? { ...draft, rest: extendRest(draft.rest, now) } : draft));

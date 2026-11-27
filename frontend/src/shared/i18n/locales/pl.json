@@ -17,7 +17,9 @@
     "workout": "Trening",
     "addExercise": "Dodaj ćwiczenie",
     "summary": "Podsumowanie",
-    "quickLog": "Szybki zapis"
+    "quickLog": "Szybki zapis",
+    "session": "Sesja",
+    "editSession": "Edycja sesji"
   },
   "home": {
     "title": "Ruszajmy dalej.",
@@ -69,7 +71,8 @@
     },
     "recent": {
       "title": "Ostatnie sesje",
-      "empty": "Tutaj pojawią się Twoje sesje."
+      "empty": "Tutaj pojawią się Twoje sesje.",
+      "seeAll": "Zobacz wszystkie"
     },
     "next": {
       "title": "{{amount}} do kolejnego celu",
@@ -104,7 +107,131 @@
   },
   "history": {
     "title": "Twój wysiłek, zapisany.",
-    "empty": "Tutaj pojawią się ukończone sesje."
+    "caption": "Historia",
+    "loading": "Wczytywanie postępów…",
+    "loadErrorTitle": "Nie udało się wczytać historii.",
+    "loadError": "Twoje zapisane dane są bezpieczne. Sprawdź połączenie i spróbuj ponownie.",
+    "retry": "Spróbuj ponownie",
+    "empty": {
+      "title": "Twoja historia zaczyna się od sesji.",
+      "body": "Tutaj pojawią się ukończone sesje.",
+      "action": "Zapisz pierwszą sesję"
+    },
+    "filter": {
+      "label": "Pokaż sesje",
+      "all": "Wszystkie trackery",
+      "more": "Więcej",
+      "open": "Filtruj według trackera",
+      "title": "Pokaż sesje",
+      "archived": "Zarchiwizowany"
+    },
+    "calendar": {
+      "previous": "Poprzedni miesiąc",
+      "next": "Następny miesiąc",
+      "nothing": "brak sesji",
+      "today": "dzisiaj",
+      "legend": "Rodzaje sesji"
+    },
+    "types": {
+      "strength": "Siła",
+      "cardio": "Cardio",
+      "reading": "Czytanie",
+      "general": "Ogólne"
+    },
+    "week": {
+      "this": "Ten tydzień",
+      "last": "Poprzedni tydzień",
+      "rangeSameMonth": "{{startDay}}–{{end}}",
+      "range": "{{start}} – {{end}}",
+      "empty": "Brak sesji w tym tygodniu.",
+      "emptyTracker": "Brak sesji „{{tracker}}” w tym tygodniu.",
+      "loading": "Wczytywanie tygodnia…",
+      "loadingMore": "Wczytywanie…",
+      "errorTitle": "Nie udało się wczytać tego tygodnia.",
+      "more": "Pokaż więcej",
+      "count_one": "{{count}} sesja",
+      "count_few": "{{count}} sesje",
+      "count_many": "{{count}} sesji",
+      "count_other": "{{count}} sesji",
+      "countMore_one": "{{count}}+ sesji",
+      "countMore_few": "{{count}}+ sesji",
+      "countMore_many": "{{count}}+ sesji",
+      "countMore_other": "{{count}}+ sesji"
+    },
+    "review": {
+      "title": "Podsumowanie miesiąca",
+      "sessions": "Sesje",
+      "hours": "Godziny aktywności"
+    },
+    "detail": {
+      "loading": "Wczytywanie sesji…",
+      "errorTitle": "Nie udało się wczytać tej sesji.",
+      "missing": "Tej sesji już tu nie ma. Mogła zostać usunięta na innym urządzeniu.",
+      "back": "Wróć do historii",
+      "duration": "Czas trwania",
+      "volume": "Objętość · {{unit}}",
+      "sets": "Serie",
+      "distance": "Dystans · {{unit}}",
+      "pace": "Tempo · min/{{unit}}",
+      "pagesRead": "Przeczytane strony",
+      "minutes": "Minuty",
+      "endPage": "Koniec na stronie",
+      "count": "Liczba · {{unit}}",
+      "same": "{{count}} × {{reps}} po {{weight}}",
+      "sameBodyweight": "{{count}} × {{reps}} powt.",
+      "volumeLine": "objętość {{weight}}",
+      "note": "Notatka do sesji",
+      "edit": "Edytuj sesję",
+      "delete": "Usuń",
+      "offline": "Jesteś offline. Edycja i usuwanie wymagają połączenia.",
+      "deleteFailed": "Nie udało się usunąć sesji. Spróbuj ponownie.",
+      "removed": "Sesja usunięta",
+      "undo": "Cofnij",
+      "restored": "Sesja przywrócona.",
+      "restoreConflict": "Nie da się jej przywrócić: późniejsza sesja czytania tej samej książki kończy się wcześniej.",
+      "restoreFailed": "Nie udało się przywrócić sesji. Spróbuj ponownie.",
+      "weekTitle": "Tydzień regularności.",
+      "weekBody": "Ta sesja liczy się do Twojego tygodniowego celu.",
+      "records_one": "{{count}} rekord osobisty",
+      "records_few": "{{count}} rekordy osobiste",
+      "records_many": "{{count}} rekordów osobistych",
+      "records_other": "{{count}} rekordu osobistego",
+      "reps_one": "{{count}} powt.",
+      "reps_few": "{{count}} powt.",
+      "reps_many": "{{count}} powt.",
+      "reps_other": "{{count}} powt.",
+      "setsCount_one": "{{count}} seria",
+      "setsCount_few": "{{count}} serie",
+      "setsCount_many": "{{count}} serii",
+      "setsCount_other": "{{count}} serii"
+    },
+    "edit": {
+      "title": "Edytuj sesję",
+      "name": "Nazwa sesji",
+      "duration": "Czas trwania · minuty",
+      "note": "Notatka",
+      "save": "Zapisz zmiany",
+      "saved": "Zmiany zapisane.",
+      "offline": "Jesteś offline. Edycja wymaga połączenia.",
+      "sideTitle": "Wszystko się zaktualizuje.",
+      "sideBody": "Objętość, rekordy, cele i serie tygodniowe przeliczą się po zapisaniu.",
+      "pickerCaption": "Edycja sesji",
+      "pickerSideTitle": "Twoje zmiany czekają.",
+      "pickerSideBody": "Dodaj pominięte ćwiczenia. Dołączą do sesji po zapisaniu.",
+      "problems": {
+        "empty": "Zostaw co najmniej jedną serię.",
+        "sets": "Niektóre serie potrzebują powtórzeń lub ciężaru.",
+        "duration": "Od 1 do 1440 minut."
+      },
+      "errors": {
+        "offline": "Jesteś offline. Zmiany wciąż tu są; spróbuj ponownie po powrocie do sieci.",
+        "gone": "Ta sesja została usunięta, więc nie da się zapisać zmian.",
+        "pagesBefore": "Przeczytaj coś za stroną {{page}}, żeby to zapisać.",
+        "pagesLater": "Późniejsza sesja tej książki kończy się na tej stronie lub wcześniej. Najpierw zmień tamtą.",
+        "future": "Ta chwila jeszcze nie nadeszła.",
+        "failed": "Nie udało się zapisać zmian. Spróbuj ponownie."
+      }
+    }
   },
   "progress": {
     "title": "Szerszy obraz.",
@@ -713,7 +840,8 @@
       "trackerGone": "Tracker tego treningu został usunięty, więc nie da się go zapisać. Możesz go odrzucić.",
       "failed": "Nie udało się zapisać treningu. Zostaje na tym urządzeniu; spróbuj ponownie.",
       "offlineTitle": "Jesteś offline.",
-      "offlineBody": "Trening zostanie zapisany na tym urządzeniu i zsynchronizowany, gdy wrócisz do sieci."
+      "offlineBody": "Trening zostanie zapisany na tym urządzeniu i zsynchronizowany, gdy wrócisz do sieci.",
+      "editLater": "Objętość, rekordy i postęp tygodnia zaktualizują się po zakończeniu. Zapisaną sesję możesz edytować w Historii."
     },
     "stats": {
       "elapsed": "Czas",
