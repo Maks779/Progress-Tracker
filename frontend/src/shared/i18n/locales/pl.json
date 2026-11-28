@@ -1344,5 +1344,35 @@
       "totalBelowCurrent": "Jesteś już na stronie {{page}}.",
       "start": "Od 0 do ostatniej strony."
     }
+  },
+  "notifications": {
+    "channel": "Minutnik przerwy i przypomnienia",
+    "rest": {
+      "title": "Koniec przerwy.",
+      "body": "Czas na kolejną serię · {{name}}."
+    },
+    "weekly": {
+      "title": "Tydzień jeszcze się nie skończył.",
+      "body": "Wciąż w zasięgu: {{names}}.",
+      "two": "{{first}} i {{second}}",
+      "more": "{{first}}, {{second}} i jeszcze {{extra}}"
+    },
+    "settings": {
+      "title": "Powiadomienia",
+      "rest": "Minutnik przerwy",
+      "restHint": "Gdy przerwa się kończy, a Ember działa w tle",
+      "weekly": "Przypomnienie tygodniowe",
+      "weeklyHint": "W piątek o 18:00, gdy cel tygodniowy jest jeszcze w zasięgu",
+      "blocked": "Powiadomienia Ember są wyłączone w ustawieniach telefonu.",
+      "openSettings": "Otwórz ustawienia",
+      "late": "Na tym telefonie powiadomienia o końcu przerwy mogą się spóźniać. Zezwól Ember na „Alarmy i przypomnienia”, aby przychodziły na czas.",
+      "allowAlarms": "Zezwól na alarmy"
+    },
+    "ask": {
+      "title": "Delikatne przypomnienia, na Twoich zasadach.",
+      "body": "Pozwól na delikatne przypomnienia tygodniowe i sygnał końca przerwy. Zmienisz to w każdej chwili w Ustawieniach.",
+      "enable": "Włącz powiadomienia",
+      "later": "Nie teraz"
+    }
   }
 }

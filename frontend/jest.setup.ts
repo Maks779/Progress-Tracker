@@ -38,3 +38,21 @@ jest.mock('@react-native-async-storage/async-storage', () =>
 );
 
 jest.mock('expo-crypto', () => ({ randomUUID: () => jest.requireActual<typeof import('node:crypto')>('node:crypto').randomUUID() }));
+
+jest.mock('expo-notifications', () => {
+  const unanswered = { granted: false, canAskAgain: true, status: 'undetermined', expires: 'never' };
+  return {
+    AndroidImportance: { HIGH: 4 },
+    IosAuthorizationStatus: { PROVISIONAL: 3 },
+    SchedulableTriggerInputTypes: { DATE: 'date' },
+    setNotificationHandler: jest.fn(),
+    setNotificationChannelAsync: jest.fn(async () => null),
+    getPermissionsAsync: jest.fn(async () => unanswered),
+    requestPermissionsAsync: jest.fn(async () => unanswered),
+    getExactAlarmPermissionsAsync: jest.fn(async () => ({ ...unanswered, granted: true, status: 'granted' })),
+    requestExactAlarmPermissionsAsync: jest.fn(async () => ({ ...unanswered, granted: true, status: 'granted' })),
+    scheduleNotificationAsync: jest.fn(async () => 'scheduled'),
+    cancelScheduledNotificationAsync: jest.fn(async () => undefined),
+    cancelAllScheduledNotificationsAsync: jest.fn(async () => undefined),
+  };
+});

@@ -17,7 +17,7 @@ import {
 jest.mock('@/shared/api/generated/endpoints/me/me', () => ({ updateMe: jest.fn() }));
 
 const updateMock = updateMe as jest.Mock;
-const DEFAULTS: Preferences = { language: 'en', theme: 'system', weight_unit: 'kg', distance_unit: 'km' };
+const DEFAULTS: Preferences = { language: 'en', theme: 'system', weight_unit: 'kg', distance_unit: 'km', notify_rest_timer: true, notify_weekly_reminder: true };
 
 function me(values: Partial<Preferences> = {}) {
   return { status: 200, headers: new Headers(), data: { ...DEFAULTS, ...values, name: 'Alex' } };
@@ -102,13 +102,22 @@ describe('changePreference', () => {
 
 describe('applyServerPreferences', () => {
   it('takes the account values on a new device', async () => {
-    await applyServerPreferences({ language: 'uk', theme: 'light', weight_unit: 'lb', distance_unit: 'mi' });
+    await applyServerPreferences({
+      language: 'uk',
+      theme: 'light',
+      weight_unit: 'lb',
+      distance_unit: 'mi',
+      notify_rest_timer: true,
+      notify_weekly_reminder: false,
+    });
 
     expect(usePreferences.getState().values).toEqual({
       language: 'uk',
       theme: 'light',
       weight_unit: 'lb',
       distance_unit: 'mi',
+      notify_rest_timer: true,
+      notify_weekly_reminder: false,
     });
     expect(i18n.language).toBe('uk');
   });

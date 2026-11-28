@@ -14,6 +14,8 @@ import { ActivityIndicator, View } from 'react-native';
 
 import { installAuth, restoreSession } from '@/features/auth/session';
 import { useAuthStore } from '@/features/auth/store';
+import { hydrateNotifications } from '@/features/notifications/store';
+import { useNotificationSync } from '@/features/notifications/useNotificationSync';
 import { useOnboardingGate } from '@/features/onboarding/useOnboardingGate';
 import { hydrateOutbox, useOutbox } from '@/features/outbox/outbox';
 import { useOutboxSync } from '@/features/outbox/useOutboxSync';
@@ -45,6 +47,7 @@ function Navigator() {
   const onboarding = useOnboardingGate();
   usePreferencesSync();
   useOutboxSync();
+  useNotificationSync();
   useServerProbe(signedIn);
 
   if (signedIn && onboarding === 'unknown') {
@@ -109,6 +112,7 @@ export default function RootLayout() {
     hydratePreferences();
     hydrateWorkout();
     hydrateOutbox();
+    void hydrateNotifications();
     restoreSession();
     restoreCache(queryClient).then(() => setCacheLoaded(true));
   }, [queryClient]);

@@ -21,7 +21,7 @@ const offline = new ApiError({ type: 'about:blank', title: 'x', status: 0, code:
 const saved = {
   status: 200,
   headers: new Headers(),
-  data: { language: 'en', theme: 'dark', weight_unit: 'kg', distance_unit: 'km' },
+  data: { language: 'en', theme: 'dark', weight_unit: 'kg', distance_unit: 'km', notify_rest_timer: true, notify_weekly_reminder: true },
 };
 
 function wrapper({ children }: { children: ReactNode }) {
@@ -41,7 +41,7 @@ beforeEach(async () => {
   focusManager.setFocused(undefined);
   useAuthStore.setState({ status: 'signedIn', accessToken: 'token', expired: false });
   usePreferences.setState({
-    values: { language: 'en', theme: 'dark', weight_unit: 'kg', distance_unit: 'km' },
+    values: { language: 'en', theme: 'dark', weight_unit: 'kg', distance_unit: 'km', notify_rest_timer: true, notify_weekly_reminder: true },
     pending: ['theme'],
     hydrated: true,
   });

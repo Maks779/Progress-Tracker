@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
+import { NotificationAskSheet, useAskOnRest } from '@/features/notifications/components';
 import { useListTrackers } from '@/shared/api/generated/endpoints/trackers/trackers';
 import { useBreakpoint, useSideColumn } from '@/shared/theme/breakpoints';
 import { useTheme } from '@/shared/theme/ThemeProvider';
@@ -54,6 +55,7 @@ function ActiveWorkout({ draft, onLeave }: { draft: WorkoutDraft; onLeave: () =>
   const side = useSideColumn(false) !== null;
   const trackers = useListTrackers({ include_archived: true });
   const [sheet, setSheet] = useState<OpenSheet | null>(null);
+  const askNotifications = useAskOnRest(draft.rest !== null);
   const close = () => setSheet(null);
   const counts = tally(draft.exercises);
   const trackerName =
@@ -161,6 +163,7 @@ function ActiveWorkout({ draft, onLeave }: { draft: WorkoutDraft; onLeave: () =>
           onClose={close}
         />
       ) : null}
+      {askNotifications && !sheet ? <NotificationAskSheet onClose={() => undefined} /> : null}
     </View>
   );
 }

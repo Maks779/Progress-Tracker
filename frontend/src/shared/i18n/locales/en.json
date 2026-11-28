@@ -1256,5 +1256,35 @@
       "totalBelowCurrent": "You’re already on page {{page}}.",
       "start": "From 0 up to the last page."
     }
+  },
+  "notifications": {
+    "channel": "Rest timer and reminders",
+    "rest": {
+      "title": "Rest’s done.",
+      "body": "Back to {{name}} when you’re ready."
+    },
+    "weekly": {
+      "title": "Your week isn’t over yet.",
+      "body": "Still within reach: {{names}}.",
+      "two": "{{first}} and {{second}}",
+      "more": "{{first}}, {{second}} and {{extra}} more"
+    },
+    "settings": {
+      "title": "Notifications",
+      "rest": "Rest timer",
+      "restHint": "When rest ends while Ember is in the background",
+      "weekly": "Weekly reminder",
+      "weeklyHint": "Friday at 6 PM, while a weekly goal is still within reach",
+      "blocked": "Notifications are off for Ember in your phone’s settings.",
+      "openSettings": "Open settings",
+      "late": "Rest alerts may arrive late on this phone. Allow Alarms & reminders for Ember to get them on time.",
+      "allowAlarms": "Allow alarms & reminders"
+    },
+    "ask": {
+      "title": "A nudge, on your terms.",
+      "body": "Allow gentle weekly reminders and rest-timer alerts. Change this any time in Settings.",
+      "enable": "Enable notifications",
+      "later": "Not now"
+    }
   }
 }

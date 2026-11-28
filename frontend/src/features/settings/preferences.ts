@@ -6,7 +6,10 @@ import type { Me, MeUpdate } from '@/shared/api/generated/model';
 import i18n, { isLanguage, LANGUAGES } from '@/shared/i18n';
 import { storage } from '@/shared/storage/storage';
 
-export type Preferences = Pick<Me, 'language' | 'theme' | 'weight_unit' | 'distance_unit'>;
+export type Preferences = Pick<
+  Me,
+  'language' | 'theme' | 'weight_unit' | 'distance_unit' | 'notify_rest_timer' | 'notify_weekly_reminder'
+>;
 export type PreferenceKey = keyof Preferences;
 
 export const PREFERENCE_CHOICES: { [K in PreferenceKey]: readonly Preferences[K][] } = {
@@ -14,6 +17,8 @@ export const PREFERENCE_CHOICES: { [K in PreferenceKey]: readonly Preferences[K]
   theme: ['system', 'light', 'dark'],
   weight_unit: ['kg', 'lb'],
   distance_unit: ['km', 'mi'],
+  notify_rest_timer: [true, false],
+  notify_weekly_reminder: [true, false],
 };
 
 const KEYS = Object.keys(PREFERENCE_CHOICES) as PreferenceKey[];
@@ -30,13 +35,15 @@ function deviceDefaults(): Preferences {
     theme: 'system',
     weight_unit: 'kg',
     distance_unit: 'km',
+    notify_rest_timer: true,
+    notify_weekly_reminder: true,
   };
 }
 
 /**
- * Language, theme and units. The device keeps its own copy, so the app starts with the right
- * look offline and a change applies at once; `pending` lists changes the server has not got
- * yet. The server copy follows the account to other devices.
+ * Language, theme, units and which notifications to get. The device keeps its own copy, so the
+ * app starts with the right look offline and a change applies at once; `pending` lists changes
+ * the server has not got yet. The server copy follows the account to other devices.
  */
 export const usePreferences = create<PreferencesState>()(() => ({
   values: deviceDefaults(),
