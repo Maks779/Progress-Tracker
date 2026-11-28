@@ -55,6 +55,24 @@ function Sync() {
 
 let client: QueryClient;
 
+const WEDNESDAY_NOON = new Date(2026, 10, 25, 12);
+const REAL_TIMERS = [
+  'hrtime',
+  'nextTick',
+  'performance',
+  'queueMicrotask',
+  'requestAnimationFrame',
+  'cancelAnimationFrame',
+  'requestIdleCallback',
+  'cancelIdleCallback',
+  'setImmediate',
+  'clearImmediate',
+  'setInterval',
+  'clearInterval',
+  'setTimeout',
+  'clearTimeout',
+] as const;
+
 async function show(element: React.ReactElement) {
   return render(
     <QueryClientProvider client={client}>
@@ -80,6 +98,7 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
+  jest.useFakeTimers({ now: WEDNESDAY_NOON, doNotFake: [...REAL_TIMERS] });
   jest.clearAllMocks();
   await AsyncStorage.clear();
   client = new QueryClient();
@@ -95,6 +114,7 @@ beforeEach(async () => {
 
 afterEach(() => {
   client.clear();
+  jest.useRealTimers();
 });
 
 describe('Scheduled notifications', () => {
@@ -121,8 +141,7 @@ describe('Scheduled notifications', () => {
       body: 'Still within reach: Reading and Gym.',
     });
     const [, at] = jest.mocked(scheduleNotification).mock.calls.find(([kind]) => kind === 'weekly')!;
-    expect(at.getDay()).toBe(5);
-    expect(at.getHours()).toBe(18);
+    expect(at).toEqual(new Date(2026, 10, 27, 18));
 
     jest.mocked(cancelNotification).mockClear();
     serveGoals([goal('gym', 3, 3), goal('read', 2, 2)]);
