@@ -1,10 +1,10 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Cookie, Depends, Request, Response
+from fastapi import APIRouter, BackgroundTasks, Cookie, Depends, Request, Response
 
 from app.auth import service
 from app.auth.dependencies import Client
-from app.auth.email import EmailSender, get_email_sender
+from app.auth.email import EmailSender, deliver_reset_email, get_email_sender
 from app.auth.schemas import (
     ClientKind,
     ForgotPasswordRequest,
@@ -145,9 +145,12 @@ async def forgot_password(
     request: Request,
     db: DbSession,
     sender: Annotated[EmailSender, Depends(get_email_sender)],
+    background: BackgroundTasks,
 ) -> Response:
     _limit(request, "forgot", data.email)
-    await service.request_password_reset(db, data.email, sender)
+    mail = await service.request_password_reset(db, data.email)
+    if mail is not None:
+        background.add_task(deliver_reset_email, sender, mail)
     return Response(status_code=202)
 
 

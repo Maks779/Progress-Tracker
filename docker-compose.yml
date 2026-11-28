@@ -24,6 +24,9 @@ services:
     environment:
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
       WATCHFILES_FORCE_POLLING: "true"
+      SMTP_HOST: ${SMTP_HOST:-mail}
+      SMTP_PORT: ${SMTP_PORT:-1025}
+      SMTP_STARTTLS: ${SMTP_STARTTLS:-false}
     ports:
       - "${API_PORT:-8000}:8000"
     volumes:
@@ -31,6 +34,13 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      mail:
+        condition: service_started
+
+  mail:
+    image: axllent/mailpit:v1.33.1
+    ports:
+      - "127.0.0.1:${MAIL_UI_PORT:-8025}:8025"
 
 volumes:
   db-data:

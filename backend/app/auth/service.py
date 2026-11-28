@@ -7,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app import clock
-from app.auth.email import EmailSender
+from app.auth.email import ResetEmail
 from app.auth.models import PasswordResetToken, RefreshToken
 from app.auth.schemas import ClientKind, RegisterRequest
 from app.auth.security import (
@@ -171,13 +171,13 @@ def _invalid_reset_link() -> AppError:
     )
 
 
-async def request_password_reset(db: AsyncSession, email: str, sender: EmailSender) -> None:
-    """Email a reset link, at most once a minute per account, so repeated clicks send one email."""
+async def request_password_reset(db: AsyncSession, email: str) -> ResetEmail | None:
+    """A reset link to email, at most once a minute per account, so repeated clicks send one."""
     user = await db.scalar(
         select(UserAccount).where(UserAccount.email == normalize_email(email)).with_for_update()
     )
     if user is None:
-        return
+        return None
     settings = get_settings()
     now = clock.utcnow()
     recent = await db.scalar(
@@ -190,7 +190,7 @@ async def request_password_reset(db: AsyncSession, email: str, sender: EmailSend
     )
     if recent is not None:
         await db.rollback()
-        return
+        return None
     raw_token = new_opaque_token()
     db.add(
         PasswordResetToken(
@@ -202,7 +202,7 @@ async def request_password_reset(db: AsyncSession, email: str, sender: EmailSend
     )
     await db.commit()
     link = f"{settings.web_app_url}/reset-password?token={raw_token}"
-    await sender.send_password_reset(user.email, link)
+    return ResetEmail(to=user.email, name=user.name, link=link, language=user.language)
 
 
 async def _usable_reset_token(
