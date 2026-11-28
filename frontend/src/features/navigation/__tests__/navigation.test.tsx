@@ -5,6 +5,7 @@ import { act, fireEvent, renderRouter, screen, waitFor, within } from 'expo-rout
 import HomeLayout, { unstable_settings as homeSettings } from '@/app/(tabs)/(home)/_layout';
 import TabsLayout from '@/app/(tabs)/_layout';
 import ProfileLayout, { unstable_settings } from '@/app/(tabs)/profile/_layout';
+import { useAuthStore } from '@/features/auth/store';
 import { useWorkout } from '@/features/workout/store';
 import { useListTrackers } from '@/shared/api/generated/endpoints/trackers/trackers';
 import i18n from '@/shared/i18n';
@@ -95,6 +96,7 @@ beforeAll(async () => {
 beforeEach(() => {
   mockWidth = 1440;
   client = new QueryClient();
+  useAuthStore.setState({ status: 'signedIn', accessToken: null, userId: null, expired: false });
   useWorkout.setState({ hydrated: true, draft: null, summary: null });
   jest.mocked(useListTrackers).mockReturnValue({
     data: { status: 200, data: { items: [{ id: 'gym', name: 'Gym', type: 'strength', archived: false }] } },

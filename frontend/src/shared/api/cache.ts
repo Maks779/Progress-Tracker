@@ -8,6 +8,8 @@ import {
 } from '@tanstack/react-query-persist-client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+import { getReadMeQueryKey } from './generated/endpoints/me/me';
+
 const DAY = 24 * 60 * 60_000;
 
 /** Raise it when a saved answer's shape changes, so older copies are dropped instead of read. */
@@ -93,4 +95,11 @@ export async function restoreCache(queryClient: QueryClient): Promise<void> {
 /** Sign-out: nothing of the account stays on the device for the next person. */
 export async function forgetCache(): Promise<void> {
   await Promise.resolve(persister.removeClient()).catch(() => undefined);
+}
+
+/** The account the data in memory belongs to, as far as the saved profile tells. */
+export function savedAccountId(queryClient: QueryClient): string | undefined {
+  const me = queryClient.getQueryData<{ status: number; data?: { id?: unknown } }>(getReadMeQueryKey());
+  const id = me?.status === 200 ? me.data?.id : undefined;
+  return typeof id === 'string' ? id : undefined;
 }

@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Ember API",
-    "description": "\nREST API of **Ember**, a personal progress tracker for workouts, reading and habits.\n\n## Authentication\n\n- Sign up or log in with `POST /api/v1/auth/register` or `/auth/login` and send the header\n  `X-Client: web` or `X-Client: native`.\n- Send the access token as `Authorization: Bearer <token>`. It lives 15 minutes.\n- Get a new one with `POST /api/v1/auth/refresh`. Web clients send the `refresh_token`\n  cookie (httpOnly); native clients send the refresh token in the body. Refresh tokens rotate:\n  reusing an old one signs out that device.\n\n## Usage limits\n\nLog in, sign up and password reset requests are limited to 5 per 15 minutes per email and\n20 per 15 minutes per IP address. Over the limit the API answers `429` with `Retry-After`.\n\n## Conventions\n\n- Errors use RFC 9457 problem details (`application/problem+json`) with a stable `code`;\n  validation errors list each invalid `field`.\n- Units are canonical: weight in kg, distance in metres, durations in seconds.\n- Times are ISO 8601 in UTC; `local_date` is the date in the user's timezone.\n- Sessions, custom exercises and books are created with `PUT` under a client-generated UUID,\n  so retries from an offline outbox never create duplicates.\n- Lists that can grow use cursor pagination: `limit` and `cursor`, answered with `next_cursor`.\n- Every resource belongs to the signed-in user; another user's ID answers `404`.\n",
+    "description": "\nREST API of **Ember**, a personal progress tracker for workouts, reading and habits.\n\n## Authentication\n\n- Sign up or log in with `POST /api/v1/auth/register` or `/auth/login` and send the header\n  `X-Client: web` or `X-Client: native`.\n- Send the access token as `Authorization: Bearer <token>`. It lives 15 minutes.\n- Get a new one with `POST /api/v1/auth/refresh`. Web clients send the `__Secure-refresh_token`\n  cookie (httpOnly); native clients send the refresh token in the body. Refresh tokens rotate:\n  reusing an old one signs out that device.\n- Logging out, changing or resetting the password and a reused refresh token end the access\n  tokens of that sign-in at once, not when they expire.\n\n## Usage limits\n\n- Log in: 20 attempts per 15 minutes per IP address. Wrong passwords also count per email:\n  5 per 15 minutes from one IP address and 20 per 15 minutes from all of them together\n  (a password reset clears both counts).\n- Sign up, password reset requests and reset links: 20 per 15 minutes per IP address;\n  reset requests also 5 per 15 minutes per email.\n- Password checks on `/me/password` and `/me/delete`: 5 per 15 minutes per account.\n- IPv6 addresses count per /64 network.\n\nOver a limit the API answers `429` with `Retry-After`.\n\n## Conventions\n\n- Errors use RFC 9457 problem details (`application/problem+json`) with a stable `code`;\n  validation errors list each invalid `field`.\n- Units are canonical: weight in kg, distance in metres, durations in seconds.\n- Times are ISO 8601 in UTC; `local_date` is the date in the user's timezone.\n- Sessions, custom exercises and books are created with `PUT` under a client-generated UUID,\n  so retries from an offline outbox never create duplicates.\n- Lists that can grow use cursor pagination: `limit` and `cursor`, answered with `next_cursor`.\n- Every resource belongs to the signed-in user; another user's ID answers `404`.\n",
     "version": "0.1.0"
   },
   "paths": {
@@ -205,7 +205,7 @@
             }
           },
           {
-            "name": "refresh_token",
+            "name": "__Secure-refresh_token",
             "in": "cookie",
             "required": false,
             "schema": {
@@ -217,7 +217,7 @@
                   "type": "null"
                 }
               ],
-              "title": "Refresh Token"
+              "title": "  Secure-Refresh Token"
             }
           }
         ],
@@ -304,7 +304,7 @@
             }
           },
           {
-            "name": "refresh_token",
+            "name": "__Secure-refresh_token",
             "in": "cookie",
             "required": false,
             "schema": {
@@ -316,7 +316,7 @@
                   "type": "null"
                 }
               ],
-              "title": "Refresh Token"
+              "title": "  Secure-Refresh Token"
             }
           }
         ],

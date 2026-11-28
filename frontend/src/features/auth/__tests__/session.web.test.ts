@@ -1,7 +1,8 @@
 import { ApiError } from '@/shared/api/fetcher';
-import { refresh } from '@/shared/api/generated/endpoints/auth/auth';
+import { logout, refresh } from '@/shared/api/generated/endpoints/auth/auth';
 
-import { restoreSession } from '../session';
+import { type ElsewhereChange, onSessionChangedElsewhere, refreshTokenStore } from '../refreshToken';
+import { installAuth, restoreSession } from '../session';
 import { useAuthStore } from '../store';
 
 jest.mock('@/shared/api/fetcher', () => ({
@@ -29,9 +30,16 @@ jest.mock('../refreshToken', () => ({
     }),
     exists: jest.fn(async () => mockRemembered),
   },
+  onSessionChangedElsewhere: jest.fn(),
 }));
 
 const refreshMock = refresh as jest.Mock;
+const logoutMock = logout as jest.Mock;
+
+function jwt(sub: string): string {
+  const part = (value: object) => btoa(JSON.stringify(value)).replace(/=+$/, '');
+  return `${part({ alg: 'HS256' })}.${part({ sub, fid: 'family' })}.signature`;
+}
 
 function unauthorized(code: string) {
   return new ApiError({ type: 'about:blank', title: 'Unauthorized', status: 401, code });
@@ -40,13 +48,15 @@ function unauthorized(code: string) {
 beforeEach(() => {
   jest.clearAllMocks();
   mockRemembered = false;
-  useAuthStore.setState({ status: 'restoring', accessToken: null, expired: false });
+  logoutMock.mockResolvedValue({ status: 204, data: undefined, headers: new Headers() });
+  useAuthStore.setState({ status: 'restoring', accessToken: null, userId: null, expired: false });
 });
 
 const unreachable = () => new ApiError({ type: 'about:blank', title: 'Offline', status: 0, code: 'network_error' });
 
 describe('restoreSession on the web, where the refresh cookie is invisible to the page', () => {
-  it('asks the server, because only the server sees the cookie', async () => {
+  it('asks the server when the browser noted a session, because only the server sees the cookie', async () => {
+    mockRemembered = true;
     refreshMock.mockRejectedValue(unauthorized('no_session'));
 
     await restoreSession();
@@ -54,8 +64,16 @@ describe('restoreSession on the web, where the refresh cookie is invisible to th
     expect(refreshMock).toHaveBeenCalledWith(null);
   });
 
-  it('shows the welcome screen when the browser has no session', async () => {
-    refreshMock.mockRejectedValue(unauthorized('no_session'));
+  it('does not sign in with a cookie left behind by a log out, and ends it on the server', async () => {
+    await restoreSession();
+
+    expect(refreshMock).not.toHaveBeenCalled();
+    expect(logoutMock).toHaveBeenCalledWith(null);
+    expect(useAuthStore.getState()).toMatchObject({ status: 'signedOut', expired: false });
+  });
+
+  it('shows the welcome screen even when ending that cookie fails', async () => {
+    logoutMock.mockRejectedValue(unreachable());
 
     await restoreSession();
 
@@ -81,20 +99,45 @@ describe('restoreSession on the web, where the refresh cookie is invisible to th
     expect(useAuthStore.getState()).toMatchObject({ status: 'signedIn', accessToken: null });
   });
 
-  it('shows the welcome screen when the server cannot be reached and the browser never signed in', async () => {
-    refreshMock.mockRejectedValue(unreachable());
+  it('notes whose session the browser holds after the server renews it', async () => {
+    mockRemembered = true;
+    const access = jwt('account-a');
+    refreshMock.mockResolvedValue({ status: 200, headers: new Headers(), data: { access_token: access, expires_in: 900, token_type: 'bearer' } });
 
     await restoreSession();
 
-    expect(useAuthStore.getState()).toMatchObject({ status: 'signedOut', expired: false });
+    expect(useAuthStore.getState()).toMatchObject({ status: 'signedIn', accessToken: access, userId: 'account-a' });
+    expect(refreshTokenStore.remember).toHaveBeenCalledWith('account-a');
+  });
+});
+
+describe('other tabs of the same browser', () => {
+  let changed: (change: ElsewhereChange) => void = () => undefined;
+
+  beforeEach(() => {
+    (onSessionChangedElsewhere as jest.Mock).mockImplementation((listener) => {
+      changed = listener;
+    });
+    installAuth();
+    useAuthStore.getState().setSignedIn(jwt('account-a'));
   });
 
-  it('remembers the session after the server renews it', async () => {
-    refreshMock.mockResolvedValue({ status: 200, headers: new Headers(), data: { access_token: 'access', expires_in: 900, token_type: 'bearer' } });
+  it('signing out there signs this tab out, without ending anything on the server', () => {
+    changed({ signedOut: true });
 
-    await restoreSession();
+    expect(useAuthStore.getState()).toMatchObject({ status: 'signedOut', accessToken: null, expired: false });
+    expect(logoutMock).not.toHaveBeenCalled();
+  });
 
-    expect(useAuthStore.getState()).toMatchObject({ status: 'signedIn', accessToken: 'access' });
-    expect(mockRemembered).toBe(true);
+  it('signing in there as someone else signs this tab out', () => {
+    changed({ signedOut: false, userId: 'account-b' });
+
+    expect(useAuthStore.getState().status).toBe('signedOut');
+  });
+
+  it('renewing the same session there changes nothing here', () => {
+    changed({ signedOut: false, userId: 'account-a' });
+
+    expect(useAuthStore.getState()).toMatchObject({ status: 'signedIn', userId: 'account-a' });
   });
 });

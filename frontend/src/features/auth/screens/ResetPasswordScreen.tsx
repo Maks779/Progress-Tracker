@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -19,6 +19,7 @@ import { AuthLayout } from '../components/AuthLayout';
 import { PasswordVisibility } from '../components/PasswordVisibility';
 import { errorMessageKey, isCommonPasswordError } from '../errors';
 import { type ResetPasswordValues, resetPasswordSchema } from '../schemas';
+import { type ResetLinkParams, resetTokenOf, showsResetToken, WITHOUT_TOKEN } from '../resetLink';
 import { forgetSession } from '../session';
 
 type Stage = 'checking' | 'form' | 'done' | 'invalid';
@@ -28,25 +29,43 @@ function isInvalidLink(error: unknown): boolean {
 }
 
 /**
- * Opened from the emailed link `/reset-password?token=…`. The link is checked first, so a used
- * or expired one is reported before the user types a new password. When the check cannot reach
- * the server, the form still opens and saving reports the problem.
+ * Opened from the emailed link `/reset-password#token=…`. The token is taken out of the address
+ * bar at once, then the link is checked, so a used or expired one is reported before the user
+ * types a new password. A link opened again in the same tab (the page does not reload when only the
+ * part after `#` changes) is checked again, even the same one. When the check cannot reach the server, the form
+ * still opens and saving reports the problem.
  */
 export function ResetPasswordScreen() {
   const { t } = useTranslation();
   const { colors, space } = useTheme();
   const router = useRouter();
-  const { token } = useLocalSearchParams<{ token?: string }>();
+  const navigation = useNavigation();
+  const params = useLocalSearchParams<ResetLinkParams>();
+  const linked = resetTokenOf(params);
+  const [token, setToken] = useState(linked);
+  const tokenShown = showsResetToken(params);
   const confirmRef = useRef<TextInputInstance>(null);
   const [stage, setStage] = useState<Stage>(token ? 'checking' : 'invalid');
   const [showPassword, setShowPassword] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [shownBefore, setShownBefore] = useState(tokenShown);
+  const [opening, setOpening] = useState(0);
+  if (tokenShown !== shownBefore) {
+    setShownBefore(tokenShown);
+    if (linked) {
+      setToken(linked);
+      setStage('checking');
+      setFormError(null);
+      setOpening((count) => count + 1);
+    }
+  }
   const {
     control,
     handleSubmit,
     setError,
     trigger,
     getFieldState,
+    reset,
     formState: { errors, isSubmitting },
   } = useForm<ResetPasswordValues>({
     resolver: zodResolver(resetPasswordSchema),
@@ -55,6 +74,12 @@ export function ResetPasswordScreen() {
   });
 
   const password = useWatch({ control, name: 'password' });
+
+  useEffect(() => {
+    if (tokenShown) {
+      navigation.setParams(WITHOUT_TOKEN as never);
+    }
+  }, [navigation, tokenShown]);
 
   useEffect(() => {
     if (!token) {
@@ -69,13 +94,14 @@ export function ResetPasswordScreen() {
         }
       });
     return () => request.abort();
-  }, [token]);
+  }, [token, opening]);
 
   const submit = useExclusive(handleSubmit(async ({ password }) => {
     setFormError(null);
     try {
       await resetPassword({ token: token ?? '', new_password: password });
       await forgetSession();
+      reset();
       setStage('done');
     } catch (error) {
       if (isCommonPasswordError(error)) {

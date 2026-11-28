@@ -50,7 +50,7 @@ def create_access_token(user_id: UUID, family_id: UUID) -> tuple[str, int]:
         "iat": now,
         "exp": now + ttl,
     }
-    token = jwt.encode(payload, settings.jwt_secret, algorithm=ALGORITHM)
+    token = jwt.encode(payload, settings.jwt_secret.get_secret_value(), algorithm=ALGORITHM)
     return token, int(ttl.total_seconds())
 
 
@@ -59,7 +59,7 @@ def decode_access_token(token: str) -> AccessClaims | None:
     try:
         payload = jwt.decode(
             token,
-            get_settings().jwt_secret,
+            get_settings().jwt_secret.get_secret_value(),
             algorithms=[ALGORITHM],
             options={"require": ["exp", "sub", "fid"], "verify_exp": False, "verify_iat": False},
         )

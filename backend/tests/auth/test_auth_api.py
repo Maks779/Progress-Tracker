@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app import clock
 from app.auth.email import ResetEmail, get_email_sender
 from app.auth.models import RefreshToken
+from app.auth.router import REFRESH_COOKIE
 from app.main import app
 from tests.conftest import CapturedEmails
 from tests.helpers import NATIVE, PASSWORD, WEB, bearer, login, register
@@ -18,8 +19,8 @@ pytestmark = pytest.mark.anyio
 
 def refresh_cookie(response: Response) -> str:
     header = response.headers["set-cookie"]
-    assert header.startswith("refresh_token=")
-    return header.split(";", 1)[0].removeprefix("refresh_token=")
+    assert header.startswith(f"{REFRESH_COOKIE}=")
+    return header.split(";", 1)[0].removeprefix(f"{REFRESH_COOKIE}=")
 
 
 async def refresh_native(client: AsyncClient, token: str) -> Response:
@@ -50,6 +51,7 @@ async def test_register_web_puts_refresh_token_in_a_strict_httponly_cookie(clien
 
     assert response.status_code == 201
     assert "refresh_token" not in response.json()
+    assert response.headers["set-cookie"].startswith("__Secure-refresh_token=")
     cookie = response.headers["set-cookie"].lower()
     for attribute in ("httponly", "secure", "samesite=strict", "path=/api/v1/auth"):
         assert attribute in cookie
@@ -188,7 +190,7 @@ async def test_web_refresh_reads_the_cookie(client: AsyncClient):
 
     response = await client.post(
         "/api/v1/auth/refresh",
-        headers={**WEB, "Cookie": f"refresh_token={refresh_cookie(registered)}"},
+        headers={**WEB, "Cookie": f"{REFRESH_COOKIE}={refresh_cookie(registered)}"},
     )
 
     assert response.status_code == 200
@@ -223,7 +225,7 @@ async def test_logout_revokes_the_family_and_clears_the_cookie(client: AsyncClie
     )
 
     assert response.status_code == 204
-    assert 'refresh_token=""' in response.headers["set-cookie"]
+    assert f'{REFRESH_COOKIE}=""' in response.headers["set-cookie"]
     assert (await refresh_native(client, tokens["refresh_token"])).status_code == 401
 
 
@@ -412,7 +414,7 @@ async def test_web_session_from_before_a_reset_reports_it_has_expired(
 
     response = await client.post(
         "/api/v1/auth/refresh",
-        headers={**WEB, "Cookie": f"refresh_token={refresh_cookie(registered)}"},
+        headers={**WEB, "Cookie": f"{REFRESH_COOKIE}={refresh_cookie(registered)}"},
     )
 
     assert response.status_code == 401

@@ -10,14 +10,23 @@
  * - Sign up or log in with `POST /api/v1/auth/register` or `/auth/login` and send the header
  *   `X-Client: web` or `X-Client: native`.
  * - Send the access token as `Authorization: Bearer <token>`. It lives 15 minutes.
- * - Get a new one with `POST /api/v1/auth/refresh`. Web clients send the `refresh_token`
+ * - Get a new one with `POST /api/v1/auth/refresh`. Web clients send the `__Secure-refresh_token`
  *   cookie (httpOnly); native clients send the refresh token in the body. Refresh tokens rotate:
  *   reusing an old one signs out that device.
+ * - Logging out, changing or resetting the password and a reused refresh token end the access
+ *   tokens of that sign-in at once, not when they expire.
  *
  * ## Usage limits
  *
- * Log in, sign up and password reset requests are limited to 5 per 15 minutes per email and
- * 20 per 15 minutes per IP address. Over the limit the API answers `429` with `Retry-After`.
+ * - Log in: 20 attempts per 15 minutes per IP address. Wrong passwords also count per email:
+ *   5 per 15 minutes from one IP address and 20 per 15 minutes from all of them together
+ *   (a password reset clears both counts).
+ * - Sign up, password reset requests and reset links: 20 per 15 minutes per IP address;
+ *   reset requests also 5 per 15 minutes per email.
+ * - Password checks on `/me/password` and `/me/delete`: 5 per 15 minutes per account.
+ * - IPv6 addresses count per /64 network.
+ *
+ * Over a limit the API answers `429` with `Retry-After`.
  *
  * ## Conventions
  *

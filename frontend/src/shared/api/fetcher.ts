@@ -32,10 +32,18 @@ export class ApiError extends Error {
 /** A request without an answer after this long fails as `timeout` instead of hanging. */
 export const REQUEST_TIMEOUT_MS = 10_000;
 
+/**
+ * A refresh waits longer (a server waking from sleep can take that long): the server rotates
+ * the token even when the app stopped waiting, and the app would then send the old one again,
+ * which the server must treat as theft and end the session.
+ */
+export const REFRESH_TIMEOUT_MS = 30_000;
+
 /** Web keeps the refresh token in an httpOnly cookie, phones send it in the request body. */
 export const CLIENT_KIND: 'web' | 'native' = Platform.OS === 'web' ? 'web' : 'native';
 
 const AUTH_PATH = '/api/v1/auth/';
+const REFRESH_PATH = `${AUTH_PATH}refresh`;
 
 type TokenProvider = () => string | null;
 type UnauthorizedHandler = () => Promise<boolean>;
@@ -98,7 +106,7 @@ async function send<T>(url: string, options: RequestInit): Promise<T> {
   const timer = setTimeout(() => {
     timedOut = true;
     controller.abort();
-  }, REQUEST_TIMEOUT_MS);
+  }, url.startsWith(REFRESH_PATH) ? REFRESH_TIMEOUT_MS : REQUEST_TIMEOUT_MS);
   const cancel = () => controller.abort();
   if (caller?.aborted) {
     cancel();

@@ -22,13 +22,15 @@ import { WelcomeScreen } from '../screens/WelcomeScreen';
 import { logIn, signUp } from '../session';
 import { useAuthStore } from '../store';
 
-const mockSearchParams: { token?: string } = {};
+const mockSearchParams: { token?: string; '#'?: string } = {};
 const mockRedirect = jest.fn();
+const mockSetParams = jest.fn();
 
 jest.mock('expo-router', () => ({
   Link: ({ children }: { children: unknown }) => children,
   useRouter: () => ({ push: jest.fn(), replace: jest.fn() }),
   useLocalSearchParams: () => mockSearchParams,
+  useNavigation: () => ({ setParams: mockSetParams }),
   Redirect: ({ href }: { href: string }) => {
     mockRedirect(href);
     return null;
@@ -76,6 +78,7 @@ beforeAll(async () => {
 beforeEach(() => {
   jest.clearAllMocks();
   delete mockSearchParams.token;
+  delete mockSearchParams['#'];
   useAuthStore.setState({ status: 'signedOut', accessToken: null, expired: false });
 });
 
@@ -286,6 +289,77 @@ describe('Reset password', () => {
       { token: 'emailed-token' },
       expect.objectContaining({ signal: expect.anything() }),
     );
+  });
+
+  it('reads the token of an emailed link after #, and takes it out of the address bar', async () => {
+    mockSearchParams['#'] = 'token=emailed-token';
+    (checkResetToken as jest.Mock).mockResolvedValue(linkWorks);
+
+    await open(ResetPasswordScreen);
+
+    expect(await screen.findByLabelText('New password')).toBeTruthy();
+    expect(checkResetToken).toHaveBeenCalledWith({ token: 'emailed-token' }, expect.anything());
+    expect(mockSetParams).toHaveBeenCalledWith({ token: undefined, '#': undefined });
+  });
+
+  it('checks again when another link opens in the same tab (only the part after # changes)', async () => {
+    mockSearchParams['#'] = 'token=first-token';
+    (checkResetToken as jest.Mock).mockResolvedValueOnce(linkWorks).mockRejectedValueOnce(apiError(400, 'invalid_reset_link'));
+    const view = await open(ResetPasswordScreen);
+    expect(await screen.findByLabelText('New password')).toBeTruthy();
+
+    delete mockSearchParams['#'];
+    await view.rerender(
+      <ThemeProvider>
+        <ResetPasswordScreen />
+      </ThemeProvider>,
+    );
+    mockSearchParams['#'] = 'token=used-token';
+    await view.rerender(
+      <ThemeProvider>
+        <ResetPasswordScreen />
+      </ThemeProvider>,
+    );
+
+    expect(await screen.findByText('This link no longer works')).toBeTruthy();
+    expect(checkResetToken).toHaveBeenLastCalledWith({ token: 'used-token' }, expect.anything());
+  });
+
+  it('checks the same link again when it is opened again after saving', async () => {
+    mockSearchParams['#'] = 'token=emailed-token';
+    (resetPassword as jest.Mock).mockResolvedValue(linkWorks);
+    (checkResetToken as jest.Mock).mockResolvedValueOnce(linkWorks).mockRejectedValueOnce(apiError(400, 'invalid_reset_link'));
+    const view = await open(ResetPasswordScreen);
+    await fillAndSave('correct-horse', 'correct-horse');
+    expect(await screen.findByText('Password updated')).toBeTruthy();
+    const page = () => (
+      <ThemeProvider>
+        <ResetPasswordScreen />
+      </ThemeProvider>
+    );
+
+    delete mockSearchParams['#'];
+    await view.rerender(page());
+    mockSearchParams['#'] = 'token=emailed-token';
+    await view.rerender(page());
+
+    expect(await screen.findByText('This link no longer works')).toBeTruthy();
+    expect(checkResetToken).toHaveBeenCalledTimes(2);
+  });
+
+  it('takes a token given as ?token= out of the address bar too', async () => {
+    await openWithToken(() => Promise.resolve(linkWorks));
+
+    expect(await screen.findByLabelText('New password')).toBeTruthy();
+    expect(mockSetParams).toHaveBeenCalledWith({ token: undefined, '#': undefined });
+  });
+
+  it('says the link does not work when it has no token', async () => {
+    await open(ResetPasswordScreen);
+
+    expect(await screen.findByText('This link no longer works')).toBeTruthy();
+    expect(checkResetToken).not.toHaveBeenCalled();
+    expect(mockSetParams).not.toHaveBeenCalled();
   });
 
   it('opens the form when the server cannot be reached for the check', async () => {

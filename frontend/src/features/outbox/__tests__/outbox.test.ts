@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+import { useAuthStore } from '@/features/auth/store';
 import { useConnection } from '@/shared/api/connection';
 import { ApiError } from '@/shared/api/fetcher';
 import { putBook } from '@/shared/api/generated/endpoints/books/books';
@@ -37,9 +38,33 @@ beforeEach(async () => {
   await AsyncStorage.clear();
   useOutbox.setState({ hydrated: true, items: [], syncing: false, retryAt: null });
   useConnection.setState({ online: true, reachable: true });
+  useAuthStore.setState({ status: 'signedIn', accessToken: null, userId: null, expired: false });
   jest.mocked(putSession).mockImplementation(async (id) => ok({ session: { id }, new_records: [] }));
   jest.mocked(putExercise).mockImplementation(async (id) => ok({ id }));
   jest.mocked(putBook).mockImplementation(async (id) => ok({ id }));
+});
+
+describe('whose session sends a change', () => {
+  it("never sends one account's changes with another account's session", async () => {
+    await enqueue({ kind: 'session', id: 'theirs', userId: 'account-a', body: BODY });
+    useAuthStore.setState({ userId: 'account-b' });
+
+    expect(await flushOutbox('account-a')).toBe('stopped');
+    expect(putSession).not.toHaveBeenCalled();
+    expect(ids()).toEqual(['theirs']);
+  });
+
+  it('sends them with their own account, or while the session is not known yet (opened offline)', async () => {
+    await enqueue({ kind: 'session', id: 'mine', userId: 'account-a', body: BODY });
+    await enqueue({ kind: 'session', id: 'also-mine', userId: 'account-a', body: BODY });
+
+    useAuthStore.setState({ userId: null });
+    await flushOutbox('account-a');
+    useAuthStore.setState({ userId: 'account-a' });
+
+    expect(putSession).toHaveBeenCalledTimes(2);
+    expect(ids()).toEqual([]);
+  });
 });
 
 describe('changes on the device', () => {

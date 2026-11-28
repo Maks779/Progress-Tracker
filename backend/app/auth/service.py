@@ -201,7 +201,7 @@ async def request_password_reset(db: AsyncSession, email: str) -> ResetEmail | N
         )
     )
     await db.commit()
-    link = f"{settings.web_app_url}/reset-password?token={raw_token}"
+    link = f"{settings.web_app_url}/reset-password#token={raw_token}"
     return ResetEmail(to=user.email, name=user.name, link=link, language=user.language)
 
 
@@ -222,7 +222,8 @@ async def check_reset_token(db: AsyncSession, raw_token: str) -> None:
     await _usable_reset_token(db, raw_token)
 
 
-async def reset_password(db: AsyncSession, raw_token: str, new_password: str) -> None:
+async def reset_password(db: AsyncSession, raw_token: str, new_password: str) -> str:
+    """Set the new password, use up the reset links, sign out everywhere; returns the email."""
     token = await _usable_reset_token(db, raw_token, for_update=True)
     user = await db.get(UserAccount, token.user_id)
     if user is None:
@@ -236,3 +237,4 @@ async def reset_password(db: AsyncSession, raw_token: str, new_password: str) ->
     )
     await revoke_families(db, user.id)
     await db.commit()
+    return user.email

@@ -2,6 +2,7 @@ import { Platform } from 'react-native';
 import { z } from 'zod';
 import { create } from 'zustand';
 
+import { useAuthStore } from '@/features/auth/store';
 import { useConnection } from '@/shared/api/connection';
 import { putBook } from '@/shared/api/generated/endpoints/books/books';
 import { putExercise } from '@/shared/api/generated/endpoints/exercises/exercises';
@@ -228,6 +229,12 @@ export type FlushResult = 'done' | 'stopped' | 'offline';
 
 let failures = 0;
 
+/** A change is only sent with its own account's session, never with another one's token. */
+function sessionIsNot(userId: string): boolean {
+  const signedInAs = useAuthStore.getState().userId;
+  return signedInAs !== null && signedInAs !== userId;
+}
+
 async function run(userId: string): Promise<FlushResult> {
   if (!useConnection.getState().online) {
     return 'offline';
@@ -235,6 +242,9 @@ async function run(userId: string): Promise<FlushResult> {
   useOutbox.setState({ syncing: true });
   try {
     for (let item = pendingFor(useOutbox.getState().items, userId)[0]; item; item = pendingFor(useOutbox.getState().items, userId)[0]) {
+      if (sessionIsNot(userId)) {
+        return 'stopped';
+      }
       if ((await send(item)) === 'stopped') {
         failures += 1;
         useOutbox.setState({ retryAt: Date.now() + retryDelay(failures, Math.random()) });

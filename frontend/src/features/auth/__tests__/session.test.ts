@@ -26,11 +26,18 @@ jest.mock('../refreshToken', () => {
       remember: jest.fn(async () => undefined),
       exists: jest.fn(async () => saved !== null),
     },
+    onSessionChangedElsewhere: jest.fn(),
   };
 });
 
 const refreshMock = refresh as jest.Mock;
 const logoutMock = logout as jest.Mock;
+
+/** An access token shaped like the server's: only its `sub` claim matters to the app. */
+function jwt(sub: string): string {
+  const part = (value: object) => btoa(JSON.stringify(value)).replace(/=+$/, '');
+  return `${part({ alg: 'HS256' })}.${part({ sub, fid: 'family' })}.signature`;
+}
 
 function tokens(access: string, refreshToken: string) {
   return {
@@ -47,7 +54,7 @@ function apiError(status: number, code: string) {
 beforeEach(async () => {
   jest.clearAllMocks();
   await refreshTokenStore.clear();
-  useAuthStore.setState({ status: 'restoring', accessToken: null, expired: false });
+  useAuthStore.setState({ status: 'restoring', accessToken: null, userId: null, expired: false });
 });
 
 describe('refreshSession', () => {
@@ -78,6 +85,51 @@ describe('refreshSession', () => {
 
     expect(await refreshSession()).toBe('unreachable');
     expect(await refreshTokenStore.get()).toBe('refresh-1');
+  });
+
+  it.each([
+    [408, 'timeout'],
+    [429, 'rate_limited'],
+  ])('keeps the token when the answer only says "not now" (%i)', async (status, code) => {
+    await refreshTokenStore.set('refresh-1');
+    refreshMock.mockRejectedValue(apiError(status, code));
+
+    expect(await refreshSession()).toBe('unreachable');
+    expect(await refreshTokenStore.get()).toBe('refresh-1');
+  });
+
+  it('knows whose session it is from the access token', async () => {
+    await refreshTokenStore.set('refresh-1');
+    refreshMock.mockResolvedValue(tokens(jwt('account-a'), 'refresh-2'));
+
+    await refreshSession();
+
+    expect(useAuthStore.getState().userId).toBe('account-a');
+  });
+
+  it('drops an answer that arrives after the person logged out', async () => {
+    await refreshTokenStore.set('refresh-1');
+    useAuthStore.getState().setSignedIn(jwt('account-a'));
+    let answer: (value: unknown) => void = () => undefined;
+    refreshMock.mockReturnValue(new Promise((resolve) => (answer = resolve)));
+    logoutMock.mockResolvedValue({ status: 204, data: undefined, headers: new Headers() });
+
+    const renewal = refreshSession();
+    await signOut();
+    answer(tokens(jwt('account-a'), 'refresh-2'));
+
+    expect(await renewal).toBe('cancelled');
+    expect(await refreshTokenStore.get()).toBeNull();
+    expect(useAuthStore.getState()).toMatchObject({ status: 'signedOut', accessToken: null, expired: false });
+  });
+
+  it("signs out instead of carrying on when the tokens are another account's", async () => {
+    await refreshTokenStore.set('refresh-1');
+    useAuthStore.getState().setSignedIn(jwt('account-a'));
+    refreshMock.mockResolvedValue(tokens(jwt('account-b'), 'refresh-2'));
+
+    expect(await refreshSession()).toBe('cancelled');
+    expect(useAuthStore.getState()).toMatchObject({ status: 'signedOut', accessToken: null, userId: null });
   });
 });
 

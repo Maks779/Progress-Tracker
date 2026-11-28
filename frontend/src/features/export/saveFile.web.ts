@@ -14,3 +14,6 @@ export async function saveFile(file: ExportFile): Promise<void> {
   link.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
+
+/** The web keeps no copy: a download belongs to the person's own downloads folder. */
+export async function forgetExportFiles(): Promise<void> {}

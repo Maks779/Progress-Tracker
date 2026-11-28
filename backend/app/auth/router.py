@@ -17,23 +17,18 @@ from app.auth.schemas import (
 )
 from app.config import get_settings
 from app.database import DbSession
-from app.rate_limit import RateLimiter
+from app.rate_limit import RateLimiter, client_ip
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
-REFRESH_COOKIE = "refresh_token"
+REFRESH_COOKIE = "__Secure-refresh_token"
 COOKIE_PATH = "/api/v1/auth"
 WINDOW_SECONDS = 15 * 60
 
 attempts_by_email = RateLimiter(limit=5, window_seconds=WINDOW_SECONDS)
 attempts_by_ip = RateLimiter(limit=20, window_seconds=WINDOW_SECONDS)
-
-
-def client_ip(request: Request) -> str:
-    forwarded = request.headers.get("cf-connecting-ip")
-    if forwarded:
-        return forwarded
-    return request.client.host if request.client else "unknown"
+failed_logins_by_account_and_ip = RateLimiter(limit=5, window_seconds=WINDOW_SECONDS)
+failed_logins_by_account = RateLimiter(limit=20, window_seconds=WINDOW_SECONDS)
 
 
 def _limit(request: Request, action: str, email: str | None = None) -> None:
@@ -43,13 +38,12 @@ def _limit(request: Request, action: str, email: str | None = None) -> None:
 
 
 def set_refresh_cookie(response: Response, token: str) -> None:
-    settings = get_settings()
     response.set_cookie(
         REFRESH_COOKIE,
         token,
-        max_age=settings.refresh_token_ttl_days * 24 * 60 * 60,
+        max_age=get_settings().refresh_token_ttl_days * 24 * 60 * 60,
         httponly=True,
-        secure=settings.cookie_secure,
+        secure=True,
         samesite="strict",
         path=COOKIE_PATH,
     )
@@ -57,11 +51,7 @@ def set_refresh_cookie(response: Response, token: str) -> None:
 
 def clear_refresh_cookie(response: Response) -> None:
     response.delete_cookie(
-        REFRESH_COOKIE,
-        httponly=True,
-        secure=get_settings().cookie_secure,
-        samesite="strict",
-        path=COOKIE_PATH,
+        REFRESH_COOKIE, httponly=True, secure=True, samesite="strict", path=COOKIE_PATH
     )
 
 
@@ -102,9 +92,26 @@ async def register(
 async def login(
     data: LoginRequest, client: Client, request: Request, response: Response, db: DbSession
 ) -> TokenResponse:
-    _limit(request, "login", data.email)
+    ip = client_ip(request)
+    account = service.normalize_email(data.email)
+    _count_login(ip, account)
     tokens = await service.login(db, data.email, data.password, client)
+    _uncount_login(ip, account)
     return _token_response(tokens, client, response)
+
+
+def _count_login(ip: str, account: str) -> None:
+    """Wrong passwords count per account and network, and more loosely per account: guessing stays
+    slow, while locking someone else out takes many networks at once (and a reset ends it)."""
+    attempts_by_ip.hit(f"login:{ip}")
+    failed_logins_by_account_and_ip.hit(f"{account}|{ip}")
+    failed_logins_by_account.hit(account)
+
+
+def _uncount_login(ip: str, account: str) -> None:
+    """A right password is not a failed attempt."""
+    failed_logins_by_account_and_ip.release(f"{account}|{ip}")
+    failed_logins_by_account.release(account)
 
 
 @router.post(
@@ -168,5 +175,7 @@ async def check_reset_token(data: ResetTokenCheck, request: Request, db: DbSessi
 @router.post("/password/reset", status_code=204, summary="Set a new password with a reset token")
 async def reset_password(data: ResetPasswordRequest, request: Request, db: DbSession) -> Response:
     _limit(request, "reset")
-    await service.reset_password(db, data.token, data.new_password)
+    email = await service.reset_password(db, data.token, data.new_password)
+    failed_logins_by_account.forget(email)
+    failed_logins_by_account_and_ip.forget_starting_with(f"{email}|")
     return Response(status_code=204)

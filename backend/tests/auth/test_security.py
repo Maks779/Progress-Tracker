@@ -70,7 +70,11 @@ def test_token_signed_with_another_secret_is_rejected():
     ],
 )
 def test_malformed_access_tokens_are_rejected(payload: dict[str, str]):
-    token = jwt.encode({**payload, "exp": 9999999999}, get_settings().jwt_secret, algorithm="HS256")
+    token = jwt.encode(
+        {**payload, "exp": 9999999999},
+        get_settings().jwt_secret.get_secret_value(),
+        algorithm="HS256",
+    )
 
     assert decode_access_token(token) is None
 

@@ -25,7 +25,7 @@ LINK = "https://ember.example.workers.dev/reset-password?token=abc&x=<1>"
 def settings(**overrides: Any) -> Settings:
     values: dict[str, Any] = {
         "database_url": "postgresql+psycopg://unused",
-        "jwt_secret": "unused",
+        "jwt_secret": "a-test-secret-that-is-long-enough",
         "smtp_host": "smtp.example.com",
         "smtp_port": 587,
         "smtp_username": "ember@example.com",

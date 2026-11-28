@@ -117,7 +117,8 @@ export async function prepareWorkout(client: QueryClient, start: Start, now = ne
 
 /**
  * The workout on this device, if it belongs to the signed-in account. A workout or summary
- * left by another account on a shared device is dropped once the account is known.
+ * left by another account on a shared device is dropped once the account is known, and
+ * neither is shown before that.
  */
 export function useActiveDraft(): WorkoutDraft | null {
   const draft = useWorkout((state) => state.draft);
@@ -128,7 +129,7 @@ export function useActiveDraft(): WorkoutDraft | null {
       workout.discard();
     }
   }, [foreign]);
-  return draft && !foreign ? draft : null;
+  return draft && accountId && !foreign ? draft : null;
 }
 
 export function useActiveSummary(): WorkoutSummary | null {
@@ -140,7 +141,7 @@ export function useActiveSummary(): WorkoutSummary | null {
       workout.closeSummary();
     }
   }, [foreign]);
-  return summary && !foreign ? summary : null;
+  return summary && accountId && !foreign ? summary : null;
 }
 
 export type WorkoutEntry = {

@@ -1,6 +1,7 @@
 import { apiOrigin } from '../config';
 import {
   ApiError,
+  REFRESH_TIMEOUT_MS,
   REQUEST_TIMEOUT_MS,
   apiFetch,
   setAccessTokenProvider,
@@ -173,6 +174,24 @@ describe('apiFetch', () => {
       const error = (await pending) as ApiError;
 
       expect(error).toBeInstanceOf(ApiError);
+      expect(error.code).toBe('timeout');
+    });
+
+    it('waits longer for a refresh, which the server carries out even when the app stops waiting', async () => {
+      hangUntilAborted();
+      let settled = false;
+
+      const pending = apiFetch('/api/v1/auth/refresh', { method: 'POST' })
+        .catch((caught: unknown) => caught)
+        .finally(() => {
+          settled = true;
+        });
+      jest.advanceTimersByTime(REQUEST_TIMEOUT_MS);
+      await Promise.resolve();
+      expect(settled).toBe(false);
+      jest.advanceTimersByTime(REFRESH_TIMEOUT_MS - REQUEST_TIMEOUT_MS);
+      const error = (await pending) as ApiError;
+
       expect(error.code).toBe('timeout');
     });
 

@@ -22,7 +22,8 @@ import { useOutboxSync } from '@/features/outbox/useOutboxSync';
 import { hydratePreferences, usePreferences } from '@/features/settings/preferences';
 import { usePreferencesSync } from '@/features/settings/usePreferencesSync';
 import { hydrateWorkout, useWorkout } from '@/features/workout/store';
-import { forgetCache, restoreCache } from '@/shared/api/cache';
+import { forgetExportFiles } from '@/features/export/saveFile';
+import { forgetCache, restoreCache, savedAccountId } from '@/shared/api/cache';
 import { watchConnection } from '@/shared/api/connection';
 import { createQueryClient, followAppFocus } from '@/shared/api/queryClient';
 import { useServerProbe } from '@/shared/api/useServerProbe';
@@ -95,6 +96,7 @@ export default function RootLayout() {
     Inter_700Bold,
   });
   const status = useAuthStore((state) => state.status);
+  const userId = useAuthStore((state) => state.userId);
   const hydrated = usePreferences((state) => state.hydrated);
   const workoutLoaded = useWorkout((state) => state.hydrated);
   const outboxLoaded = useOutbox((state) => state.hydrated);
@@ -121,8 +123,17 @@ export default function RootLayout() {
     if (cacheLoaded && status === 'signedOut') {
       queryClient.clear();
       void forgetCache();
+      void forgetExportFiles();
     }
   }, [cacheLoaded, status, queryClient]);
+
+  useEffect(() => {
+    const saved = cacheLoaded && status === 'signedIn' ? savedAccountId(queryClient) : undefined;
+    if (saved !== undefined && userId !== null && saved !== userId) {
+      queryClient.clear();
+      void forgetCache();
+    }
+  }, [cacheLoaded, status, userId, queryClient]);
 
   useEffect(() => {
     if (ready) {
