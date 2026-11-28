@@ -6,6 +6,7 @@ import type { ReactElement } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { useAuthStore } from '@/features/auth/store';
+import { useNotifications } from '@/features/notifications/store';
 import { sessionKey, useOutbox } from '@/features/outbox/outbox';
 import { usePreferences } from '@/features/settings/preferences';
 import { useConnection } from '@/shared/api/connection';
@@ -123,6 +124,7 @@ beforeEach(async () => {
   useOutbox.setState({ hydrated: true, items: [], syncing: false, retryAt: null });
   usePreferences.setState((current) => ({ values: { ...current.values, weight_unit: 'kg' } }));
   useWorkout.setState({ hydrated: true, draft: draft(), summary: null });
+  useNotifications.setState({ hydrated: true, permission: 'granted', asked: true });
   jest.mocked(useExerciseRecords).mockImplementation(() => ({ data: undefined }) as never);
   jest.mocked(useListTrackers).mockReturnValue({
     data: { status: 200, data: { items: [{ id: 'gym', name: 'Gym', type: 'strength', archived: false }] } },
@@ -199,6 +201,18 @@ describe('Workout', () => {
 
     await press(screen.getByRole('checkbox', { name: 'Bench press, Set 2, done' }));
     expect(screen.queryByText(/Max weight/)).toBeNull();
+  });
+
+  it('asks once for notifications the first time a rest starts', async () => {
+    useNotifications.setState({ hydrated: true, permission: 'undetermined', asked: false });
+    await show(<WorkoutScreen />);
+    expect(screen.queryByText('A nudge, on your terms.')).toBeNull();
+
+    await press(screen.getByRole('checkbox', { name: 'Bench press, Set 1, done' }));
+    expect(screen.getByText('A nudge, on your terms.')).toBeTruthy();
+    await press(screen.getByRole('button', { name: 'Not now' }));
+    expect(screen.queryByText('A nudge, on your terms.')).toBeNull();
+    expect(useNotifications.getState().asked).toBe(true);
   });
 
   it('takes typed weight and reps, in pounds too', async () => {

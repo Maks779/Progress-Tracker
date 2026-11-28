@@ -5,6 +5,7 @@
 export type { LucideIcon } from 'lucide-react-native';
 export { default as Activity } from 'lucide-react-native/icons/activity';
 export { default as Bike } from 'lucide-react-native/icons/bike';
+export { default as Bell } from 'lucide-react-native/icons/bell';
 export { default as BookOpen } from 'lucide-react-native/icons/book-open';
 export { default as Brain } from 'lucide-react-native/icons/brain';
 export { default as CalendarDays } from 'lucide-react-native/icons/calendar-days';

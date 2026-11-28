@@ -81,7 +81,7 @@ beforeEach(async () => {
   await AsyncStorage.clear();
   await i18n.changeLanguage('en');
   usePreferences.setState({
-    values: { language: 'en', theme: 'system', weight_unit: 'kg', distance_unit: 'km' },
+    values: { language: 'en', theme: 'system', weight_unit: 'kg', distance_unit: 'km', notify_rest_timer: true, notify_weekly_reminder: true },
     pending: [],
     hydrated: true,
   });

@@ -5,6 +5,7 @@ import { View } from 'react-native';
 
 import { signOut } from '@/features/auth/session';
 import { ExportSheet } from '@/features/export/ExportSheet';
+import { NotificationsCard } from '@/features/notifications/components';
 import { forgetAccount, useOutbox } from '@/features/outbox/outbox';
 import { workout } from '@/features/workout/store';
 import { useReadMe } from '@/shared/api/generated/endpoints/me/me';
@@ -90,6 +91,7 @@ export function ProfileScreen() {
         onEditName={() => setEditingName(true)}
       />
       <SettingsCard />
+      <NotificationsCard />
     </>
   );
 
