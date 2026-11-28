@@ -49,6 +49,8 @@ uv run fastapi dev app/main.py
 
 API docs: http://localhost:8000/api/docs
 
+Reset emails: with Docker they go to Mailpit (http://localhost:8025); without `SMTP_HOST` the link is written to the server log instead.
+
 ## Tests and linting
 
 From `backend/`, with the database container running (tests create their own `_test` database):

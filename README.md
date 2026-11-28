@@ -25,6 +25,8 @@ docker compose up --build
 
 On Windows PowerShell use `Copy-Item .env.example .env`. Then open the interactive API docs at http://localhost:8000/api/docs.
 
+Password reset emails go to Mailpit, a local test mailbox: http://localhost:8025. Live, the API sends them through Gmail's SMTP server (see `.env.example`).
+
 Backend development without Docker, tests and linting: [backend/README.md](backend/README.md).
 
 ## Repository layout

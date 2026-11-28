@@ -14,7 +14,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engin
 from sqlalchemy.pool import NullPool
 
 from app import clock
-from app.auth.email import get_email_sender
+from app.auth.email import ResetEmail, get_email_sender
 from app.config import Settings
 from app.database import get_db
 from app.main import app
@@ -90,10 +90,14 @@ async def db(engine: AsyncEngine) -> AsyncIterator[AsyncSession]:
 
 class CapturedEmails:
     def __init__(self) -> None:
-        self.links: list[tuple[str, str]] = []
+        self.sent: list[ResetEmail] = []
 
-    async def send_password_reset(self, email: str, link: str) -> None:
-        self.links.append((email, link))
+    async def send_password_reset(self, mail: ResetEmail) -> None:
+        self.sent.append(mail)
+
+    @property
+    def links(self) -> list[tuple[str, str]]:
+        return [(mail.to, mail.link) for mail in self.sent]
 
 
 @pytest.fixture(autouse=True)

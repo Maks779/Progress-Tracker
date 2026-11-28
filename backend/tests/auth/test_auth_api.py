@@ -1,3 +1,4 @@
+import smtplib
 from datetime import timedelta
 
 import pytest
@@ -6,7 +7,9 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app import clock
+from app.auth.email import ResetEmail, get_email_sender
 from app.auth.models import RefreshToken
+from app.main import app
 from tests.conftest import CapturedEmails
 from tests.helpers import NATIVE, PASSWORD, WEB, bearer, login, register
 
@@ -323,6 +326,33 @@ async def test_forgot_password_sends_at_most_one_email_a_minute(
     await client.post("/api/v1/auth/password/forgot", json={"email": "alex@example.com"})
 
     assert len(emails.links) == 2
+
+
+async def test_the_reset_email_greets_by_name_in_the_accounts_language(
+    client: AsyncClient, emails: CapturedEmails
+):
+    await register(client, language="pl")
+
+    await client.post("/api/v1/auth/password/forgot", json={"email": "alex@example.com"})
+
+    [mail] = emails.sent
+    assert (mail.to, mail.name, mail.language) == ("alex@example.com", "Alex Morgan", "pl")
+
+
+async def test_a_failing_mail_server_does_not_change_the_answer(
+    client: AsyncClient, caplog: pytest.LogCaptureFixture
+):
+    class Refusing:
+        async def send_password_reset(self, mail: ResetEmail) -> None:
+            raise smtplib.SMTPServerDisconnected("Connection unexpectedly closed")
+
+    app.dependency_overrides[get_email_sender] = lambda: Refusing()
+    await register(client)
+
+    response = await client.post("/api/v1/auth/password/forgot", json={"email": "alex@example.com"})
+
+    assert response.status_code == 202
+    assert "Could not send the password reset email" in caplog.text
 
 
 @pytest.mark.parametrize("password", ["password123", "Qwerty123", "iloveyou"])
